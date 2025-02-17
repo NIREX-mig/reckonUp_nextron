@@ -1,0 +1,12 @@
+appId: com.reckonUp.nextron
+productName: ReckonUp 
+copyright: Copyright © 2024 NIreX
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+publish: null
