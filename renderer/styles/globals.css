@@ -20,7 +20,7 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 *:focus {
-  outline-color: #9333ea;
+  outline-color: #6b21a8;
 }
 
 ::-webkit-scrollbar {

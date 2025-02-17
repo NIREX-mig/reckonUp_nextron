@@ -76,7 +76,7 @@ const SettingPage: NextPageWithLayout = () => {
               </h2>
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Owner Name
                   </label>
                   <input
@@ -88,11 +88,11 @@ const SettingPage: NextPageWithLayout = () => {
                         ownerName: e.target.value,
                       }))
                     }
-                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     GST Number
                   </label>
                   <input
@@ -104,11 +104,11 @@ const SettingPage: NextPageWithLayout = () => {
                         GSTNO: e.target.value,
                       }))
                     }
-                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Address
                   </label>
                   <textarea
@@ -120,11 +120,11 @@ const SettingPage: NextPageWithLayout = () => {
                       }))
                     }
                     rows={3}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Phone Number
                   </label>
                   <input
@@ -136,11 +136,11 @@ const SettingPage: NextPageWithLayout = () => {
                         mobileNumber: e.target.value,
                       }))
                     }
-                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Whatsapp Number
                   </label>
                   <input
@@ -152,7 +152,7 @@ const SettingPage: NextPageWithLayout = () => {
                         whatsappNumber: e.target.value,
                       }))
                     }
-                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
                   />
                 </div>
               </div>
