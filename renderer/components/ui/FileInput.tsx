@@ -1,10 +1,8 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { APiRes } from "../../types";
-import useToast from "../../hooks/useToast";
 
 const FileInput = () => {
-  const { showToast } = useToast();
 
   const [qrImage, setQrImage] = useState(undefined);
   const [imageUploded, setImageUploded] = useState(false);

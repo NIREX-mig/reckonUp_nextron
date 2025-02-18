@@ -288,9 +288,7 @@ const InvoicePage: NextPageWithLayout = () => {
     const gstInRupee = (grossAmt * inputValue) / 100;
 
     // calculate total
-    let total = parseFloat(
-      (grossAmt + gstInRupee).toFixed(2)
-    );
+    let total = parseFloat((grossAmt + gstInRupee).toFixed(2));
 
     // set gst amount
     setGSTAMT(gstInRupee);
@@ -669,17 +667,16 @@ const InvoicePage: NextPageWithLayout = () => {
 
           {/* print and clear Button section */}
           <div className="my-auto flex gap-3 ">
-            <button
-              type="button"
-              onClick={handleGenrateInvoice}
-              className="text-white bg-black/90 hover:bg-black focus:ring-2 focus:outline-none focus:ring-purple-600 font-medium rounded-lg text-sm w-full sm:w-auto px-6 py-2.5 text-center flex gap-3 mb-2"
-            >
-              Genrate invoice
-            </button>
+            <Button
+              title="Genrate Invoice"
+              buttonType="button"
+              extraClass="sm:w-auto mb-2 font-medium"
+              handleClick={handleGenrateInvoice}
+            />
             <button
               type="button"
               onClick={handleClearInvoice}
-              className="text-white bg-red-600 hover:bg-red-700 focus:ring-2 focus:outline-none focus:ring-purple-600 font-medium rounded-lg text-sm w-full sm:w-auto px-6 py-2.5 text-center flex gap-3 mb-2"
+              className="text-white bg-red-600 hover:bg-red-700 focus:ring-2 focus:outline-none focus:ring-purple-600 font-medium rounded-lg w-full sm:w-auto px-6 py-2.5 text-center flex gap-3 mb-2"
             >
               Clear invoice
             </button>

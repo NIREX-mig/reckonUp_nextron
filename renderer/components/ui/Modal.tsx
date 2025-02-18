@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import { IoCloseSharp } from "react-icons/io5";
+import { TbFileInvoice } from "react-icons/tb";
 import { useRouter } from "next/router";
 
 const Modal = ({ isOpen, closeModal }) => {
-  const [invoiceDate, setInvoiceData] = useState(undefined);
+  const [invoiceData, setInvoiceData] = useState(undefined);
 
   const router = useRouter();
 
@@ -19,7 +20,7 @@ const Modal = ({ isOpen, closeModal }) => {
       setInvoiceData(ObjInvoice);
     };
     setinvoice();
-  }, []);
+  }, [isOpen]);
 
   if (!isOpen) return null;
   return (
@@ -37,26 +38,27 @@ const Modal = ({ isOpen, closeModal }) => {
             <div className="flex space-x-2">
               <button
                 onClick={handlGenrateInvoice}
-                className="p-2 text-primary-800 hover:text-primary-300 hover:bg-primary-900 rounded-full"
+                className="p-2 text-primary-50 bg-btn/95 hover:bg-btn rounded-lg flex gap-2 items-center"
                 title="Genrate Invoice"
               >
-                <FaDownload className="w-5 h-5" />
+                <TbFileInvoice className="w-5 h-5" />
+                Genrate
               </button>
               <button
                 onClick={() => {
                   localStorage.removeItem("finalInvoice");
                   closeModal();
                 }}
-                className="p-2 text-white bg-red-600 hover:bg-red-700 rounded-full"
+                className="p-2 text-white bg-red-400  hover:bg-red-500 rounded-lg"
                 title="Close"
               >
-                <IoCloseSharp className="w-5 h-5" />
+                <IoCloseSharp className="w-5 h-5 text-black" />
               </button>
             </div>
           </div>
 
           {/* Invoice Details */}
-          <div className="border-t border-gray-200 pt-6">
+          <div className="border-t border-primary-900 pt-6">
             <div className="flex gap-10">
               <div className="px-3 border-r">
                 <table className=" text-sm text-gray-500 border flex w-[25rem]">
@@ -109,54 +111,54 @@ const Modal = ({ isOpen, closeModal }) => {
                         scope="row"
                         className="py-1 font-medium text-gray-900 whitespace-nowrap capitalize bg-green-300 w-full text-start"
                       >
-                        {invoiceDate?.invoiceNo}
+                        {invoiceData?.invoiceNo}
                       </th>
                       <td className="py-1 capitalize w-full">
-                        {invoiceDate?.customerName}
+                        {invoiceData?.customerName}
                       </td>
                       <td className="py-1 bg-green-300 w-full">
-                        {invoiceDate?.customerPhone}
+                        {invoiceData?.customerPhone}
                       </td>
                       <td className="py-1 capitalize w-full">
-                        {invoiceDate?.customerAddress}
+                        {invoiceData?.customerAddress}
                       </td>
                       <td className="py-1 bg-green-300 w-full">
-                        {`₹${invoiceDate?.grossAmt}`}
+                        {`₹${invoiceData?.grossAmt}`}
                       </td>
                       <td className="py-1 w-full">
-                        {`${invoiceDate?.makingCost}%`}
+                        {`${invoiceData?.makingCost}%`}
                       </td>
                       <td className="py-1 bg-green-300 w-full">
                         {`₹ ${
-                          invoiceDate?.exchangeAmt === ""
+                          invoiceData?.exchangeAmt === ""
                             ? "0"
-                            : invoiceDate?.exchangeAmt
+                            : invoiceData?.exchangeAmt
                         }`}
                       </td>
-                      <td className="py-1 w-full">{`₹${invoiceDate?.GSTAMT}`}</td>
+                      <td className="py-1 w-full">{`₹${invoiceData?.GSTAMT}`}</td>
                       <td className="py-1 bg-green-300 w-full">
-                        {`${invoiceDate?.GSTPercentage}%`}
+                        {`${invoiceData?.GSTPercentage}%`}
                       </td>
                       <td className="py-1 w-full">
-                        {`₹${invoiceDate?.totalAmt}`}
+                        {`₹${invoiceData?.totalAmt}`}
                       </td>
                       <td className="py-1 bg-green-300 w-full">
-                        {invoiceDate?.exchangeCategory === "select"
+                        {invoiceData?.exchangeCategory === "select"
                           ? "N/A"
-                          : invoiceDate?.exchangeCategory}
+                          : invoiceData?.exchangeCategory}
                       </td>
                       <td className="py-1 w-full">
                         {`${
-                          invoiceDate?.exchangePercentage === ""
+                          invoiceData?.exchangePercentage === ""
                             ? "0"
-                            : invoiceDate?.exchangePercentage
+                            : invoiceData?.exchangePercentage
                         }%`}
                       </td>
                       <td className="py-1 bg-green-300 w-full">
                         {`${
-                          invoiceDate?.exchangeWeight === ""
+                          invoiceData?.exchangeWeight === ""
                             ? "0 gram"
-                            : `${invoiceDate?.exchangeWeight} gram`
+                            : `${invoiceData?.exchangeWeight} gram`
                         }`}
                       </td>
                     </tr>
@@ -201,7 +203,7 @@ const Modal = ({ isOpen, closeModal }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {invoiceDate?.productList?.map((product, index) => {
+                    {invoiceData?.productList?.map((product, index) => {
                       return (
                         <tr
                           key={index}

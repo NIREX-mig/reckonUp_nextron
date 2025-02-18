@@ -7,6 +7,7 @@ module.exports = {
     extend: {
       colors: {
         lightbg: "#DEF3FF",
+        btn : "#3e514c",
         primary: {
           '50': '#f9f7fd',
           '100': '#f2ecfb',

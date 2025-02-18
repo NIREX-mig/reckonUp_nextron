@@ -8,6 +8,7 @@ import { APiRes } from "../../types";
 import Header from "../../components/ui/Header";
 import FileInput from "../../components/ui/FileInput";
 import toast from "react-hot-toast";
+import Button from "../../components/ui/Button";
 
 const SettingPage: NextPageWithLayout = () => {
   const router = useRouter();
@@ -17,6 +18,7 @@ const SettingPage: NextPageWithLayout = () => {
     mobileNumber: "",
     whatsappNumber: "",
     address: "",
+    shopName: "",
     GSTNO: "",
   });
 
@@ -26,6 +28,7 @@ const SettingPage: NextPageWithLayout = () => {
       mobileNumber: settingData.mobileNumber,
       whatsappNumber: settingData.whatsappNumber,
       address: settingData.address,
+      shopName: settingData.shopName,
       GSTNO: settingData.GSTNO,
     });
 
@@ -36,6 +39,21 @@ const SettingPage: NextPageWithLayout = () => {
         toast.error(res.message);
       }
     });
+  };
+
+  const handleExportToExcel = () => {
+    toast("Sorry This Feature Is Not WorKing!", {
+      icon: "😭",
+    });
+
+    // window.ipc.send("export2excel", {});
+
+    // window.ipc.on("export2excel", (res: APiRes) => {
+    //   if (!res.success) {
+    //     toast.error(res.message);
+    //   }
+    //   toast.success("Saved Successfully.");
+    // });
   };
 
   useEffect(() => {
@@ -49,6 +67,7 @@ const SettingPage: NextPageWithLayout = () => {
             mobileNumber: res.data.mobileNumber,
             whatsappNumber: res.data.whatsappNumber,
             address: res.data.address,
+            shopName: res.data.shopName,
             GSTNO: res.data.GSTNO,
           });
         } else {
@@ -75,6 +94,22 @@ const SettingPage: NextPageWithLayout = () => {
                 Business Information
               </h2>
               <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
+                    Shop Name
+                  </label>
+                  <input
+                    type="text"
+                    value={settingData.shopName}
+                    onChange={(e) =>
+                      setSettingData((prev) => ({
+                        ...prev,
+                        shopName: e.target.value,
+                      }))
+                    }
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-primary-700 mb-2">
                     Owner Name
@@ -162,6 +197,17 @@ const SettingPage: NextPageWithLayout = () => {
               <h2 className="text-lg font-semibold mb-4">Invoice Settings</h2>
               <div className="space-y-4">
                 <div>
+                  <label className="block font-medium text-gray-700 mb-1">
+                    Export all invoice in CSV file:
+                  </label>
+                  <Button
+                    buttonType="button"
+                    title="Export to Excel"
+                    extraClass="sm:w-auto"
+                    handleClick={handleExportToExcel}
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Payment QR:
                   </label>
@@ -174,7 +220,7 @@ const SettingPage: NextPageWithLayout = () => {
           <div className="mt-6 flex justify-end">
             <button
               onClick={handleSaveSettings}
-              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-black/90 text-white hover:bg-black/95"
+              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-btn/95 text-white hover:bg-btn"
             >
               <FaSave className="h-5 w-5" />
               Save Settings

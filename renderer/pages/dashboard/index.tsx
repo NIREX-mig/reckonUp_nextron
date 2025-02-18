@@ -160,7 +160,7 @@ const DashboardPage: NextPageWithLayout = () => {
           ))}
         </div>
 
-        <div className="rounded-lg bg-primary-200 mb-3 border border-primary-400 p-2">
+        <div className="rounded-lg bg-primary-200 mb-3 border border-primary-500 p-2">
           <h2 className="text-lg font-semibold mb-1 text-primary-950">
             Monthly Invoices
           </h2>
@@ -168,7 +168,7 @@ const DashboardPage: NextPageWithLayout = () => {
             <form className=" p-4 flex gap-2">
               <select
                 id="search"
-                className="bg-gray-50 border border-gray-600 text-gray-900 text-sm rounded-md focus:outline-purple-600 block w-30 p-1.5"
+                className="bg-primary-100 border border-primary-800 text-primary-800 text-sm rounded-md focus:outline-primary-900 block w-30 p-1.5"
                 value={selectedOption}
                 onChange={(e) => setSelectedOption(e.target.value)}
               >
@@ -178,7 +178,7 @@ const DashboardPage: NextPageWithLayout = () => {
               <div>
                 <input
                   type="text"
-                  className="bg-gray-50 border border-gray-500 text-gray-900 text-sm rounded-md focus:outline-purple-600 block w-52 p-1.5 px-2 placeholder:px-1"
+                  className="bg-primary-100 border border-primary-900 text-primary-900 text-sm font-semibold rounded-md focus:outline-primary-900 block w-52 p-1.5 px-2 placeholder:px-1"
                   placeholder="Search"
                   value={search}
                   onChange={handleSearchInvoice}
@@ -302,7 +302,7 @@ const DashboardPage: NextPageWithLayout = () => {
                               {invoice.invoiceNo}
                             </th>
                             <td className="px-3 py-2 text-center">
-                              {moment(invoice.createdAt).format("LL")}
+                              {moment(invoice.createdAt).format("MMM DD, YYYY")}
                             </td>
                             <td className="px-3 py-2 text-center">
                               {moment(invoice.createdAt).format("LT")}

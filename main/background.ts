@@ -1,5 +1,5 @@
 import path from "path";
-import { app, ipcMain, dialog} from "electron";
+import { app, ipcMain, dialog } from "electron";
 import serve from "electron-serve";
 import { createWindow } from "./helpers";
 import EventResponse from "./helpers/EventResponse";
@@ -9,6 +9,7 @@ import jwt from "jsonwebtoken";
 import sendForgotPasswordEmail from "./helpers/sendEmail";
 import fs from "node:fs";
 import { autoUpdater } from "electron-updater";
+import papa from "papaparse";
 
 // Basic flags for Electron updater
 autoUpdater.autoDownload = false;
@@ -330,7 +331,7 @@ ipcMain.on("forgotpassword", async (event, args) => {
 //     Invoice Events
 // ----------------------------
 
-ipcMain.on ("createinvoice", async (event, args) => {
+ipcMain.on("createinvoice", async (event, args) => {
   try {
     const { invoiceData } = await args;
 
@@ -414,7 +415,7 @@ ipcMain.on("fetchbycustomername", async (event, args) => {
     const collection = db.collection("invoices");
 
     const page = parseInt(pageNo) || 1; // Default to page 1
-    const limit = 2; // Default to 40 items per page
+    const limit = 40; // Default to 40 items per page
     const skip = (page - 1) * limit; // Calculate skip value
 
     // find invoice
@@ -549,7 +550,7 @@ ipcMain.on("getallinvoice", async (event, args) => {
     const collection = db.collection("invoices");
 
     const page = parseInt(pageNo) || 1; // Default to page 1
-    const limit = 2; // Default to 40 items per page
+    const limit = 40; // Default to 40 items per page
     const skip = (page - 1) * limit; // Calculate skip value
 
     const invoices = await collection
@@ -715,7 +716,14 @@ ipcMain.on("tracks", async (event) => {
 
 ipcMain.on("createsetting", async (event, args) => {
   try {
-    const { ownerName, mobileNumber, whatsappNumber, address, GSTNO } = args;
+    const {
+      ownerName,
+      mobileNumber,
+      whatsappNumber,
+      address,
+      shopName,
+      GSTNO,
+    } = args;
 
     const db = client.db("reckonup");
     const collection = db.collection("settings");
@@ -732,6 +740,7 @@ ipcMain.on("createsetting", async (event, args) => {
             mobileNumber,
             whatsappNumber,
             address,
+            shopName,
             GSTNO,
           },
         }
@@ -748,6 +757,7 @@ ipcMain.on("createsetting", async (event, args) => {
       whatsappNumber: whatsappNumber,
       address: address,
       GSTNO: GSTNO,
+      shopName: shopName,
       createdAt: new Date(),
     };
 
@@ -777,6 +787,7 @@ ipcMain.on("fetchsetting", async (event) => {
         mobileNumber: "not set",
         whatsappNumber: " not set",
         address: " not set",
+        shopName: "not set",
         GSTNO: " not set",
       };
 
@@ -892,5 +903,29 @@ ipcMain.on("getqr", async (event) => {
     event.reply("getqr", response);
   } catch (err) {
     event.reply("getqr", err);
+  }
+});
+
+ipcMain.on("export2excel", async (event) => {
+  try {
+    const db = client.db("reckonup");
+    const collection = db.collection("invoices");
+
+    const invoices = await collection.find().toArray();
+
+    if (invoices.length === 0) {
+      throw new EventResponse(false, "Don't have Any Invoice!", {});
+    }
+
+    const desktopPath = path.join(app.getPath("desktop"), `invoice.csv`);
+
+    const csvData = papa.unparse(invoices);
+
+    fs.writeFileSync(desktopPath, csvData, "utf-8");
+
+    const response = new EventResponse(true, "Successfully Saved!", {});
+    event.reply("export2excel", response);
+  } catch (err) {
+    event.reply("export2excel", err);
   }
 });

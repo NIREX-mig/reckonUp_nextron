@@ -20,7 +20,9 @@ const Button = ({
   return (
     <button
       type={buttonType}
-      className={`text-white bg-gradient-to-b border from-primary-600 to-primary-700 border-primary-800 hover:from-primary-700 hover:to-primary-800 hover:border-primary-900 active:from-primary-800 active:to-primary-900 active:border-primary-950 rounded-lg p-2 text-center mx-auto w-full ${extraClass}`}
+      className={`text-white bg-btn/95 hover:bg-btn disabled:bg-btn/50 rounded-lg px-4 py-2 text-center mx-auto w-full ${extraClass}`}
+      disabled={disabled}
+      onClick={handleClick}
     >
       {icon}
       {title}

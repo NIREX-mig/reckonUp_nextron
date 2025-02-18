@@ -5,10 +5,10 @@ import Head from "next/head";
 import { FaArrowLeft } from "react-icons/fa";
 import { FiPrinter } from "react-icons/fi";
 import moment from "moment";
-import useToast from "../../hooks/useToast";
 import { useRouter } from "next/router";
 import { useReactToPrint } from "react-to-print";
 import { APiRes } from "../../types";
+import toast from "react-hot-toast";
 
 const ViewInvoicePage: NextPageWithLayout = () => {
   const [finalInvoiceData, setFinalInvoiceData] = useState(undefined);
@@ -16,7 +16,6 @@ const ViewInvoicePage: NextPageWithLayout = () => {
   const contentRef = useRef();
   const [qr, setQr] = useState(undefined);
 
-  const { showToast } = useToast();
   const router = useRouter();
 
   const reactToPrintFn = useReactToPrint({
@@ -35,7 +34,7 @@ const ViewInvoicePage: NextPageWithLayout = () => {
         if (res.success) {
           setSetting(res.data);
         } else {
-          showToast("Something Went Wrong!", "error");
+          toast.error("Something Went Wrong!");
           router.back();
         }
       });
@@ -79,7 +78,7 @@ const ViewInvoicePage: NextPageWithLayout = () => {
           </button>
           <button
             onClick={handlePrintInvoice}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            className="flex items-center gap-2 px-4 py-2 bg-btn/95 text-white rounded-lg hover:bg-btn"
           >
             <FiPrinter className="h-5 w-5" />
             Print Invoice
