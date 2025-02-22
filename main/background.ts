@@ -4,12 +4,13 @@ import serve from "electron-serve";
 import { createWindow } from "./helpers";
 import EventResponse from "./helpers/EventResponse";
 import bcrypt from "bcrypt";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import jwt from "jsonwebtoken";
 import sendForgotPasswordEmail from "./helpers/sendEmail";
 import fs from "node:fs";
 import { autoUpdater } from "electron-updater";
-import papa from "papaparse";
+import * as XLSX from "xlsx";
+import { jsonData } from "../data";
 
 // Basic flags for Electron updater
 autoUpdater.autoDownload = false;
@@ -88,7 +89,7 @@ if (!fs.existsSync(uploadPath)) {
     width: 1366,
     height: 768,
     webPreferences: {
-      // devTools: false, // Disable DevTools
+      devTools: false, // Disable DevTools
       preload: path.join(__dirname, "preload.js"),
     },
   });
@@ -331,12 +332,32 @@ ipcMain.on("forgotpassword", async (event, args) => {
 //     Invoice Events
 // ----------------------------
 
+// Create inovice Event
 ipcMain.on("createinvoice", async (event, args) => {
   try {
     const { invoiceData } = await args;
 
     const db = client.db("reckonup");
     const collection = db.collection("invoices");
+    const paymentCollection = db.collection("payments");
+
+    const paymentHistoryObj = {
+      paidAmount: Number(invoiceData.paymentHistory[0].paidAmount),
+      dueAmount: Number(invoiceData.paymentHistory[0].dueAmount),
+      createdAt: new Date(),
+    };
+
+    const insertedPayment = await paymentCollection.insertOne(
+      paymentHistoryObj
+    );
+
+    const isInserted = await paymentCollection.findOne({
+      _id: insertedPayment.insertedId,
+    });
+
+    if (!isInserted) {
+      throw new EventResponse(false, "Faild to make payment!", {});
+    }
 
     const invoiceObj = {
       // customer Details
@@ -346,25 +367,40 @@ ipcMain.on("createinvoice", async (event, args) => {
 
       // exchange Details
       exchange: invoiceData.exchange,
-      exchangeCategory: invoiceData.exchangeCategory,
-      exchangeWeight: invoiceData.exchangeWeight,
-      exchangePercentage: invoiceData.exchangePercentage,
-      exchangeAmt: invoiceData.exchangeAmt,
+      exchangeCategory: invoiceData.exchangeCategory
+        ? "N/A"
+        : invoiceData.exchangeCategory,
+      exchangeWeight:
+        invoiceData.exchangeWeight.length === 0
+          ? "N/A"
+          : invoiceData.exchangeWeight,
+      exchangePercentage:
+        invoiceData.exchangePercentage.length === 0
+          ? "N/A"
+          : invoiceData.exchangePercentage,
+      exchangeAmt:
+        invoiceData.exchangeAmt.length === 0 ? "N/A" : invoiceData.exchangeAmt,
 
       // product Details
       productList: invoiceData.productList,
 
       // gst Details
       GST: invoiceData.GST,
-      GSTPercentage: invoiceData.GSTPercentage,
+      GSTPercentage:
+        invoiceData.GSTPercentage.length === 0
+          ? "N/A"
+          : invoiceData.GSTPercentage,
       GSTAMT: invoiceData.GSTAMT,
+
+      // payment details
+      discount: invoiceData.discount,
+      paymentHistory: [isInserted._id],
 
       // invoice Details
       invoiceNo: invoiceData.invoiceNo,
       grossAmt: invoiceData.grossAmt,
-      makingCost: invoiceData.makingCost,
       totalAmt: invoiceData.totalAmt,
-      createdAt: new Date(),
+      createdAt: Date.now(),
     };
 
     await collection.insertOne(invoiceObj);
@@ -385,8 +421,30 @@ ipcMain.on("fetchbyinvoiceno", async (event, args) => {
     const db = client.db("reckonup");
     const collection = db.collection("invoices");
 
-    // find invoice
-    const invoice = await collection.find({ invoiceNo }).toArray();
+    const invoice = await collection
+      .aggregate([
+        {
+          $match: {
+            invoiceNo: invoiceNo,
+          },
+        },
+        {
+          $lookup: {
+            from: "payments",
+            foreignField: "_id",
+            localField: "paymentHistory",
+            as: "paymentHistory",
+            pipeline: [
+              {
+                $sort: {
+                  createdAt: 1,
+                },
+              },
+            ],
+          },
+        },
+      ])
+      .toArray();
 
     if (!invoice || invoice.length === 0) {
       throw new EventResponse(false, "Invalid Invoice Number!", {});
@@ -418,11 +476,35 @@ ipcMain.on("fetchbycustomername", async (event, args) => {
     const limit = 40; // Default to 40 items per page
     const skip = (page - 1) * limit; // Calculate skip value
 
-    // find invoice
     const invoices = await collection
-      .find({ customerName })
-      .skip(skip)
-      .limit(limit)
+      .aggregate([
+        {
+          $match: {
+            customerName: customerName,
+          },
+        },
+        {
+          $lookup: {
+            from: "payments",
+            foreignField: "_id",
+            localField: "paymentHistory",
+            as: "paymentHistory",
+            pipeline: [
+              {
+                $sort: {
+                  createdAt: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
+        },
+      ])
       .toArray();
 
     if (!invoices || invoices.length === 0) {
@@ -457,18 +539,38 @@ ipcMain.on("fetchbydaterange", async (event, args) => {
     const limit = 40; // Default to 40 items per page
     const skip = (page - 1) * limit; // Calculate skip value
 
-    // find invoice
-    const filter = {
-      createdAt: {
-        $gte: new Date(startingDate),
-        $lte: new Date(endingDate),
-      },
-    };
-
     const invoices = await collection
-      .find(filter)
-      .skip(skip)
-      .limit(limit)
+      .aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: new Date(startingDate),
+              $lte: new Date(endingDate),
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "payments",
+            foreignField: "_id",
+            localField: "paymentHistory",
+            as: "paymentHistory",
+            pipeline: [
+              {
+                $sort: {
+                  createdAt: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
+        },
+      ])
       .toArray();
 
     const total = await collection.countDocuments({});
@@ -506,15 +608,33 @@ ipcMain.on("fetchmonthlyinvoice", async (event) => {
       0
     );
 
-    // find invoice
-    const filter = {
-      createdAt: {
-        $gte: firstDayOfCurrentMonth,
-        $lte: lastDayOfCurrentMonth,
-      },
-    };
-
-    const invoices = await collection.find(filter).toArray();
+    const invoices = await collection
+      .aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: firstDayOfCurrentMonth,
+              $lte: lastDayOfCurrentMonth,
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "payments",
+            foreignField: "_id",
+            localField: "paymentHistory",
+            as: "paymentHistory",
+            pipeline: [
+              {
+                $sort: {
+                  createdAt: 1,
+                },
+              },
+            ],
+          },
+        },
+      ])
+      .toArray();
 
     // create response and emmit event
     const response = new EventResponse(true, "Success", invoices);
@@ -554,9 +674,29 @@ ipcMain.on("getallinvoice", async (event, args) => {
     const skip = (page - 1) * limit; // Calculate skip value
 
     const invoices = await collection
-      .find({})
-      .skip(skip)
-      .limit(limit)
+      .aggregate([
+        {
+          $lookup: {
+            from: "payments",
+            foreignField: "_id",
+            localField: "paymentHistory",
+            as: "paymentHistory",
+            pipeline: [
+              {
+                $sort: {
+                  createdAt: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
+        },
+      ])
       .toArray();
 
     const total = await collection.countDocuments({});
@@ -714,6 +854,7 @@ ipcMain.on("tracks", async (event) => {
 //     Setting Events
 // ----------------------------
 
+// create invoice Event
 ipcMain.on("createsetting", async (event, args) => {
   try {
     const {
@@ -804,6 +945,7 @@ ipcMain.on("fetchsetting", async (event) => {
   }
 });
 
+// upload qr code for payment Event
 ipcMain.on("uploadqr", async (event, args) => {
   try {
     const { fileName, qrimg } = args;
@@ -881,6 +1023,7 @@ ipcMain.on("uploadqr", async (event, args) => {
   }
 });
 
+// get Qr code Event
 ipcMain.on("getqr", async (event) => {
   try {
     const db = client.db("reckonup");
@@ -906,26 +1049,283 @@ ipcMain.on("getqr", async (event) => {
   }
 });
 
+// Exprt to excel Event
 ipcMain.on("export2excel", async (event) => {
   try {
     const db = client.db("reckonup");
     const collection = db.collection("invoices");
 
-    const invoices = await collection.find().toArray();
+    const invoices = await collection
+      .aggregate([
+        {
+          $lookup: {
+            from: "payments",
+            foreignField: "_id",
+            localField: "paymentHistory",
+            as: "paymentHistory",
+            pipeline: [
+              {
+                $project: {
+                  _id: 0,
+                },
+              },
+              {
+                $sort: {
+                  createdAt: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+          },
+        },
+      ])
+      .toArray();
 
     if (invoices.length === 0) {
       throw new EventResponse(false, "Don't have Any Invoice!", {});
     }
 
-    const desktopPath = path.join(app.getPath("desktop"), `invoice.csv`);
+    // const jsonData = [
+    //   {
+    //     Name: "Ashish Kumar",
+    //     Age: 23,
+    //     Product: [
+    //       { Id: 1, Name: "chini", Weight: "2kg" },
+    //       { Id: 2, Name: "machala", Weight: "2kg" },
+    //     ],
+    //   },
+    //   {
+    //     Name: "Ashish Kumar",
+    //     Age: 23,
+    //     Product: [
+    //       { Id: 1, Name: "chini", Weight: "2kg" },
+    //       { Id: 2, Name: "machala", Weight: "2kg" },
+    //     ],
+    //   },
+    // ];
 
-    const csvData = papa.unparse(invoices);
+    // // Step 1: Create worksheet manually
+    // const ws = XLSX.utils.aoa_to_sheet([
+    //   ["Name", "Age", "Product", "", ""], // Header row
+    //   [jsonData.Name, jsonData.Age, "Id", "Name", "Weight"], // Column Titles
+    //   [
+    //     "",
+    //     "",
+    //     jsonData.Product[0].Id,
+    //     jsonData.Product[0].Name,
+    //     jsonData.Product[0].Weight,
+    //   ],
+    //   [
+    //     "",
+    //     "",
+    //     jsonData.Product[1].Id,
+    //     jsonData.Product[1].Name,
+    //     jsonData.Product[1].Weight,
+    //   ],
+    // ]);
 
-    fs.writeFileSync(desktopPath, csvData, "utf-8");
+    // // Step 2: Merge Cells for "Name" and "Age"
+    // ws["!merges"] = [
+    //   { s: { r: 1, c: 0 }, e: { r: 3, c: 0 } }, // Merge Name column
+    //   { s: { r: 1, c: 1 }, e: { r: 3, c: 1 } }, // Merge Age column
+    // ];
+
+    // // Step 3: Create workbook and append the worksheet
+    // const wb = XLSX.utils.book_new();
+    // XLSX.utils.book_append_sheet(wb, ws, "Customer Data");
+
+    let data = [
+      [
+        "InvoiceNO",
+        "Name",
+        "PhoneNo",
+        "Address",
+        "ProName",
+        "ProCategory",
+        "ProRate",
+        "proWeight",
+        "ProQuantity",
+        "ProMaking",
+        "ProAmount",
+        "Gst(%)",
+        "Discount",
+        "Total",
+      ],
+    ];
+    let merges = [];
+    let rowIndex = 1; // Start after the header
+
+    invoices?.forEach((customer) => {
+      let startRow = rowIndex;
+
+      customer.productList.forEach((product) => {
+        data.push([
+          customer.invoiceNo,
+          customer.customerName,
+          customer.customerPhone,
+          customer.customerAddress,
+          product.productName,
+          product.productCategory,
+          product.rate.toString(),
+          product.netWeight.toString(),
+          product.quantity.toString(),
+          product.makingCost.toString(),
+          product.amount.toString(),
+          customer.GSTPercentage.toString(),
+          customer.discount.toString(),
+          customer.totalAmt.toString(),
+        ]);
+        rowIndex++;
+      });
+
+      // Merge columns
+      merges.push({ s: { r: startRow, c: 0 }, e: { r: rowIndex - 1, c: 0 } }); // Merge innvoiceNO column
+      merges.push({ s: { r: startRow, c: 1 }, e: { r: rowIndex - 1, c: 1 } }); // Merge name column
+      merges.push({ s: { r: startRow, c: 2 }, e: { r: rowIndex - 1, c: 2 } }); // Merge phoneNO column
+      merges.push({ s: { r: startRow, c: 3 }, e: { r: rowIndex - 1, c: 3 } }); // Merge address column
+      merges.push({ s: { r: startRow, c: 11 }, e: { r: rowIndex - 1, c: 11 } }); // Merge gst column
+      merges.push({ s: { r: startRow, c: 12 }, e: { r: rowIndex - 1, c: 12 } }); // Merge discount column
+      merges.push({ s: { r: startRow, c: 13 }, e: { r: rowIndex - 1, c: 13 } }); // Merge total column
+    });
+
+    // Step 4: Get Desktop Path
+    const desktopPath = path.join(
+      app.getPath("desktop"),
+      "Customer_Products.xlsx"
+    );
+
+    // Convert data to worksheet
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws["!merges"] = merges; // Apply merging
+    // const max_width = rows.reduce((w, r) => Math.max(w, r.name.length), 10);
+    ws["!cols"] = [
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 10 },
+      { wch: 10 },
+      { wch: 20 },
+    ];
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Customers");
+
+    // Step 5: Write the Excel file to Desktop
+    XLSX.writeFile(wb, desktopPath);
+
+    // const desktopPath = path.join(app.getPath("desktop"), `invoice.csv`);
+
+    // const csvData = papa.unparse(invoices);
+
+    // fs.writeFileSync(desktopPath, csvData, "utf-8");
 
     const response = new EventResponse(true, "Successfully Saved!", {});
     event.reply("export2excel", response);
   } catch (err) {
     event.reply("export2excel", err);
+  }
+});
+
+//---------------------------------
+//       Payment Events
+//---------------------------------
+ipcMain.on("payment", async (event, args) => {
+  try {
+    const { paidAmount, invoiceNo } = args;
+
+    const db = client.db("reckonup");
+    const collection = db.collection("invoices");
+    const paymentCollection = db.collection("payments");
+
+    // find invoice
+    const invoice = await collection
+      .aggregate([
+        {
+          $match: {
+            invoiceNo: invoiceNo,
+          },
+        },
+        {
+          $lookup: {
+            from: "payments",
+            foreignField: "_id",
+            localField: "paymentHistory",
+            as: "paymentHistory",
+            pipeline: [
+              {
+                $sort: {
+                  createdAt: 1,
+                },
+              },
+            ],
+          },
+        },
+      ])
+      .toArray();
+
+    if (invoice.length === 0) {
+      throw new EventResponse(false, "Something Went Wrong!", {});
+    }
+
+    // calculate due amount
+    const dueAmount =
+      Number(
+        invoice[0].paymentHistory[invoice[0].paymentHistory.length - 1]
+          .dueAmount
+      ) - Number(paidAmount);
+
+    if (dueAmount < 0) {
+      throw new EventResponse(false, "Invalid Amount!", {});
+    }
+
+    const paymentObj = {
+      paidAmount: Number(paidAmount),
+      dueAmount: dueAmount,
+      createdAt: new Date(),
+    };
+
+    const addPayment = await paymentCollection.insertOne(paymentObj);
+
+    const isAdded = await paymentCollection.findOne({
+      _id: addPayment.insertedId,
+    });
+
+    if (!isAdded) {
+      throw new EventResponse(false, "Faild To Payment!", {});
+    }
+
+    const updatePaymentHistory = await collection.findOneAndUpdate(
+      {
+        invoiceNo: invoiceNo,
+      },
+      {
+        $addToSet: {
+          paymentHistory: addPayment.insertedId,
+        },
+      }
+    );
+
+    if (!updatePaymentHistory) {
+      throw new EventResponse(false, "Faild to payment!", {});
+    }
+
+    const response = new EventResponse(true, "Payment Add Successfully", {});
+
+    event.reply("payment", response);
+  } catch (error) {
+    event.reply("payment", error);
   }
 });

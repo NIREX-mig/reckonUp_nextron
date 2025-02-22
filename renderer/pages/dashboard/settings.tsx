@@ -9,6 +9,7 @@ import Header from "../../components/ui/Header";
 import FileInput from "../../components/ui/FileInput";
 import toast from "react-hot-toast";
 import Button from "../../components/ui/Button";
+import ExportToExel from "../../components/settings/ExportToExel";
 
 const SettingPage: NextPageWithLayout = () => {
   const router = useRouter();
@@ -39,21 +40,6 @@ const SettingPage: NextPageWithLayout = () => {
         toast.error(res.message);
       }
     });
-  };
-
-  const handleExportToExcel = () => {
-    toast("Sorry This Feature Is Not WorKing!", {
-      icon: "😭",
-    });
-
-    // window.ipc.send("export2excel", {});
-
-    // window.ipc.on("export2excel", (res: APiRes) => {
-    //   if (!res.success) {
-    //     toast.error(res.message);
-    //   }
-    //   toast.success("Saved Successfully.");
-    // });
   };
 
   useEffect(() => {
@@ -197,21 +183,20 @@ const SettingPage: NextPageWithLayout = () => {
               <h2 className="text-lg font-semibold mb-4">Invoice Settings</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block font-medium text-gray-700 mb-1">
-                    Export all invoice in CSV file:
-                  </label>
-                  <Button
-                    buttonType="button"
-                    title="Export to Excel"
-                    extraClass="sm:w-auto"
-                    handleClick={handleExportToExcel}
-                  />
-                </div>
-                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Payment QR:
                   </label>
                   <FileInput />
+                </div>
+              </div>
+              <div className="space-y-4 my-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Invoice Logo:
+                  </label>
+                  <div className="w-[300px] h-[150px] border-2 border-dashed border-primary-900 rounded-lg p-2">
+                    here create invoice logo uploader
+                  </div>
                 </div>
               </div>
             </div>
@@ -220,13 +205,14 @@ const SettingPage: NextPageWithLayout = () => {
           <div className="mt-6 flex justify-end">
             <button
               onClick={handleSaveSettings}
-              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-btn/95 text-white hover:bg-btn"
+              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-btn text-white hover:bg-btn/95"
             >
               <FaSave className="h-5 w-5" />
               Save Settings
             </button>
           </div>
         </div>
+        <ExportToExel />
       </div>
     </React.Fragment>
   );

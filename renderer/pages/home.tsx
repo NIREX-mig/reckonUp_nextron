@@ -85,12 +85,12 @@ export default function HomePage() {
                 Username
               </label>
               <div className="relative">
-                <FaRegUser className="absolute left-3 top-2.5 h-5 w-5 text-gray-700" />
+                <FaRegUser className="absolute left-3 top-2.5 h-5 w-5 text-gray-900" />
                 <input
                   type="text"
                   autoComplete="off"
                   value={formData.username}
-                  className="bg-primary-50 border border-primary-900 text-primary-800 text-md rounded-md focus:outline-purple-600 block w-full p-2 font-semibold indent-8"
+                  className="bg-primary-50 border border-primary-900 text-primary-900 rounded-md focus:outline-purple-600 block w-full p-2 font-semibold indent-8"
                   placeholder="Username"
                   readOnly
                   required
@@ -100,12 +100,12 @@ export default function HomePage() {
             <div>
               <label
                 htmlFor="password"
-                className="block mb-2 text-sm font-semibold   text-gray-900"
+                className="block mb-2 text-sm font-semibold text-gray-900"
               >
                 Password
               </label>
               <div className="relative">
-                <FaUnlockAlt className="absolute left-3 top-2.5 h-5 w-5 text-gray-700" />
+                <FaUnlockAlt className="absolute left-3 top-2.5 h-5 w-5 text-gray-900" />
                 <input
                   type={isPasswordHidden ? "password" : "text"}
                   autoComplete="off"
@@ -116,14 +116,14 @@ export default function HomePage() {
                       password: e.target.value,
                     }))
                   }
-                  className="bg-primary-50 border border-primary-900 text-primary-800 text-sm rounded-md focus:outline-purple-600 block w-full p-2 mb-3 font-semibold indent-8"
+                  className="bg-primary-50 border border-primary-900 text-primary-800 rounded-md focus:outline-purple-600 block w-full p-2 mb-3 font-semibold indent-8"
                   placeholder="•••••••••"
                   required
                   autoFocus={true}
                 />
                 <div className="realtive">
                   <div
-                    className="text-gray-900 absolute right-3 inset-y-2 my-auto
+                    className="text-gray-900 absolute right-3 inset-y-3 my-auto
                   active:text-gray-600"
                     onClick={handlePasswordHidden}
                   >

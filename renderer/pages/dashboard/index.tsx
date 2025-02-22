@@ -6,12 +6,12 @@ import { FaDollarSign } from "react-icons/fa";
 import { ImStatsDots } from "react-icons/im";
 import { TfiStatsUp } from "react-icons/tfi";
 import { FiFileText } from "react-icons/fi";
-import moment from "moment";
 import useModal from "../../hooks/useModal";
 import Modal from "../../components/ui/Modal";
 import { APiRes } from "../../types";
 import Header from "../../components/ui/Header";
 import toast from "react-hot-toast";
+import DashboardPageTable from "../../components/ui/DashboardPageTable";
 
 const iconMap: { [key: string]: JSX.Element } = {
   FaDollarSign: <FaDollarSign />,
@@ -26,14 +26,12 @@ const ServerIconRenderer: React.FC<{ iconName: string }> = ({ iconName }) => {
 };
 
 const DashboardPage: NextPageWithLayout = () => {
-  const { isOpen, openModal, closeModal } = useModal();
+  const { modalType, openModal, closeModal } = useModal();
 
   const [search, setSearch] = useState("");
 
   const [invoices, setInvoices] = useState([]);
   const [filteredData, setFilterdData] = useState([]);
-
-  const [loading, setLoading] = useState(false);
 
   const [selectedOption, setSelectedOption] = useState("invoiceNo");
 
@@ -90,7 +88,7 @@ const DashboardPage: NextPageWithLayout = () => {
   };
 
   const handleShowDetails = (invoice) => {
-    openModal();
+    openModal("Invoice-Details");
     const jsonInvoice = JSON.stringify(invoice);
     localStorage.setItem("finalInvoice", jsonInvoice);
   };
@@ -101,26 +99,21 @@ const DashboardPage: NextPageWithLayout = () => {
 
       window.ipc.on("tracks", (res: APiRes) => {
         if (res.success) {
-          setLoading(false);
           setStats(res.data);
         } else {
-          setLoading(false);
           toast.error(res.message);
         }
       });
     };
 
     const getMonthlyInvoice = () => {
-      setLoading(true);
       window.ipc.send("fetchmonthlyinvoice", {});
 
       window.ipc.on("fetchmonthlyinvoice", (res: APiRes) => {
         if (res.success) {
-          setLoading(false);
           setInvoices(res.data);
           setFilterdData(res.data);
         } else {
-          setLoading(false);
           toast.error(res.message);
         }
       });
@@ -136,7 +129,7 @@ const DashboardPage: NextPageWithLayout = () => {
         <title>ReckonUp - Devloped by NIreX</title>
       </Head>
       <div className="px-4 py-2 bg-primary-50">
-        <Modal isOpen={isOpen} closeModal={closeModal} />
+      <Modal type={modalType} closeModal={closeModal} />
         <Header title="Dashboard" extraStyle="mb-6" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-2">
           {stats.map((stat) => (
@@ -161,10 +154,10 @@ const DashboardPage: NextPageWithLayout = () => {
         </div>
 
         <div className="rounded-lg bg-primary-200 mb-3 border border-primary-500 p-2">
-          <h2 className="text-lg font-semibold mb-1 text-primary-950">
-            Monthly Invoices
-          </h2>
-          <div>
+          <div className="flex justify-between">
+            <h2 className="text-xl font-bold ml-2 text-primary-950">
+              Monthly Invoices
+            </h2>
             <form className=" p-4 flex gap-2">
               <select
                 id="search"
@@ -188,146 +181,15 @@ const DashboardPage: NextPageWithLayout = () => {
             </form>
           </div>
           <hr />
-          <div className="h-[calc(100vh-140px)]">
-            <div className=" overflow-x-auto shadow-md">
-              <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-                <thead className="text-xs text-black uppercase bg-green-300">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-3 py-2 border-r w-[8rem] text-center"
-                    >
-                      Invoice No
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-2 w-[8rem] border-r text-center"
-                    >
-                      Invoice Date
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-2 w-[8rem] border-r text-center"
-                    >
-                      Invoice Time
-                    </th>
-                    <th scope="col" className="px-3 py-2 border-r text-center">
-                      Customer Name
-                    </th>
-                    <th scope="col" className="px-3 py-2 border-r text-center">
-                      mobile NO
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-2 border-r w-[9rem] text-center"
-                    >
-                      Address
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-2 border-r w-[8rem] text-center"
-                    >
-                      GrossAmt
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-2 border-r w-[8rem] text-center"
-                    >
-                      making Cost
-                    </th>
-                    <th scope="col" className="px-3 py-3 w-[8rem] text-center">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {!loading && filteredData.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={9}
-                        className="py-3 text-lg font-bold border border-gray-200 text-center"
-                      >
-                        No invoices available In This Month.
-                      </td>
-                    </tr>
-                  )}
-                  {loading
-                    ? Array.from({ length: 15 }).map((_, index) => (
-                        <tr
-                          key={index}
-                          className="odd:bg-white even:bg-green-200 text-black"
-                        >
-                          <td className="px-3 py-2 text-center">
-                            <div className="h-4 w-16 bg-gray-200 animate-pulse rounded"></div>
-                          </td>
-                          <td className="px-3 py-2 text-center">
-                            <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
-                          </td>
-                          <td className="px-3 py-2 text-center">
-                            <div className="h-4 w-20 bg-gray-200 animate-pulse rounded"></div>
-                          </td>
-                          <td className="px-3 py-2 text-center">
-                            <div className="h-4 w-28 bg-gray-200 animate-pulse rounded"></div>
-                          </td>
-                          <td className="px-3 py-2 text-center">
-                            <div className="h-4 w-16 bg-gray-200 animate-pulse rounded"></div>
-                          </td>
-                          <td className="px-3 py-2 text-center">
-                            <div className="h-4 w-36 bg-gray-200 animate-pulse rounded"></div>
-                          </td>
-                          <td className="px-3 py-2 text-center">
-                            <div className="h-4 w-20 bg-gray-200 animate-pulse rounded"></div>
-                          </td>
-                          <td className="px-3 py-2 text-center">
-                            <div className="h-4 w-20 bg-gray-200 animate-pulse rounded"></div>
-                          </td>
-                          <td className="px-3 py-2 text-center">
-                            <div className="h-4 w-20 bg-gray-200 animate-pulse rounded"></div>
-                          </td>
-                        </tr>
-                      ))
-                    : filteredData?.map((invoice, index) => {
-                        return (
-                          <tr
-                            key={index}
-                            onClick={() => {
-                              handleShowDetails(invoice);
-                            }}
-                            className="odd:bg-white even:bg-green-200 cursor-pointer text-black"
-                          >
-                            <th
-                              scope="row"
-                              className="px-3 py-2 font-medium text-gray-900 whitespace-nowrap text-center"
-                            >
-                              {invoice.invoiceNo}
-                            </th>
-                            <td className="px-3 py-2 text-center">
-                              {moment(invoice.createdAt).format("MMM DD, YYYY")}
-                            </td>
-                            <td className="px-3 py-2 text-center">
-                              {moment(invoice.createdAt).format("LT")}
-                            </td>
-                            <td className="px-3 py-2 capitalize text-center">
-                              {invoice.customerName}
-                            </td>
-                            <td className="px-3 py-2 text-center">
-                              {invoice.customerPhone === null
-                                ? "N/A"
-                                : invoice.customerPhone}
-                            </td>
-                            <td className="px-3 py-2 capitalize text-center">
-                              {invoice.customerAddress}
-                            </td>
-                            <td className="px-3 py-2 text-center">{`₹ ${invoice.grossAmt}`}</td>
-                            <td className="px-3 py-2 text-center">{`${invoice.makingCost}%`}</td>
-                            <td className="px-3 py-2 text-center">{`₹ ${invoice.totalAmt}`}</td>
-                          </tr>
-                        );
-                      })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <DashboardPageTable
+            data={filteredData}
+            handleTableRowClick={handleShowDetails}
+            handlePaymentClick={(invoice) => {
+              openModal("Payment");
+              const jsonInvoice = JSON.stringify(invoice);
+              localStorage.setItem("finalInvoice", jsonInvoice);
+            }}
+          />
         </div>
       </div>
     </React.Fragment>

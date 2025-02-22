@@ -6,45 +6,21 @@ import { HiRefresh } from "react-icons/hi";
 import { MdDownloadDone } from "react-icons/md";
 import { useRouter } from "next/router";
 import ProductTable from "../../components/ui/ProductTable";
-import { APiRes } from "../../types";
+import {
+  APiRes,
+  CustomerDetails,
+  ExchangeDetails,
+  finalInvoice,
+  PaymentDetails,
+  Product,
+  SingleProduct,
+} from "../../types";
 import Header from "../../components/ui/Header";
 import Input from "../../components/ui/Input";
 import Textarea from "../../components/ui/Textarea";
 import Button from "../../components/ui/Button";
 import Switch from "../../components/ui/Switch";
 import toast from "react-hot-toast";
-
-interface Product {
-  rate: string;
-  quantity: string;
-  productName: string;
-  netWeight: string;
-  productCategory: string;
-  makingCost: number;
-}
-
-interface CustomerDetails {
-  name: string;
-  phone: string;
-  address: string;
-}
-
-interface ExchangeDetails {
-  exchangeCategory: string;
-  weight: string;
-  percentage: string;
-  exchangeAmt: string;
-}
-
-interface SingleProduct {
-  rate: number;
-  quantity: number;
-  productName: string;
-  netWeight: number;
-  productCategory: string;
-  makingCost: number;
-  amount: number;
-}
 
 const InvoicePage: NextPageWithLayout = () => {
   const router = useRouter();
@@ -60,6 +36,12 @@ const InvoicePage: NextPageWithLayout = () => {
     weight: "",
     percentage: "",
     exchangeAmt: "",
+  });
+
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
+    pay: 0,
+    due: 0,
+    discount: 0,
   });
 
   const [exchange, setExchange] = useState(false);
@@ -152,22 +134,18 @@ const InvoicePage: NextPageWithLayout = () => {
   };
 
   const handleGenrateInvoice = () => {
-    if (
-      customerDetails.name.length === 0 ||
-      customerDetails.address.length === 0 ||
-      customerDetails.phone.length === 0
-    ) {
+    if (customerDetails.name.length === 0) {
       toast.error("Add Customer Details!");
       return;
     }
 
-    // check before submit productList is not Empty
+    /// check before submit productList is not Empty
     if (productList.length === 0) {
       toast.error("Add Atleast One Product!");
       return;
     }
 
-    let invoiceData = {
+    let invoiceData: finalInvoice = {
       // customer Details
       customerName: customerDetails.name.toLowerCase(),
       customerPhone: customerDetails.phone,
@@ -193,6 +171,15 @@ const InvoicePage: NextPageWithLayout = () => {
       grossAmt: grossAmt,
       totalAmt: totalAmt,
       createdAt: Date.now(),
+
+      // payment details
+      discount: paymentDetails.discount,
+      paymentHistory: [
+        {
+          paidAmount: paymentDetails.pay,
+          dueAmount: paymentDetails.due,
+        },
+      ],
     };
 
     // set invoice Data in localStorage
@@ -234,6 +221,11 @@ const InvoicePage: NextPageWithLayout = () => {
       netWeight: "",
       productCategory: "gold",
       makingCost: 0,
+    });
+    setPaymentDetails({
+      due: 0,
+      pay: 0,
+      discount: 0,
     });
     setcheckedbox(false);
     setGST("");
@@ -308,7 +300,15 @@ const InvoicePage: NextPageWithLayout = () => {
     }
     let total = totalAmt - parseFloat(exchangeDetails.exchangeAmt);
     setTotalAmt(total);
-    setTotalAmt(total);
+  };
+
+  const handlePayChange = (e) => {
+    const due = totalAmt - e.target.value;
+    setPaymentDetails((prev) => ({
+      ...prev,
+      pay: e.target.value,
+      due: due,
+    }));
   };
 
   useEffect(() => {
@@ -662,9 +662,7 @@ const InvoicePage: NextPageWithLayout = () => {
         </section>
 
         {/* total Amount section  */}
-        <section className="w-full p-2 border rounded-lg mt-2 flex justify-between bg-primary-200 border-primary-500">
-          <div></div>
-
+        <section className="w-full h-[130px] p-2 border rounded-lg mt-2 flex justify-between bg-primary-200 border-primary-500">
           {/* print and clear Button section */}
           <div className="my-auto flex gap-3 ">
             <Button
@@ -718,13 +716,56 @@ const InvoicePage: NextPageWithLayout = () => {
                   value={GST}
                   onChange={handleGstChange}
                   onBlur={handleGstBlur}
-                  className={`bg-white border border-gray-400 text-gray-900 text-sm rounded-md block w-[3rem] py-1 px-2 mb-0.5 ${
+                  className={`bg-white border border-gray-400 text-gray-900 text-sm rounded-md block w-full py-1 px-2 mb-0.5 ${
                     !checkedbox && "text-gray-300"
                   } focus:outline-purple-600`}
                   disabled={!checkedbox}
                 />
               </div>
             </div>
+
+            <Input
+              title="Discount"
+              lableStyle="text-primary-900"
+              otherStyle=""
+              type="number"
+              min="0"
+              value={paymentDetails.discount}
+              handleChangeText={(e) => {
+                setPaymentDetails((prev) => ({
+                  ...prev,
+                  discount: e.target.value,
+                  due: paymentDetails.due - e.target.value,
+                }));
+              }}
+              placeholder="Pay amount"
+            />
+          </div>
+
+          {/* payment section */}
+          <div>
+            <div className="flex justify-between font-semibold">
+              <span>Pay :</span>
+              <span>{`₹ ${paymentDetails.pay}`}</span>
+            </div>
+            <div className="flex justify-between font-semibold">
+              <span>Due :</span>
+              <span>{`₹ ${paymentDetails.due}`}</span>
+            </div>
+            <div className="flex justify-between font-semibold">
+              <span>Discont :</span>
+              <span>{`₹ ${paymentDetails.discount}`}</span>
+            </div>
+            <Input
+              title="Pay Amount"
+              lableStyle="text-primary-900"
+              otherStyle=""
+              type="number"
+              min="0"
+              value={paymentDetails.pay}
+              handleChangeText={handlePayChange}
+              placeholder="Pay amount"
+            />
           </div>
 
           {/* total*/}
@@ -758,7 +799,7 @@ const InvoicePage: NextPageWithLayout = () => {
             )}
 
             {/* Total amount */}
-            <div className="flex justify-between font-bold border-t border-zinc-300 mt-1 pt-1">
+            <div className="flex justify-between font-bold border-t border-primary-900 mt-1 pt-1">
               <span>Total :</span>
               <span>{`₹ ${totalAmt}`}</span>
             </div>

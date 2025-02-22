@@ -51,7 +51,7 @@ const SideBar = () => {
         >
           <button
             onClick={toggleSidebar}
-            className="p-1.5 rounded-full bg-primary-300 hover:bg-primary-400"
+            className="p-1.5 rounded-full border border-primary-800 bg-primary-300 hover:bg-primary-400"
           >
             {collapsed ? (
               <FiChevronRight className="w-5 h-5" />

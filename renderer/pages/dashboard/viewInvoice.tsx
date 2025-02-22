@@ -214,6 +214,18 @@ const ViewInvoicePage: NextPageWithLayout = () => {
                 <span>Total:</span>
                 <span>{` ₹ ${finalInvoiceData?.totalAmt}`}</span>
               </div>
+              <div className="flex justify-between font-semibold">
+                <span>Paid Amount :</span>
+                <span>{`₹ ${finalInvoiceData?.paymentHistory[0]?.paidAmount}`}</span>
+              </div>
+              <div className="flex justify-between font-semibold">
+                <span>Discount :</span>
+                <span>{`₹ ${finalInvoiceData?.discount}`}</span>
+              </div>
+              {/* <div className="flex justify-between font-semibold">
+                <span>Due :</span>
+                <span>{`₹ ${finalInvoiceData?.paymentHistory[0]?.dueAmount}`}</span>
+              </div> */}
             </div>
           </div>
 

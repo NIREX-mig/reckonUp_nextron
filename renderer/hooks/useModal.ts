@@ -1,18 +1,29 @@
-import { useState, useCallback } from 'react';
+import { useState } from "react";
 
 const useModal = () => {
-    const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [modalType, setModalType] = useState(null);
+  const [modalProps, setModalProps] = useState({});
 
-    const openModal = useCallback(() => setIsOpen(true), []);
-    const closeModal = useCallback(() => setIsOpen(false), []);
-    const toggleModal = useCallback(() => setIsOpen(prev => !prev), []);
+  const openModal = (type: "Invoice-Details" | "Payment", props = {}) => {
+    setModalType(type);
+    setModalProps(props);
+    setIsOpen(true);
+  };
 
-    return {
-        isOpen,
-        openModal,
-        closeModal,
-        toggleModal,
-    };
+  const closeModal = () => {
+    setIsOpen(false);
+    setModalType(null);
+    setModalProps({});
+  };
+
+  return {
+    isOpen,
+    modalType,
+    modalProps,
+    openModal,
+    closeModal,
+  };
 };
 
 export default useModal;

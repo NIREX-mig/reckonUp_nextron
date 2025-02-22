@@ -42,10 +42,11 @@ const Input = ({
       <input
         type={type}
         autoComplete="off"
+        onFocus={(e) => e.target.select()}
         value={value}
-        min={min}
-        step={step}
-        max={max}
+        min={`${min}`}
+        step={`${step}`}
+        max={`${max}`}
         onChange={handleChangeText}
         onBlur={handleOnBlur}
         className={`bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-purple-800 inline-block py-1.5 px-2 ${otherStyle}`}

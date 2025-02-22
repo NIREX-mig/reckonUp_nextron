@@ -20,7 +20,7 @@ const Button = ({
   return (
     <button
       type={buttonType}
-      className={`text-white bg-btn/95 hover:bg-btn disabled:bg-btn/50 rounded-lg px-4 py-2 text-center mx-auto w-full ${extraClass}`}
+      className={`text-white bg-btn hover:bg-btn/95  disabled:bg-btn/50 cursor-pointer disabled:cursor-not-allowed rounded-lg px-4 py-2 text-center mx-auto w-full ${extraClass}`}
       disabled={disabled}
       onClick={handleClick}
     >
