@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Button from "../ui/Button";
 import toast from "react-hot-toast";
 import { APiRes } from "../../types";
@@ -6,8 +6,13 @@ import SelectData from "./SelectData";
 import SelectDate from "./SelectDate";
 
 const ExportToExel = () => {
+  const [date, setDate] = useState({
+    start: "",
+    end: "",
+  });
+
   const handleExportToExcel = () => {
-    window.ipc.send("export2excel", {});
+    window.ipc.send("export2excel", {date});
 
     window.ipc.on("export2excel", (res: APiRes) => {
       if (!res.success) {
@@ -28,7 +33,7 @@ const ExportToExel = () => {
           <SelectData />
         </div>
         <div>
-          <SelectDate />
+          <SelectDate date={date} setDate={setDate} />
           <Button
             buttonType="button"
             title="Export to Excel"

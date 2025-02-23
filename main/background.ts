@@ -400,7 +400,7 @@ ipcMain.on("createinvoice", async (event, args) => {
       invoiceNo: invoiceData.invoiceNo,
       grossAmt: invoiceData.grossAmt,
       totalAmt: invoiceData.totalAmt,
-      createdAt: Date.now(),
+      createdAt: new Date(),
     };
 
     await collection.insertOne(invoiceObj);
@@ -1050,8 +1050,10 @@ ipcMain.on("getqr", async (event) => {
 });
 
 // Exprt to excel Event
-ipcMain.on("export2excel", async (event) => {
+ipcMain.on("export2excel", async (event, args) => {
   try {
+    const { date } = args;
+
     const db = client.db("reckonup");
     const collection = db.collection("invoices");
 
@@ -1088,55 +1090,6 @@ ipcMain.on("export2excel", async (event) => {
     if (invoices.length === 0) {
       throw new EventResponse(false, "Don't have Any Invoice!", {});
     }
-
-    // const jsonData = [
-    //   {
-    //     Name: "Ashish Kumar",
-    //     Age: 23,
-    //     Product: [
-    //       { Id: 1, Name: "chini", Weight: "2kg" },
-    //       { Id: 2, Name: "machala", Weight: "2kg" },
-    //     ],
-    //   },
-    //   {
-    //     Name: "Ashish Kumar",
-    //     Age: 23,
-    //     Product: [
-    //       { Id: 1, Name: "chini", Weight: "2kg" },
-    //       { Id: 2, Name: "machala", Weight: "2kg" },
-    //     ],
-    //   },
-    // ];
-
-    // // Step 1: Create worksheet manually
-    // const ws = XLSX.utils.aoa_to_sheet([
-    //   ["Name", "Age", "Product", "", ""], // Header row
-    //   [jsonData.Name, jsonData.Age, "Id", "Name", "Weight"], // Column Titles
-    //   [
-    //     "",
-    //     "",
-    //     jsonData.Product[0].Id,
-    //     jsonData.Product[0].Name,
-    //     jsonData.Product[0].Weight,
-    //   ],
-    //   [
-    //     "",
-    //     "",
-    //     jsonData.Product[1].Id,
-    //     jsonData.Product[1].Name,
-    //     jsonData.Product[1].Weight,
-    //   ],
-    // ]);
-
-    // // Step 2: Merge Cells for "Name" and "Age"
-    // ws["!merges"] = [
-    //   { s: { r: 1, c: 0 }, e: { r: 3, c: 0 } }, // Merge Name column
-    //   { s: { r: 1, c: 1 }, e: { r: 3, c: 1 } }, // Merge Age column
-    // ];
-
-    // // Step 3: Create workbook and append the worksheet
-    // const wb = XLSX.utils.book_new();
-    // XLSX.utils.book_append_sheet(wb, ws, "Customer Data");
 
     let data = [
       [

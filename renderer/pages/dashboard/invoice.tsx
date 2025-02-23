@@ -59,14 +59,14 @@ const InvoicePage: NextPageWithLayout = () => {
 
   const [checkedbox, setcheckedbox] = useState(false);
 
-  const [totalAmt, setTotalAmt] = useState(0);
-
-  const [grossAmt, setGrossAmt] = useState(undefined);
+  const [grossAmt, setGrossAmt] = useState(0);
 
   const [GST, setGST] = useState(undefined);
   const [GSTAMT, setGSTAMT] = useState(0);
 
   const [productList, setProductList] = useState([]);
+
+  let totalAmt = grossAmt + GSTAMT - Number(exchangeDetails.exchangeAmt);
 
   const genrateInvoiceNo = async () => {
     window.ipc.send("totalcountofinvoice", {});
@@ -118,19 +118,17 @@ const InvoicePage: NextPageWithLayout = () => {
       productName: "",
       netWeight: "",
       productCategory: "gold",
-      makingCost: undefined,
+      makingCost: 0,
     });
-
-    let grossamount = 0;
 
     // calculate grossAmount
-    productList.map((product) => {
-      return (grossamount += product.amount);
-    });
+    let grossamount = productList.reduce(
+      (total, item) => total + item.amount,
+      0
+    );
 
     // set GrossAmount and totalAmount
     setGrossAmt(parseFloat(grossamount.toFixed(2)));
-    setTotalAmt(parseFloat(grossamount.toFixed(2)));
   };
 
   const handleGenrateInvoice = () => {
@@ -231,7 +229,6 @@ const InvoicePage: NextPageWithLayout = () => {
     setGST("");
     setGSTAMT(0);
     setGrossAmt(0);
-    setTotalAmt(0);
     setProductList([]);
   };
 
@@ -279,12 +276,8 @@ const InvoicePage: NextPageWithLayout = () => {
     // convert gst percentage to rupees
     const gstInRupee = (grossAmt * inputValue) / 100;
 
-    // calculate total
-    let total = parseFloat((grossAmt + gstInRupee).toFixed(2));
-
     // set gst amount
     setGSTAMT(gstInRupee);
-    setTotalAmt(total);
   };
 
   const handleGstBlur = () => {
@@ -292,14 +285,6 @@ const InvoicePage: NextPageWithLayout = () => {
     const numericValue = Number(GST);
     if (numericValue < 0.0) setGST(0);
     else if (numericValue > 100.0) setGST(100);
-  };
-
-  const handleExchangeAmountAdd = () => {
-    if (exchangeDetails.exchangeAmt === "") {
-      return;
-    }
-    let total = totalAmt - parseFloat(exchangeDetails.exchangeAmt);
-    setTotalAmt(total);
   };
 
   const handlePayChange = (e) => {
@@ -485,13 +470,6 @@ const InvoicePage: NextPageWithLayout = () => {
                     disabled={!exchange}
                     placeholder="Amount"
                   />
-                  <Button
-                    title="Add"
-                    buttonType="submit"
-                    handleClick={handleExchangeAmountAdd}
-                    disabled={!exchange}
-                    extraClass="w-auto px-4 ml-3"
-                  />
                 </div>
               </div>
             </div>
@@ -651,7 +629,6 @@ const InvoicePage: NextPageWithLayout = () => {
             grossAmt={grossAmt}
             setGrossAmt={setGrossAmt}
             setGSTAMT={setGSTAMT}
-            setTotalAmt={setTotalAmt}
             gst={GST}
             exchangeAmt={
               exchangeDetails.exchangeAmt === ""
@@ -689,7 +666,6 @@ const InvoicePage: NextPageWithLayout = () => {
                 onChange={() => {
                   setcheckedbox(!checkedbox);
                   setGST("");
-                  setTotalAmt(totalAmt - GSTAMT);
                   setGSTAMT(0);
                 }}
                 checked={checkedbox}

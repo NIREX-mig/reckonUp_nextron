@@ -5,7 +5,6 @@ const ProductTable = ({
   setProductList,
   grossAmt,
   setGrossAmt,
-  setTotalAmt,
   setGSTAMT,
   gst,
   exchangeAmt,
@@ -21,9 +20,6 @@ const ProductTable = ({
       // convert gst percentage to rupees
       const gstInRupee = (newGrossAmt * gst) / 100;
       setGSTAMT(gstInRupee);
-
-      let total = newGrossAmt + gstInRupee - parseFloat(exchangeAmt);
-      setTotalAmt(total);
 
       setProductList(
         productList.slice(0, index).concat(productList.slice(index + 1))
