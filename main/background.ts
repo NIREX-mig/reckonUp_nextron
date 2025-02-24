@@ -10,11 +10,10 @@ import sendForgotPasswordEmail from "./helpers/sendEmail";
 import fs from "node:fs";
 import { autoUpdater } from "electron-updater";
 import * as XLSX from "xlsx";
-import { jsonData } from "../data";
 
 // Basic flags for Electron updater
-autoUpdater.autoDownload = false;
-autoUpdater.autoInstallOnAppQuit = true;
+// autoUpdater.autoDownload = false;
+// autoUpdater.autoInstallOnAppQuit = true;
 
 // mongodb variables
 const URI = "mongodb://localhost:27017/";
@@ -1059,6 +1058,14 @@ ipcMain.on("export2excel", async (event, args) => {
 
     const invoices = await collection
       .aggregate([
+        // {
+        //   $match: {
+        //     createdAt: {
+        //       $gte: new Date(date.start),
+        //       $lte: new Date(date.end),
+        //     },
+        //   },
+        // },
         {
           $lookup: {
             from: "payments",

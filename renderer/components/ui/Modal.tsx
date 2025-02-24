@@ -58,7 +58,7 @@ const Modal = ({ type, closeModal }) => {
                     <span className="text-primary-900">Up</span>
                   </h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    Jewelry Billing Software
+                    Jewellery Billing Software
                   </p>
                 </div>
                 <div className="flex space-x-2">
@@ -131,7 +131,7 @@ const Modal = ({ type, closeModal }) => {
                           <span>Weight: </span>
                           <span className="capitalize">
                             {`${
-                              invoiceData?.exchangeWeight === ""
+                              invoiceData?.exchangeWeight === "N/A"
                                 ? "N/A"
                                 : `${invoiceData?.exchangeWeight} gram`
                             }`}
@@ -141,7 +141,7 @@ const Modal = ({ type, closeModal }) => {
                           <span>Percentage: </span>
                           <span className="capitalize">
                             {`${
-                              invoiceData?.exchangePercentage === ""
+                              invoiceData?.exchangePercentage === "N/A"
                                 ? "N/A"
                                 : `${invoiceData?.exchangePercentage}%`
                             }`}
@@ -151,7 +151,7 @@ const Modal = ({ type, closeModal }) => {
                           <span>Amount: </span>
                           <span className="capitalize">
                             {`₹ ${
-                              invoiceData?.exchangeAmt === ""
+                              invoiceData?.exchangeAmt === "N/A"
                                 ? "N/A"
                                 : invoiceData?.exchangeAmt
                             }`}
@@ -183,7 +183,7 @@ const Modal = ({ type, closeModal }) => {
                           <span>GST(%): </span>
                           <span className="capitalize">
                             {`${
-                              invoiceData?.GSTPercentage === 0
+                              invoiceData?.GSTPercentage === "N/A"
                                 ? "0"
                                 : `${invoiceData?.GSTPercentage}%`
                             }     (₹${
@@ -387,7 +387,7 @@ const Modal = ({ type, closeModal }) => {
                     <span className="text-primary-900">Up</span>
                   </h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    Jewelry Billing Software
+                    Jewellery Billing Software
                   </p>
                 </div>
 

@@ -33,7 +33,7 @@ const SideBar = () => {
       <aside
         className={`${
           collapsed ? "w-16" : "w-48"
-        } absolute z-50 h-screen bg-primary-100 border border-primary-700 transition-all duration-500`}
+        } absolute z-[150] h-screen bg-primary-100 border border-primary-700 transition-all duration-500`}
       >
         <div className={`flex items-center  border-b border-gray-200 p-2`}>
           <img src="/app_logo.png" alt="logo" className="w-[40px]" />

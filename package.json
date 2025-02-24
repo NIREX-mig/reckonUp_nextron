@@ -1,8 +1,8 @@
 {
   "private": true,
   "name": "reckonup",
-  "description": "ReckonUp - Jewelry Billing Software",
-  "version": "1.0.1",
+  "description": "ReckonUp - Jewellery Billing Software",
+  "version": "1.0.0",
   "author": "NIreX",
   "main": "app/background.js",
   "scripts": {
@@ -10,17 +10,11 @@
     "build": "nextron build",
     "postinstall": "electron-builder install-app-deps"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/NIREX-mig/reckonUp_nextron"
+  "repository": "https://github.com/NIREX-mig/reckonUp_nextron",
+  "publish": {
+    "provider": "github",
+    "releaseType": "realease"
   },
-  "publish": [
-    {
-      "provider": "github",
-      "owner": "NIREX-mig",
-      "repo": "reckonUp_nextron"
-    }
-  ],
   "dependencies": {
     "bcrypt": "^5.1.1",
     "electron-log": "^5.3.0",

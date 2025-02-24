@@ -288,11 +288,10 @@ const InvoicePage: NextPageWithLayout = () => {
   };
 
   const handlePayChange = (e) => {
-    const due = totalAmt - e.target.value;
     setPaymentDetails((prev) => ({
       ...prev,
       pay: e.target.value,
-      due: due,
+      due: totalAmt - e.target.value,
     }));
   };
 
@@ -308,14 +307,13 @@ const InvoicePage: NextPageWithLayout = () => {
       </Head>
       <section className=" py-2 px-4 bg-primary-50 h-full">
         <Header title="Create Invoice" extraStyle="" />
+
         {/* Invoice Details section */}
         <section className="flex-col lg:flex-row w-full lg:h-[14rem] mt-3 flex gap-2">
-          {/* Customer Details section  */}
           <div className="p-2 bg-primary-200 rounded-lg border border-primary-500 lg:w-[22rem] w-full ">
             <h2 className="font-bold text-primary-800">Customer Details</h2>
             {/* customer detail  */}
             <div className="py-4 w-[19rem]">
-              {/* customer Name section   */}
               <Input
                 title="Customer name"
                 lableStyle="text-primary-900"
@@ -331,7 +329,6 @@ const InvoicePage: NextPageWithLayout = () => {
                 placeholder="Customer Name"
               />
 
-              {/* customer phone number  */}
               <Input
                 title="Phone No"
                 lableStyle="text-primary-900"
@@ -348,7 +345,6 @@ const InvoicePage: NextPageWithLayout = () => {
                 placeholder="Phone number"
               />
 
-              {/* customer address  */}
               <Textarea
                 title="Address"
                 row={2}
@@ -477,7 +473,6 @@ const InvoicePage: NextPageWithLayout = () => {
 
           {/* Product Detail Section  */}
           <div className="p-3 bg-primary-200 rounded-lg border border-primary-500 w-full">
-            {/* invoice Number  */}
             <div className="flex justify-between">
               <h2 className="font-bold text-primary-800">Product Details</h2>
               {/* invoice number  */}
@@ -496,11 +491,12 @@ const InvoicePage: NextPageWithLayout = () => {
                 />
               </div>
             </div>
+
             {/* product rate and category and quintity  */}
             <form onSubmit={handleAddProduct}>
               <div className="p-2">
                 <div className="flex gap-4">
-                  {/* rate  */}
+                  {/* product rate  */}
                   <Input
                     title="Rate(10g)"
                     lableStyle="text-primary-800"
@@ -516,7 +512,8 @@ const InvoicePage: NextPageWithLayout = () => {
                     }
                     placeholder="rate"
                   />
-                  {/* category  */}
+
+                  {/*  product category  */}
                   <div className="flex items-center gap-2 mb-2">
                     <label
                       htmlFor="product"
@@ -539,7 +536,7 @@ const InvoicePage: NextPageWithLayout = () => {
                     </select>
                   </div>
 
-                  {/* quantity */}
+                  {/* product quantity */}
                   <Input
                     title="Quantity"
                     lableStyle="text-primary-800"
@@ -557,7 +554,8 @@ const InvoicePage: NextPageWithLayout = () => {
                   />
                 </div>
               </div>
-              {/* product name and weight */}
+
+              {/* product name and weight and making cost */}
               <div className="flex gap-3">
                 {/* product name  */}
                 <Input
@@ -657,7 +655,7 @@ const InvoicePage: NextPageWithLayout = () => {
             </button>
           </div>
 
-          {/*  gst section */}
+          {/*  gst section and discount */}
           <div>
             <div className="flex gap-2 items-center h-5 mb-2">
               <input
@@ -711,10 +709,10 @@ const InvoicePage: NextPageWithLayout = () => {
                 setPaymentDetails((prev) => ({
                   ...prev,
                   discount: e.target.value,
-                  due: paymentDetails.due - e.target.value,
+                  due: totalAmt - paymentDetails.pay - e.target.value,
                 }));
               }}
-              placeholder="Pay amount"
+              placeholder="discont"
             />
           </div>
 

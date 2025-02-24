@@ -3,7 +3,7 @@ import Input from "../ui/Input";
 
 const SelectDate = ({ date, setDate }) => {
   return (
-    <section className="flex ">
+    <section className="flex gap-1 items-center mb-5">
       <div>
         <Input
           type="date"
