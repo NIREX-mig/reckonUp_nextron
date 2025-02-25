@@ -64,7 +64,7 @@ const Modal = ({ type, closeModal }) => {
                 <div className="flex space-x-2">
                   <button
                     onClick={handlGenrateInvoice}
-                    className="p-2 text-primary-50 bg-btn/95 hover:bg-btn rounded-lg flex gap-1 items-center"
+                    className="p-2 text-primary-50 bg-btn/95 hover:bg-btn rounded-lg flex gap-1 items-center active:scale-95 transition-all duration-300"
                     title="Genrate Invoice"
                   >
                     <TbFileInvoice className="w-5 h-5" />
@@ -78,7 +78,7 @@ const Modal = ({ type, closeModal }) => {
                     className="p-2 text-white bg-red-400  hover:bg-red-500 rounded-lg"
                     title="Close"
                   >
-                    <IoCloseSharp className="w-5 h-5 text-black" />
+                    <IoCloseSharp className="w-5 h-5 text-black active:scale-95 transition-all duration-300" />
                   </button>
                 </div>
               </div>
@@ -400,7 +400,7 @@ const Modal = ({ type, closeModal }) => {
                     className="p-2 text-white bg-red-400  hover:bg-red-500 rounded-lg"
                     title="Close"
                   >
-                    <IoCloseSharp className="w-5 h-5 text-black" />
+                    <IoCloseSharp className="w-5 h-5 text-black active:scale-95 transition-all duration-300" />
                   </button>
                 </div>
               </div>

@@ -205,7 +205,7 @@ const SettingPage: NextPageWithLayout = () => {
           <div className="mt-6 flex justify-end">
             <button
               onClick={handleSaveSettings}
-              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-btn text-white hover:bg-btn/95"
+              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-btn text-white hover:bg-btn/95 active:scale-95 transition-all duration-300 "
             >
               <FaSave className="h-5 w-5" />
               Save Settings

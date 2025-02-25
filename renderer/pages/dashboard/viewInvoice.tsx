@@ -78,7 +78,7 @@ const ViewInvoicePage: NextPageWithLayout = () => {
           </button>
           <button
             onClick={handlePrintInvoice}
-            className="flex items-center gap-2 px-4 py-2 bg-btn/95 text-white rounded-lg hover:bg-btn"
+            className="flex items-center gap-2 px-4 py-2 bg-btn/95 text-white rounded-lg hover:bg-btn active:scale-95 transition-all duration-300"
           >
             <FiPrinter className="h-5 w-5" />
             Print Invoice

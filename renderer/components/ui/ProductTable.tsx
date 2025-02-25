@@ -6,8 +6,7 @@ const ProductTable = ({
   grossAmt,
   setGrossAmt,
   setGSTAMT,
-  gst,
-  exchangeAmt,
+  gst
 }) => {
   const handleDeleteProduct = (index: number) => {
     if (index > -1) {

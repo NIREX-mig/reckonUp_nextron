@@ -156,7 +156,7 @@ const SearchPage: NextPageWithLayout = () => {
                   setDate({ start: "", end: "" });
                   setFilteredData(invoices);
                 }}
-                className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm sm:w-auto px-5 py-1.5 text-center"
+                className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm sm:w-auto px-5 py-1.5 text-center active:scale-95 transition-all duration-300"
               >
                 Clear
               </button>

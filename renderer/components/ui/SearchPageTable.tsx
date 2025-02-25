@@ -112,14 +112,14 @@ const SearchPageTable = ({
                     <button
                       type="button"
                       onClick={() => handleTableRowClick(invoice)}
-                      className="bg-btn text-white px-4 py-1 rounded-md"
+                      className="bg-btn text-white px-4 py-1 rounded-md active:scale-95 transition-all duration-300"
                     >
                       Details
                     </button>
                     <button
                       type="button"
                       onClick={() => handlePaymentClick(invoice)}
-                      className="bg-btn text-white px-4 py-1 rounded-md"
+                      className="bg-btn text-white px-4 py-1 rounded-md active:scale-95 transition-all duration-300"
                     >
                       <FcMoneyTransfer size={20} />
                     </button>
@@ -135,7 +135,7 @@ const SearchPageTable = ({
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="flex items-center px-5 py-2 text-sm text-white capitalize transition-colors duration-200 bg-btn border rounded-md gap-x-2 hover:bg-btn/95 disabled:bg-btn/50 cursor-pointer disabled:cursor-not-allowed"
+          className="flex items-center px-5 py-2 text-sm text-white capitalize bg-btn border rounded-md gap-x-2 hover:bg-btn/95 disabled:bg-btn/50 cursor-pointer disabled:cursor-not-allowed active:scale-95 transition-all duration-300"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -163,7 +163,7 @@ const SearchPageTable = ({
             setCurrentPage((prev) => Math.min(prev + 1, totalPages))
           }
           disabled={currentPage === totalPages}
-          className="flex items-center px-5 py-2 text-sm text-white capitalize transition-colors duration-200 bg-btn border rounded-md gap-x-2 hover:bg-btn/95  disabled:bg-btn/50 cursor-pointer disabled:cursor-not-allowed"
+          className="flex items-center px-5 py-2 text-sm text-white capitalize bg-btn border rounded-md gap-x-2 hover:bg-btn/95  disabled:bg-btn/50 cursor-pointer disabled:cursor-not-allowed active:scale-95 transition-all duration-300"
         >
           <span>Next</span>
           <svg

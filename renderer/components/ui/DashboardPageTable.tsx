@@ -109,14 +109,14 @@ const DashboardPageTable = ({
                     <button
                       type="button"
                       onClick={() => handleTableRowClick(invoice)}
-                      className="bg-btn text-white px-4 py-1 rounded-md"
+                      className="bg-btn text-white px-4 py-1 rounded-md active:scale-95 transition-all duration-300"
                     >
                       Details
                     </button>
                     <button
                       type="button"
                       onClick={() => handlePaymentClick(invoice)}
-                      className="bg-btn text-white px-4 py-1 rounded-md"
+                      className="bg-btn text-white px-4 py-1 rounded-md active:scale-95 transition-all duration-300"
                     >
                       <FcMoneyTransfer size={20} />
                     </button>
