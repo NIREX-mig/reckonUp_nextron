@@ -4,7 +4,7 @@ import serve from "electron-serve";
 import { createWindow } from "./helpers";
 import EventResponse from "./helpers/EventResponse";
 import bcrypt from "bcrypt";
-import { MongoClient, ObjectId } from "mongodb";
+import { MongoClient } from "mongodb";
 import jwt from "jsonwebtoken";
 import sendForgotPasswordEmail from "./helpers/sendEmail";
 import fs from "node:fs";
@@ -14,6 +14,8 @@ import * as XLSX from "xlsx";
 // Basic flags for Electron updater
 // autoUpdater.autoDownload = false;
 // autoUpdater.autoInstallOnAppQuit = true;
+
+let mainWindow;
 
 // mongodb variables
 const URI = "mongodb://localhost:27017/";
@@ -83,7 +85,7 @@ if (!fs.existsSync(uploadPath)) {
   // check user is existed or not if not it create user
   await checkUserIsExistOrNot();
 
-  const mainWindow = createWindow("main", {
+  mainWindow = createWindow("main", {
     title: "ReckonUp - Devloped by NIreX",
     width: 1366,
     height: 768,
@@ -99,7 +101,7 @@ if (!fs.existsSync(uploadPath)) {
 
   if (isProd) {
     await mainWindow.loadURL("app://./home");
-    autoUpdater.checkForUpdates();
+    autoUpdater.checkForUpdatesAndNotify();
   } else {
     const port = process.argv[2];
     await mainWindow.loadURL(`http://localhost:${port}/home`);
@@ -112,7 +114,11 @@ app.on("window-all-closed", () => {
   app.quit();
 });
 
-autoUpdater.on("update-available", (_event) => {
+/* ------------------------------
+        Auto Update Section 
+------------------------------- */
+
+autoUpdater.on("update-available", () => {
   const dialogOpts = {
     type: "info",
     buttons: ["Ok"],
@@ -120,12 +126,12 @@ autoUpdater.on("update-available", (_event) => {
     message: "New Update Avilable",
     detail: "ReckonUp have new Update Released",
   };
-  dialog.showMessageBox(dialogOpts, () => {
+  dialog.showMessageBox(mainWindow, dialogOpts).then(() => {
     autoUpdater.downloadUpdate();
   });
 });
 
-autoUpdater.on("update-downloaded", (_event) => {
+autoUpdater.on("update-downloaded", (event) => {
   const dialogOpts = {
     type: "info",
     buttons: ["Restart", "Later"],
@@ -134,10 +140,11 @@ autoUpdater.on("update-downloaded", (_event) => {
     detail:
       "A new version has been downloaded. Restart the application to apply the updates.",
   };
-  dialog.showMessageBox(dialogOpts).then((returnValue) => {
+  dialog.showMessageBox(mainWindow, dialogOpts).then((returnValue) => {
     if (returnValue.response === 0) autoUpdater.quitAndInstall();
   });
 });
+
 
 // Expose events using IPC
 // -----------------------------
@@ -181,7 +188,6 @@ ipcMain.on("forgotpasswordemail", async (event, args) => {
 
     // connecting with database
     const collection = db.collection("users");
-
     // finding the user
     const user = await collection.findOne({ username });
 
@@ -1194,45 +1200,45 @@ ipcMain.on("export2excel", async (event, args) => {
       });
 
       // Step 4: Get Desktop Path
-    const desktopPath = path.join(
-      app.getPath("desktop"),
-      "Customer_Products.xlsx"
-    );
+      const desktopPath = path.join(
+        app.getPath("desktop"),
+        "Customer_Products.xlsx"
+      );
 
-    // Convert data to worksheet
-    const ws = XLSX.utils.aoa_to_sheet(headerData);
-    ws["!merges"] = merges; // Apply merging
-    // const max_width = rows.reduce((w, r) => Math.max(w, r.name.length), 10);
-    ws["!cols"] = [
-      { wch: 15 },
-      { wch: 20 },
-      { wch: 15 },
-      { wch: 20 },
-      { wch: 20 },
-      { wch: 20 },
-      { wch: 20 },
-      { wch: 20 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 20 },
-      { wch: 10 },
-      { wch: 10 },
-      { wch: 20 },
-    ];
+      // Convert data to worksheet
+      const ws = XLSX.utils.aoa_to_sheet(headerData);
+      ws["!merges"] = merges; // Apply merging
+      // const max_width = rows.reduce((w, r) => Math.max(w, r.name.length), 10);
+      ws["!cols"] = [
+        { wch: 15 },
+        { wch: 20 },
+        { wch: 15 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 20 },
+        { wch: 10 },
+        { wch: 10 },
+        { wch: 20 },
+      ];
 
-    // Create workbook
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Customers");
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Customers");
 
-    // Step 5: Write the Excel file to Desktop
-    XLSX.writeFile(wb, desktopPath);
+      // Step 5: Write the Excel file to Desktop
+      XLSX.writeFile(wb, desktopPath);
 
-    const response = new EventResponse(true, "Successfully Saved!", {});
-    event.reply("export2excel", response);
-    return;
+      const response = new EventResponse(true, "Successfully Saved!", {});
+      event.reply("export2excel", response);
+      return;
     }
 
     invoices?.forEach((customer) => {

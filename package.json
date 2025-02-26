@@ -10,11 +10,13 @@
     "build": "nextron build",
     "postinstall": "electron-builder install-app-deps"
   },
-  "repository": "https://github.com/NIREX-mig/reckonUp_nextron",
-  "publish": {
-    "provider": "github",
-    "releaseType": "realease"
-  },
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "Nirex-mig",
+      "repo": "reckonUp_nextron"
+    }
+  ],
   "dependencies": {
     "bcrypt": "^5.1.1",
     "electron-log": "^5.3.0",
@@ -25,6 +27,7 @@
     "mongodb": "^6.12.0",
     "nodemailer": "^6.9.16",
     "react-to-print": "^3.0.4",
+    "react-use-is-online": "^1.2.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

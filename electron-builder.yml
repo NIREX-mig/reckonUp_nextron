@@ -1,5 +1,5 @@
 appId: com.reckonUp.nextron
-productName: ReckonUp 
+productName: ReckonUp
 copyright: Copyright © 2024 NIreX
 directories:
   output: dist
@@ -9,4 +9,10 @@ files:
     filter:
       - package.json
       - app
-publish: null
+publish: [
+    {
+      provider: github,
+      owner: Nirex-mig,
+      repo: reckonUp_nextron
+    }
+  ],

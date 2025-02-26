@@ -628,11 +628,6 @@ const InvoicePage: NextPageWithLayout = () => {
             setGrossAmt={setGrossAmt}
             setGSTAMT={setGSTAMT}
             gst={GST}
-            exchangeAmt={
-              exchangeDetails.exchangeAmt === ""
-                ? 0
-                : exchangeDetails.exchangeAmt
-            }
           />
         </section>
 

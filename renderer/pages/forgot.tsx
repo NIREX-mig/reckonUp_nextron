@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import NewPasswordContainer from "../components/forgotpassword/NewPasswordContainer";
@@ -7,9 +7,13 @@ import ForgotContainer from "../components/forgotpassword/ForgotContainer";
 import { useRouter } from "next/router";
 import { APiRes } from "../types";
 import toast, { Toaster } from "react-hot-toast";
+import { useIsOnline } from "react-use-is-online";
+import Link from "next/link";
 
 export default function ForgotPage() {
   const router = useRouter();
+
+  const { isOnline, isOffline, error } = useIsOnline();
 
   const [username, setUsername] = useState("");
   const [finalOtp, setFinalOtp] = useState("");
@@ -89,6 +93,24 @@ export default function ForgotPage() {
       }
     });
   };
+
+  if (isOffline) {
+    return (
+      <section className="w-full h-screen flex justify-center items-center">
+        <div className="flex flex-col justify-center items-center gap-10">
+          <h1 className="text-red-500 text-3xl font-bold">
+            Please first connect to the Internet
+          </h1>
+          <Link
+            href="/home"
+            className="px-7 py-2 bg-btn rounded-full text-white font-semibold"
+          >
+            Go Back
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <React.Fragment>
