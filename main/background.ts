@@ -10,9 +10,10 @@ import sendForgotPasswordEmail from "./helpers/sendEmail";
 import fs from "node:fs";
 import { autoUpdater } from "electron-updater";
 import * as XLSX from "xlsx";
+import { tempSecret, genrateOtp } from "./helpers/utils";
 
 // Basic flags for Electron updater
-// autoUpdater.autoDownload = false;
+autoUpdater.autoDownload = false;
 // autoUpdater.autoInstallOnAppQuit = true;
 
 let mainWindow;
@@ -20,18 +21,6 @@ let mainWindow;
 // mongodb variables
 const URI = "mongodb://localhost:27017/";
 const client = new MongoClient(URI);
-
-// secret for json web token
-const tempSecret = "sdkfjasdkjfsifuoewfosadhfksdjfdjfdskjfue0iweu09230";
-
-function genrateOtp(length: number) {
-  const digits = "0123456789";
-  let otp = "";
-  for (let i = 0; i < length; i++) {
-    otp += digits[Math.floor(Math.random() * 10)];
-  }
-  return otp;
-}
 
 async function connectToDb() {
   await client.connect();
@@ -90,7 +79,7 @@ if (!fs.existsSync(uploadPath)) {
     width: 1366,
     height: 768,
     webPreferences: {
-      // devTools: false, // Disable DevTools
+      devTools: false, // Disable DevTools
       preload: path.join(__dirname, "preload.js"),
     },
   });
@@ -131,7 +120,7 @@ autoUpdater.on("update-available", () => {
   });
 });
 
-autoUpdater.on("update-downloaded", (event) => {
+autoUpdater.on("update-downloaded", () => {
   const dialogOpts = {
     type: "info",
     buttons: ["Restart", "Later"],
