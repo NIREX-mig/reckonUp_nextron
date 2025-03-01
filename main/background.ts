@@ -10,7 +10,7 @@ import sendForgotPasswordEmail from "./helpers/sendEmail";
 import fs from "node:fs";
 import { autoUpdater } from "electron-updater";
 import * as XLSX from "xlsx";
-import { tempSecret, genrateOtp } from "./helpers/utils";
+import { tempSecret, genrateOtp, MongoURI } from "./helpers/utils";
 
 // Basic flags for Electron updater
 autoUpdater.autoDownload = false;
@@ -19,8 +19,8 @@ autoUpdater.autoDownload = false;
 let mainWindow;
 
 // mongodb variables
-const URI = "mongodb://localhost:27017/";
-const client = new MongoClient(URI);
+
+const client = new MongoClient(MongoURI);
 
 async function connectToDb() {
   await client.connect();
