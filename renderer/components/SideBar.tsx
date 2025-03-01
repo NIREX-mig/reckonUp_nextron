@@ -17,12 +17,9 @@ const SideBar = () => {
 
   const menuItems = [
     { name: "Dashboard", path: "/dashboard/", icon: LuLayoutDashboard },
-    {
-      name: "New Invoice",
-      path: "/dashboard/invoice/",
-      icon: MdOutlinePostAdd,
-    },
+    { name: "New Invoice", path: "/dashboard/invoice/", icon: MdOutlinePostAdd},
     { name: "View Invoices", path: "/dashboard/search/", icon: FiFileText },
+    { name: "Due Invoices", path: "/dashboard/duehistory/", icon: FiFileText },
     { name: "settings", path: "/dashboard/settings/", icon: FiSettings },
   ];
 
@@ -95,57 +92,12 @@ const SideBar = () => {
                     {menu.name}
                   </span>
                 )}
-
-                {/* {collapsed && (
-                  <div className="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
-                    <div className="relative whitespace-nowrap rounded-md bg-primary-200 px-4 py-2 text-sm text-primary-600 drop-shadow-lg">
-                      <div className="absolute inset-0 -left-1 flex items-center">
-                        <div className="h-2 w-2 rotate-45 bg-primary-200"></div>
-                      </div>
-                      {menu.name}
-                    </div>
-                  </div>
-                )} */}
               </Link>
             );
           })}
         </nav>
       </aside>
     </section>
-
-    // <section className="flex bg-green-300 text-gray-900">
-    //   <aside className="flex w-16 flex-col items-center bg-green-300 rounded-xl">
-    //     <div className="flex h-[4.5rem] w-full items-center justify-center border-b border-gray-200 p-2">
-    //       <Image src="/app_logo.png" alt="logo" width={170} height={170} />
-    //     </div>
-    //     <nav className="flex flex-1 flex-col gap-y-3 pt-5">
-    //       {menuItems.map((menu, index) => {
-    //         return (
-    //           <Link
-    //             key={index}
-    //             href={menu.path}
-    //             className={`group relative rounded-xl p-3 ${
-    //               pathname === menu.path
-    //                 ? "text-white bg-black/80 hover:shadow-lg"
-    //                 : "hover:bg-black/50 hover:text-white"
-    //             }`}
-    //           >
-    //             <menu.icon size={22} />
-
-    //             <div className="absolute inset-y-0 left-12 hidden items-center group-hover:flex">
-    //               <div className="relative whitespace-nowrap rounded-md bg-white px-4 py-2 text-sm   text-gray-900 drop-shadow-lg">
-    //                 <div className="absolute inset-0 -left-1 flex items-center">
-    //                   <div className="h-2 w-2 rotate-45 bg-white"></div>
-    //                 </div>
-    //                 {menu.name}
-    //               </div>
-    //             </div>
-    //           </Link>
-    //         );
-    //       })}
-    //     </nav>
-    //   </aside>
-    // </section>
   );
 };
 

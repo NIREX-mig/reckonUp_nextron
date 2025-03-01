@@ -9,10 +9,4 @@ files:
     filter:
       - package.json
       - app
-publish: [
-    {
-      provider: github,
-      owner: Nirex-mig,
-      repo: reckonUp_nextron
-    }
-  ],
+publish: { provider: github, owner: Nirex-mig, repo: reckonUp_nextron }

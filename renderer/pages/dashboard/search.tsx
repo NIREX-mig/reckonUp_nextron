@@ -106,7 +106,7 @@ const SearchPage: NextPageWithLayout = () => {
 
     getInvoices();
     setSearch("");
-  }, [selectedOption, currentPage, closeModal]);
+  }, [selectedOption, currentPage]);
 
   return (
     <React.Fragment>
@@ -179,10 +179,8 @@ const SearchPage: NextPageWithLayout = () => {
                 value={search}
                 handleChangeText={(e) => {
                   setSearch(e.target.value);
-                  setFilteredData(invoices);
                 }}
               />
-
               <Button title="Search" buttonType="submit" />
             </form>
           </div>

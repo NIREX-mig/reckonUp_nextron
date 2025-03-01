@@ -90,7 +90,7 @@ if (!fs.existsSync(uploadPath)) {
     width: 1366,
     height: 768,
     webPreferences: {
-      devTools: false, // Disable DevTools
+      // devTools: false, // Disable DevTools
       preload: path.join(__dirname, "preload.js"),
     },
   });
@@ -144,7 +144,6 @@ autoUpdater.on("update-downloaded", (event) => {
     if (returnValue.response === 0) autoUpdater.quitAndInstall();
   });
 });
-
 
 // Expose events using IPC
 // -----------------------------
@@ -372,9 +371,10 @@ ipcMain.on("createinvoice", async (event, args) => {
 
       // exchange Details
       exchange: invoiceData.exchange,
-      exchangeCategory: invoiceData.exchangeCategory
-        ? "N/A"
-        : invoiceData.exchangeCategory,
+      exchangeCategory:
+        invoiceData.exchangeCategory === "select"
+          ? "N/A"
+          : invoiceData.exchangeCategory,
       exchangeWeight:
         invoiceData.exchangeWeight.length === 0
           ? "N/A"

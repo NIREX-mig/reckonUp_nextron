@@ -181,7 +181,7 @@ const ViewInvoicePage: NextPageWithLayout = () => {
           </table>
 
           <div className={`flex justify-between mb-2`}>
-            <div className="absolute w-[140px] h-[140px]">
+            <div className="w-[140px] h-[140px]">
               <img
                 src={qr}
                 alt="QR-code"
