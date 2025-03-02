@@ -40,7 +40,6 @@ const InvoicePage: NextPageWithLayout = () => {
 
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
     pay: 0,
-    due: 0,
     discount: 0,
   });
 
@@ -67,6 +66,8 @@ const InvoicePage: NextPageWithLayout = () => {
   const [productList, setProductList] = useState([]);
 
   let totalAmt = grossAmt + GSTAMT - Number(exchangeDetails.exchangeAmt);
+  let due =
+    totalAmt - Number(paymentDetails.pay) - Number(paymentDetails.discount);
 
   const genrateInvoiceNo = async () => {
     window.ipc.send("totalcountofinvoice", {});
@@ -175,7 +176,7 @@ const InvoicePage: NextPageWithLayout = () => {
       paymentHistory: [
         {
           paidAmount: paymentDetails.pay,
-          dueAmount: paymentDetails.due,
+          dueAmount: due,
         },
       ],
     };
@@ -221,7 +222,6 @@ const InvoicePage: NextPageWithLayout = () => {
       makingCost: 0,
     });
     setPaymentDetails({
-      due: 0,
       pay: 0,
       discount: 0,
     });
@@ -291,7 +291,6 @@ const InvoicePage: NextPageWithLayout = () => {
     setPaymentDetails((prev) => ({
       ...prev,
       pay: e.target.value,
-      due: totalAmt - e.target.value,
     }));
   };
 
@@ -704,7 +703,6 @@ const InvoicePage: NextPageWithLayout = () => {
                 setPaymentDetails((prev) => ({
                   ...prev,
                   discount: e.target.value,
-                  due: totalAmt - paymentDetails.pay - e.target.value,
                 }));
               }}
               placeholder="discont"
@@ -719,7 +717,7 @@ const InvoicePage: NextPageWithLayout = () => {
             </div>
             <div className="flex justify-between font-semibold">
               <span>Due :</span>
-              <span>{`₹ ${paymentDetails.due}`}</span>
+              <span>{`₹ ${due}`}</span>
             </div>
             <div className="flex justify-between font-semibold">
               <span>Discont :</span>

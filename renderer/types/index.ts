@@ -44,7 +44,6 @@ export interface SingleProduct {
 
 export interface PaymentDetails {
   pay: number;
-  due: number;
   discount: number;
 }
 
