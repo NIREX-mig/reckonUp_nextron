@@ -2,11 +2,13 @@ import Link from "next/link";
 import React from "react";
 import { FaRegUser } from "react-icons/fa";
 import Button from "../ui/Button";
+import { AiOutlineLoading } from "react-icons/ai";
 
 const ForgotContainer = ({
   handleOnChange,
   username,
   handleUsernameSubmit,
+  loading,
 }) => {
   return (
     <div className="w-[30rem] bg-primary-50">
@@ -41,7 +43,14 @@ const ForgotContainer = ({
           </div>
         </div>
 
-        <Button buttonType="submit" title="Next" />
+        <Button
+          buttonType="submit"
+          title={loading ? "Wait..." : "Next"}
+          extraClass="font-semibold"
+          icon={<AiOutlineLoading size={20} />}
+          loading={loading}
+          disabled={loading}
+        />
       </form>
       <p className=" px-8 flex text-base font-bold text-primary-800">
         Want Login in account{" "}

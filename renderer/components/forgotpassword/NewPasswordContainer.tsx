@@ -1,11 +1,13 @@
 import React from "react";
 import { FaUnlockAlt } from "react-icons/fa";
 import Button from "../ui/Button";
+import { AiOutlineLoading } from "react-icons/ai";
 
 const NewPasswordContainer = ({
   formData,
   setFormData,
   handleNewPasswordSubmit,
+  loading
 }) => {
   const handleOnChange = (e) => {
     let name = e.target.name;
@@ -72,7 +74,13 @@ const NewPasswordContainer = ({
           </div>
         </div>
 
-        <Button buttonType="submit" title="Update Password" />
+        <Button 
+        buttonType="submit" 
+        title={loading ? "Wait..." : "Submit"} 
+        extraClass="font-semibold"
+        loading={loading} 
+        disabled={loading}
+        icon={<AiOutlineLoading size={20} />} />
       </form>
     </div>
   );

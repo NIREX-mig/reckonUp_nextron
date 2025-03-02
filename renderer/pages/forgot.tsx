@@ -15,6 +15,8 @@ export default function ForgotPage() {
 
   const { isOnline, isOffline, error } = useIsOnline();
 
+  const [loading, setLoading] = useState(false);
+
   const [username, setUsername] = useState("");
   const [finalOtp, setFinalOtp] = useState("");
   const [formData, setFormData] = useState({
@@ -31,16 +33,19 @@ export default function ForgotPage() {
 
   const handleUsernameSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     window.ipc.send("forgotpasswordemail", { username });
 
     window.ipc.on("forgotpasswordemail", (res: APiRes) => {
       if (res.success) {
+        setLoading(false);
         localStorage.setItem("tempToken", res.data);
         toast.success(res.message);
         setFPContainer(false);
         setOtpContainer(true);
         setNPContainer(false);
       } else {
+        setLoading(false);
         toast.error(res.message);
         setOtpContainer(false);
         setNPContainer(false);
@@ -51,16 +56,19 @@ export default function ForgotPage() {
 
   const handleOtpSumbmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const token = localStorage.getItem("tempToken");
     window.ipc.send("validateotp", { otp: finalOtp, token });
 
     window.ipc.on("validateotp", (res: APiRes) => {
       if (res.success) {
+        setLoading(false);
         toast.success(res.message);
         setFPContainer(false);
         setOtpContainer(false);
         setNPContainer(true);
       } else {
+        setLoading(false);
         toast.error(res.message);
         setOtpContainer(true);
         setNPContainer(false);
@@ -71,6 +79,7 @@ export default function ForgotPage() {
 
   const handleNewPasswordSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const token = localStorage.getItem("tempToken");
 
     window.ipc.send("forgotpassword", {
@@ -80,12 +89,14 @@ export default function ForgotPage() {
 
     window.ipc.on("forgotpassword", (res: APiRes) => {
       if (res.success) {
+        setLoading(false);
         localStorage.removeItem("tempToken");
         toast.success(res.message);
         setTimeout(() => {
-          router.push("/");
+          router.push("/home");
         }, 500);
       } else {
+        setLoading(false);
         toast.error(res.message);
         setOtpContainer(false);
         setNPContainer(true);
@@ -99,7 +110,7 @@ export default function ForgotPage() {
       <section className="w-full h-screen flex justify-center items-center">
         <div className="flex flex-col justify-center items-center gap-10">
           <h1 className="text-red-500 text-3xl font-bold">
-            Please first connect to the Internet
+            Please First Connect To The Internet
           </h1>
           <Link
             href="/home"
@@ -134,6 +145,7 @@ export default function ForgotPage() {
             username={username}
             handleOnChange={handleOnChange}
             handleUsernameSubmit={handleUsernameSubmit}
+            loading={loading}
           />
         )}
         {otpContainer && (
@@ -141,6 +153,7 @@ export default function ForgotPage() {
             finalOtp={finalOtp}
             setFinalOtp={setFinalOtp}
             handleOtpSumbmit={handleOtpSumbmit}
+            loading={loading}
           />
         )}
         {npContainer && (
@@ -148,6 +161,7 @@ export default function ForgotPage() {
             formData={formData}
             setFormData={setFormData}
             handleNewPasswordSubmit={handleNewPasswordSubmit}
+            loading={loading}
           />
         )}
       </section>

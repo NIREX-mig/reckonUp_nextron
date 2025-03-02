@@ -7,11 +7,13 @@ import { FaEye, FaEyeSlash, FaRegUser, FaUnlockAlt } from "react-icons/fa";
 import { APiRes } from "../types";
 import Button from "../components/ui/Button";
 import toast, { Toaster } from "react-hot-toast";
+import { AiOutlineLoading } from "react-icons/ai";
 
 export default function HomePage() {
   const router = useRouter();
 
   const [isPasswordHidden, setPasswordHidden] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     username: "app-admin",
@@ -20,6 +22,7 @@ export default function HomePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     window.ipc.send("login", {
       username: formData.username,
       password: formData.password,
@@ -27,6 +30,7 @@ export default function HomePage() {
 
     window.ipc.on("login", (res: APiRes) => {
       if (res?.success) {
+        setLoading(false);
         localStorage.setItem("logedinUser", JSON.stringify(res.data));
         toast.success(res.message);
         setFormData((prev) => ({
@@ -37,6 +41,7 @@ export default function HomePage() {
           router.push("/dashboard/");
         }, 500);
       } else {
+        setLoading(false);
         toast.error(res.message);
       }
     });
@@ -137,7 +142,13 @@ export default function HomePage() {
                 Forger Password
               </p>
             </Link>
-            <Button title="Sign In" buttonType="submit" />
+            <Button
+              title={loading ? "Wait..." : "Sign In"}
+              buttonType="submit"
+              loading={loading}
+              disabled={loading}
+              icon={<AiOutlineLoading size={20} />}
+            />
           </form>
         </div>
       </section>

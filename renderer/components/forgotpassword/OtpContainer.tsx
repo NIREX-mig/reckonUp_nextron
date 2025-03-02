@@ -1,8 +1,9 @@
 import React from "react";
 import { TbPasswordUser } from "react-icons/tb";
 import Button from "../ui/Button";
+import { AiOutlineLoading } from "react-icons/ai";
 
-const OtpContainer = ({ finalOtp, setFinalOtp, handleOtpSumbmit }) => {
+const OtpContainer = ({ finalOtp, setFinalOtp, handleOtpSumbmit, loading }) => {
   return (
     <div className="w-[30rem] bg-primary-50">
       <h3 className="text-center font-bold text-4xl mb-4 text-primary-900">
@@ -28,7 +29,14 @@ const OtpContainer = ({ finalOtp, setFinalOtp, handleOtpSumbmit }) => {
           </div>
         </div>
 
-        <Button buttonType="submit" title="Verify OTP" />
+        <Button
+          buttonType="submit"
+          title={loading ? "Wait..." : "Verify OTP"}
+          extraClass="font-semibold"
+          loading={loading}
+          disabled={loading}
+          icon={<AiOutlineLoading size={20} />}
+        />
       </form>
     </div>
   );
