@@ -75,7 +75,7 @@ if (!fs.existsSync(uploadPath)) {
   await checkUserIsExistOrNot();
 
   mainWindow = createWindow("main", {
-    title: "ReckonUp - Devloped by NIreX",
+    title: "ReckonUp - Devloped by NIreX  ( v1.0.2 )",
     width: 1366,
     height: 768,
     webPreferences: {
