@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Button from "../ui/Button";
 import toast from "react-hot-toast";
 import { APiRes } from "../../types";
-import SelectData from "./SelectData";
 import SelectDate from "./SelectDate";
 
 const ExportToExel = () => {
@@ -10,10 +9,9 @@ const ExportToExel = () => {
     start: "",
     end: "",
   });
-  const [checked, setChecked] = useState(false);
 
   const handleExportToExcel = () => {
-    window.ipc.send("export2excel", { date, exchangeDetails: checked });
+    window.ipc.send("export2excel", { date });
 
     window.ipc.on("export2excel", (res: APiRes) => {
       if (!res.success) {
@@ -29,24 +27,20 @@ const ExportToExel = () => {
       <div className="w-1/2">
         <div>
           <label className=" flex flex-col font-medium text-primary-900 mb-1">
-            Select Export Data:
+            Select Date:
             <span className="my-2">
               {
-                "Note : Invoice Details & Customer Details these data by default Selected"
+                "Note : Invoice Details, Customer Details, Exchange Details these data are Exportes"
               }
             </span>
           </label>
-          <SelectData checked={checked} setChecked={setChecked} />
         </div>
-        <div>
-          <label className="block font-medium text-primary-900 mb-1">
-            Select Date:
-          </label>
+        <div className="w-1/2">
           <SelectDate date={date} setDate={setDate} />
           <Button
             buttonType="button"
             title="Export to Excel"
-            extraClass="sm:w-auto"
+            extraClass="w-auto"
             handleClick={handleExportToExcel}
           />
         </div>

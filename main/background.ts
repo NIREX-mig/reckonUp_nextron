@@ -844,6 +844,64 @@ ipcMain.on("tracks", async (event) => {
   }
 });
 
+// Get Due Invoices Event
+ipcMain.on("getdueinvoices", async (event) => {
+  try {
+    const db = client.db("reckonup");
+    const collection = db.collection("invoices");
+
+    const dueData = await collection
+      .aggregate([
+        {
+          $lookup: {
+            from: "payments",
+            foreignField: "_id",
+            localField: "paymentHistory",
+            as: "paymentHistory",
+            pipeline: [
+              {
+                $sort: {
+                  createdAt: -1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $addFields: {
+            paidAmount: { $sum: "$paymentHistory.paidAmount" },
+            due: { $arrayElemAt: ["$paymentHistory.dueAmount", 0] },
+          },
+        },
+        {
+          $match: {
+            due: { $gt: 0 }, // Filter to only show documents with due > 0
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            customerName: 1,
+            customerAddress: 1,
+            customerPhone: 1,
+            invoiceNo: 1,
+            paidAmount: 1,
+            due: 1,
+            totalAmt: 1,
+            discount: 1,
+          },
+        },
+      ])
+      .toArray();
+
+    // create response and emmit event
+    const response = new EventResponse(true, "Success", dueData);
+    event.sender.send("getdueinvoices", response);
+  } catch (err) {
+    event.sender.send("getdueinvoices", err);
+  }
+});
+
 // -----------------------------
 //     Setting Events
 // ----------------------------
@@ -1046,7 +1104,7 @@ ipcMain.on("getqr", async (event) => {
 // Exprt to excel Event
 ipcMain.on("export2excel", async (event, args) => {
   try {
-    const { date, exchangeDetails } = args;
+    const { date } = args;
 
     const db = client.db("reckonup");
     const collection = db.collection("invoices");
@@ -1093,142 +1151,30 @@ ipcMain.on("export2excel", async (event, args) => {
       throw new EventResponse(false, "Don't have Any Invoice!", {});
     }
 
-    let headerData = exchangeDetails
-      ? [
-          [
-            "InvoiceNO",
-            "Name",
-            "PhoneNo",
-            "Address",
-            "exchangeCategory",
-            "exchangeWeight",
-            "exchangePercentage",
-            "exchangeAmount",
-            "ProName",
-            "ProCategory",
-            "ProRate",
-            "proWeight",
-            "ProQuantity",
-            "ProMaking",
-            "ProAmount",
-            "Gst(%)",
-            "Discount",
-            "Total",
-          ],
-        ]
-      : [
-          [
-            "InvoiceNO",
-            "Name",
-            "PhoneNo",
-            "Address",
-            "ProName",
-            "ProCategory",
-            "ProRate",
-            "proWeight",
-            "ProQuantity",
-            "ProMaking",
-            "ProAmount",
-            "Gst(%)",
-            "Discount",
-            "Total",
-          ],
-        ];
+    let headerData = [
+      [
+        "InvoiceNO",
+        "Name",
+        "PhoneNo",
+        "Address",
+        "exchangeCategory",
+        "exchangeWeight",
+        "exchangePercentage",
+        "exchangeAmount",
+        "ProName",
+        "ProCategory",
+        "ProRate",
+        "proWeight",
+        "ProQuantity",
+        "ProMaking",
+        "ProAmount",
+        "Gst(%)",
+        "Discount",
+        "Total",
+      ],
+    ];
     let merges = [];
     let rowIndex = 1; // Start after the header
-
-    if (exchangeDetails) {
-      invoices?.forEach((customer) => {
-        let startRow = rowIndex;
-
-        customer.productList.forEach((product) => {
-          headerData.push([
-            customer.invoiceNo,
-            customer.customerName,
-            customer.customerPhone,
-            customer.customerAddress,
-            customer.exchangeCategory,
-            customer.exchangeWeight,
-            customer.exchangePercentage,
-            customer.exchangeAmt,
-            product.productName,
-            product.productCategory,
-            product.rate.toString(),
-            product.netWeight.toString(),
-            product.quantity.toString(),
-            product.makingCost.toString(),
-            product.amount.toString(),
-            customer.GSTPercentage.toString(),
-            customer.discount.toString(),
-            customer.totalAmt.toString(),
-          ]);
-          rowIndex++;
-        });
-
-        // Merge columns
-        merges.push({ s: { r: startRow, c: 0 }, e: { r: rowIndex - 1, c: 0 } }); // Merge innvoiceNO column
-        merges.push({ s: { r: startRow, c: 1 }, e: { r: rowIndex - 1, c: 1 } }); // Merge name column
-        merges.push({ s: { r: startRow, c: 2 }, e: { r: rowIndex - 1, c: 2 } }); // Merge phoneNO column
-        merges.push({ s: { r: startRow, c: 3 }, e: { r: rowIndex - 1, c: 3 } }); // Merge address column
-        merges.push({ s: { r: startRow, c: 4 }, e: { r: rowIndex - 1, c: 4 } }); // Merge exchangeCategory column
-        merges.push({ s: { r: startRow, c: 5 }, e: { r: rowIndex - 1, c: 5 } }); // Merge exchangeWeight column
-        merges.push({ s: { r: startRow, c: 6 }, e: { r: rowIndex - 1, c: 6 } }); // Merge exchangePercentage column
-        merges.push({ s: { r: startRow, c: 7 }, e: { r: rowIndex - 1, c: 7 } }); // Merge exchangeAmount column
-        merges.push({
-          s: { r: startRow, c: 11 },
-          e: { r: rowIndex - 1, c: 11 },
-        }); // Merge gst column
-        merges.push({
-          s: { r: startRow, c: 12 },
-          e: { r: rowIndex - 1, c: 12 },
-        }); // Merge discount column
-        merges.push({
-          s: { r: startRow, c: 13 },
-          e: { r: rowIndex - 1, c: 13 },
-        }); // Merge total column
-      });
-
-      // Step 4: Get Desktop Path
-      const desktopPath = path.join(
-        app.getPath("desktop"),
-        "Customer_Products.xlsx"
-      );
-
-      // Convert data to worksheet
-      const ws = XLSX.utils.aoa_to_sheet(headerData);
-      ws["!merges"] = merges; // Apply merging
-      // const max_width = rows.reduce((w, r) => Math.max(w, r.name.length), 10);
-      ws["!cols"] = [
-        { wch: 15 },
-        { wch: 20 },
-        { wch: 15 },
-        { wch: 20 },
-        { wch: 20 },
-        { wch: 20 },
-        { wch: 20 },
-        { wch: 20 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 20 },
-        { wch: 10 },
-        { wch: 10 },
-        { wch: 20 },
-      ];
-
-      // Create workbook
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Customers");
-
-      // Step 5: Write the Excel file to Desktop
-      XLSX.writeFile(wb, desktopPath);
-
-      const response = new EventResponse(true, "Successfully Saved!", {});
-      event.reply("export2excel", response);
-      return;
-    }
 
     invoices?.forEach((customer) => {
       let startRow = rowIndex;
@@ -1239,6 +1185,10 @@ ipcMain.on("export2excel", async (event, args) => {
           customer.customerName,
           customer.customerPhone,
           customer.customerAddress,
+          customer.exchangeCategory,
+          customer.exchangeWeight,
+          customer.exchangePercentage,
+          customer.exchangeAmt,
           product.productName,
           product.productCategory,
           product.rate.toString(),
@@ -1258,9 +1208,22 @@ ipcMain.on("export2excel", async (event, args) => {
       merges.push({ s: { r: startRow, c: 1 }, e: { r: rowIndex - 1, c: 1 } }); // Merge name column
       merges.push({ s: { r: startRow, c: 2 }, e: { r: rowIndex - 1, c: 2 } }); // Merge phoneNO column
       merges.push({ s: { r: startRow, c: 3 }, e: { r: rowIndex - 1, c: 3 } }); // Merge address column
-      merges.push({ s: { r: startRow, c: 11 }, e: { r: rowIndex - 1, c: 11 } }); // Merge gst column
-      merges.push({ s: { r: startRow, c: 12 }, e: { r: rowIndex - 1, c: 12 } }); // Merge discount column
-      merges.push({ s: { r: startRow, c: 13 }, e: { r: rowIndex - 1, c: 13 } }); // Merge total column
+      merges.push({ s: { r: startRow, c: 4 }, e: { r: rowIndex - 1, c: 4 } }); // Merge exchangeCategory column
+      merges.push({ s: { r: startRow, c: 5 }, e: { r: rowIndex - 1, c: 5 } }); // Merge exchangeWeight column
+      merges.push({ s: { r: startRow, c: 6 }, e: { r: rowIndex - 1, c: 6 } }); // Merge exchangePercentage column
+      merges.push({ s: { r: startRow, c: 7 }, e: { r: rowIndex - 1, c: 7 } }); // Merge exchangeAmount column
+      merges.push({
+        s: { r: startRow, c: 11 },
+        e: { r: rowIndex - 1, c: 11 },
+      }); // Merge gst column
+      merges.push({
+        s: { r: startRow, c: 12 },
+        e: { r: rowIndex - 1, c: 12 },
+      }); // Merge discount column
+      merges.push({
+        s: { r: startRow, c: 13 },
+        e: { r: rowIndex - 1, c: 13 },
+      }); // Merge total column
     });
 
     // Step 4: Get Desktop Path
@@ -1272,11 +1235,13 @@ ipcMain.on("export2excel", async (event, args) => {
     // Convert data to worksheet
     const ws = XLSX.utils.aoa_to_sheet(headerData);
     ws["!merges"] = merges; // Apply merging
-    // const max_width = rows.reduce((w, r) => Math.max(w, r.name.length), 10);
     ws["!cols"] = [
       { wch: 15 },
       { wch: 20 },
       { wch: 15 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 20 },
       { wch: 20 },
       { wch: 20 },
       { wch: 15 },
@@ -1296,12 +1261,6 @@ ipcMain.on("export2excel", async (event, args) => {
 
     // Step 5: Write the Excel file to Desktop
     XLSX.writeFile(wb, desktopPath);
-
-    // const desktopPath = path.join(app.getPath("desktop"), `invoice.csv`);
-
-    // const csvData = papa.unparse(invoices);
-
-    // fs.writeFileSync(desktopPath, csvData, "utf-8");
 
     const response = new EventResponse(true, "Successfully Saved!", {});
     event.reply("export2excel", response);

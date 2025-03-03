@@ -19,7 +19,6 @@ const SideBar = () => {
     { name: "Dashboard", path: "/dashboard/", icon: LuLayoutDashboard },
     { name: "New Invoice", path: "/dashboard/invoice/", icon: MdOutlinePostAdd},
     { name: "View Invoices", path: "/dashboard/search/", icon: FiFileText },
-    { name: "Due Invoices", path: "/dashboard/duehistory/", icon: FiFileText },
     { name: "settings", path: "/dashboard/settings/", icon: FiSettings },
   ];
 

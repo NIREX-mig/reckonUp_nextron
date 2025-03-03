@@ -4,11 +4,15 @@ import { NextPageWithLayout } from "../_app";
 import Head from "next/head";
 import { FaArrowLeft } from "react-icons/fa";
 import { FiPrinter } from "react-icons/fi";
-import moment from "moment";
 import { useRouter } from "next/router";
 import { useReactToPrint } from "react-to-print";
 import { APiRes } from "../../types";
 import toast from "react-hot-toast";
+import InvoiceHeader from "../../components/invoices/InvoiceHeader";
+import InvoiceDetailsCards from "../../components/invoices/InvoiceDetailsCards";
+import InvoiceItemsList from "../../components/invoices/InvoiceItemsList";
+import BillingSection from "../../components/invoices/BillingSection";
+import InvoiceFooter from "../../components/invoices/InvoiceFooter";
 
 const ViewInvoicePage: NextPageWithLayout = () => {
   const [finalInvoiceData, setFinalInvoiceData] = useState(undefined);
@@ -87,6 +91,64 @@ const ViewInvoicePage: NextPageWithLayout = () => {
 
         <div
           ref={contentRef}
+          className="min-h-screen max-w-4xl mx-auto bg-[#ffffff] font-[Raleway] p-8"
+        >
+          <div className="relative mx-auto max-w-[1200px]">
+            <div className="absolute left-0 top-0 h-[1000px] w-full overflow-hidden">
+              <svg
+                className="absolute left-[-10%] top-[-10%] h-[500px] w-[500px] rotate-[15deg] opacity-[0.02]"
+                viewBox="0 0 100 100"
+              >
+                <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="#4318D1" />
+              </svg>
+
+              <svg
+                className="absolute right-[-5%] top-[20%] h-[300px] w-[300px] rotate-[45deg] opacity-[0.02]"
+                viewBox="0 0 100 100"
+              >
+                <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="#4318D1" />
+              </svg>
+            </div>
+
+            <InvoiceHeader
+              shopName={setting?.shopName}
+              address={setting?.address}
+            />
+
+            <InvoiceDetailsCards
+              category={finalInvoiceData?.exchangeCategory}
+              percentage={finalInvoiceData?.exchangePercentage}
+              customername={finalInvoiceData?.customerName}
+              customeraddress={finalInvoiceData?.customerAddress}
+              customerphone={finalInvoiceData?.customerPhone}
+              invoiceNumber={finalInvoiceData?.invoiceNo}
+              date={finalInvoiceData?.createdAt}
+            />
+
+            <InvoiceItemsList productList={finalInvoiceData?.productList} />
+
+            <BillingSection
+              subtotal={finalInvoiceData?.grossAmt}
+              GSTAmount={finalInvoiceData?.GSTAMT}
+              GstPercentage={finalInvoiceData?.GSTPercentage}
+              discount={finalInvoiceData?.discount}
+              exchange={finalInvoiceData?.exchange}
+              exchangeAmount={finalInvoiceData?.exchangeAmt}
+              gst={finalInvoiceData?.GST}
+              paidAmount={finalInvoiceData?.paymentHistory[0]?.paidAmount}
+              qrSrc={qr}
+              totalAmount={finalInvoiceData?.totalAmt}
+            />
+
+            <InvoiceFooter
+              mobile={setting?.mobileNumber}
+              whatsapp={setting?.whatsappNumber}
+            />
+          </div>
+        </div>
+
+        {/* <div
+          ref={contentRef}
           className="max-w-4xl mx-auto p-10 bg-white  text-zinc-900 rounded-lg text-sm"
         >
           <div className="flex justify-between items-center mb-2 font-semibold">
@@ -162,7 +224,6 @@ const ViewInvoicePage: NextPageWithLayout = () => {
               </tr>
             </thead>
             <tbody>
-              {/* <tbody className="[&>*:nth-child(even)]:bg-green-200"> */}
               {finalInvoiceData?.productList.map((product, index) => {
                 return (
                   <tr key={index} className="border-b font-semibold">
@@ -222,10 +283,6 @@ const ViewInvoicePage: NextPageWithLayout = () => {
                 <span>Discount :</span>
                 <span>{`₹ ${finalInvoiceData?.discount}`}</span>
               </div>
-              {/* <div className="flex justify-between font-semibold">
-                <span>Due :</span>
-                <span>{`₹ ${finalInvoiceData?.paymentHistory[0]?.dueAmount}`}</span>
-              </div> */}
             </div>
           </div>
 
@@ -244,7 +301,7 @@ const ViewInvoicePage: NextPageWithLayout = () => {
           <div className="bg-green-600 text-center py-1 mt-3 capitalize">
             THANK YOU FOR YOU BUSINESS WITH US!
           </div>
-        </div>
+        </div> */}
       </div>
     </React.Fragment>
   );
