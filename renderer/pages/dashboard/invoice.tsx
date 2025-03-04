@@ -66,8 +66,13 @@ const InvoicePage: NextPageWithLayout = () => {
   const [productList, setProductList] = useState([]);
 
   let totalAmt = grossAmt + GSTAMT - Number(exchangeDetails.exchangeAmt);
-  let due =
-    totalAmt - Number(paymentDetails.pay) - Number(paymentDetails.discount);
+  let due = Number(
+    (
+      totalAmt -
+      Number(paymentDetails.pay) -
+      Number(paymentDetails.discount)
+    ).toFixed(0)
+  );
 
   const genrateInvoiceNo = async () => {
     window.ipc.send("totalcountofinvoice", {});
@@ -250,16 +255,17 @@ const InvoicePage: NextPageWithLayout = () => {
   const handleMakingCostBlur = () => {
     if (productDetails.makingCost === undefined) return; // Allow empty value
     const numericValue = Number(productDetails.makingCost);
-    if (numericValue < 0)
+    if (numericValue < 0) {
       setProductDetails((prev) => ({
         ...prev,
         makingCost: 0,
       }));
-    else if (numericValue > 100)
+    } else if (numericValue > 100) {
       setProductDetails((prev) => ({
         ...prev,
         makingCost: 100,
       }));
+    }
   };
 
   const handleGstChange = (e) => {
@@ -287,11 +293,20 @@ const InvoicePage: NextPageWithLayout = () => {
     else if (numericValue > 100.0) setGST(100);
   };
 
-  const handlePayChange = (e) => {
-    setPaymentDetails((prev) => ({
-      ...prev,
-      pay: e.target.value,
-    }));
+  const handlePayOnBlur = () => {
+    if (paymentDetails.pay === undefined) return; // Allow empty value
+
+    if (paymentDetails.pay <= 0) {
+      setPaymentDetails((prev) => ({
+        ...prev,
+        pay: 0,
+      }));
+    } else if (paymentDetails.pay >= totalAmt) {
+      setPaymentDetails((prev) => ({
+        ...prev,
+        pay: totalAmt,
+      }));
+    }
   };
 
   useEffect(() => {
@@ -593,7 +608,7 @@ const InvoicePage: NextPageWithLayout = () => {
                     lableStyle="text-primary-800"
                     type="number"
                     min="0"
-                    step="0.01"
+                    step="0.001"
                     value={productDetails.netWeight}
                     handleChangeText={(e) =>
                       setProductDetails((prev) => ({
@@ -730,7 +745,13 @@ const InvoicePage: NextPageWithLayout = () => {
               type="number"
               min="0"
               value={paymentDetails.pay}
-              handleChangeText={handlePayChange}
+              handleChangeText={(e) => {
+                setPaymentDetails((prev) => ({
+                  ...prev,
+                  pay: e.target.value,
+                }));
+              }}
+              handleOnBlur={handlePayOnBlur}
               placeholder="Pay amount"
             />
           </div>

@@ -19,6 +19,7 @@ const ViewInvoicePage: NextPageWithLayout = () => {
   const [setting, setSetting] = useState(undefined);
   const contentRef = useRef();
   const [qr, setQr] = useState(undefined);
+  const [logo, setLogo] = useState(undefined);
 
   const router = useRouter();
 
@@ -53,12 +54,22 @@ const ViewInvoicePage: NextPageWithLayout = () => {
       });
     };
 
+    const getInvoiceLog = () => {
+      window.ipc.send("get-logo", {});
+      window.ipc.on("get-logo", (res: APiRes) => {
+        if (res.success) {
+          setLogo(res?.data);
+        }
+      });
+    };
+
     const setinvoice = async () => {
       const jsonInvoice = localStorage.getItem("finalInvoice");
       const ObjInvoice = await JSON.parse(jsonInvoice);
       setFinalInvoiceData(ObjInvoice);
     };
     getPaymentQrImage();
+    getInvoiceLog();
     setinvoice();
     getsettingData();
   }, []);
@@ -91,28 +102,17 @@ const ViewInvoicePage: NextPageWithLayout = () => {
 
         <div
           ref={contentRef}
-          className="min-h-screen max-w-4xl mx-auto bg-[#ffffff] font-[Raleway] p-8"
+          className="max-w-4xl mx-auto bg-[#ffffff] font-[Raleway] p-5"
         >
           <div className="relative mx-auto max-w-[1200px]">
-            <div className="absolute left-0 top-0 h-[1000px] w-full overflow-hidden">
-              <svg
-                className="absolute left-[-10%] top-[-10%] h-[500px] w-[500px] rotate-[15deg] opacity-[0.02]"
-                viewBox="0 0 100 100"
-              >
-                <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="#4318D1" />
-              </svg>
-
-              <svg
-                className="absolute right-[-5%] top-[20%] h-[300px] w-[300px] rotate-[45deg] opacity-[0.02]"
-                viewBox="0 0 100 100"
-              >
-                <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="#4318D1" />
-              </svg>
-            </div>
-
             <InvoiceHeader
               shopName={setting?.shopName}
               address={setting?.address}
+              invoiceNo={finalInvoiceData?.invoiceNo}
+              date={finalInvoiceData?.createdAt}
+              logoSrc={logo}
+              whatsappNo={setting?.mobileNumber}
+              mobileNo={setting?.whatsappNumber}
             />
 
             <InvoiceDetailsCards
@@ -121,8 +121,7 @@ const ViewInvoicePage: NextPageWithLayout = () => {
               customername={finalInvoiceData?.customerName}
               customeraddress={finalInvoiceData?.customerAddress}
               customerphone={finalInvoiceData?.customerPhone}
-              invoiceNumber={finalInvoiceData?.invoiceNo}
-              date={finalInvoiceData?.createdAt}
+              exchange={finalInvoiceData?.exchange}
             />
 
             <InvoiceItemsList productList={finalInvoiceData?.productList} />
@@ -140,10 +139,7 @@ const ViewInvoicePage: NextPageWithLayout = () => {
               totalAmount={finalInvoiceData?.totalAmt}
             />
 
-            <InvoiceFooter
-              mobile={setting?.mobileNumber}
-              whatsapp={setting?.whatsappNumber}
-            />
+            <InvoiceFooter />
           </div>
         </div>
 

@@ -75,7 +75,7 @@ if (!fs.existsSync(uploadPath)) {
   await checkUserIsExistOrNot();
 
   mainWindow = createWindow("main", {
-    title: "ReckonUp - Devloped by NIreX  ( v1.0.2 )",
+    title: "ReckonUp - Devloped by NIreX",
     width: 1366,
     height: 768,
     webPreferences: {
@@ -896,9 +896,9 @@ ipcMain.on("getdueinvoices", async (event) => {
 
     // create response and emmit event
     const response = new EventResponse(true, "Success", dueData);
-    event.sender.send("getdueinvoices", response);
+    event.reply("getdueinvoices", response);
   } catch (err) {
-    event.sender.send("getdueinvoices", err);
+    event.reply("getdueinvoices", err);
   }
 });
 
@@ -1098,6 +1098,108 @@ ipcMain.on("getqr", async (event) => {
     event.reply("getqr", response);
   } catch (err) {
     event.reply("getqr", err);
+  }
+});
+
+// upload Invoice logo Event
+ipcMain.on("upload-logo", async (event, args) => {
+  try {
+    const { fileName, logo } = args;
+
+    const db = client.db("reckonup");
+    const collection = db.collection("settings");
+
+    const setting = await collection.find().toArray();
+    const oldfilePath = setting[0]?.logo;
+
+    const base64Data = logo.replace(/^data:image\/\w+;base64,/, "");
+    const filePath = path.join(uploadPath, fileName);
+
+    // newly upload qr in locally and path save in db
+    if (!oldfilePath || oldfilePath === null) {
+      fs.writeFile(filePath, base64Data, "base64", async (err) => {
+        if (err) {
+          throw new EventResponse(false, err.message, {});
+        } else {
+          if (setting.length === 0) {
+            await collection.insertOne({ logo: filePath });
+          }
+
+          await collection.updateOne(
+            { _id: setting[0]._id },
+            { $set: { logo: filePath } }
+          );
+
+          const response = new EventResponse(
+            true,
+            "Successfully qr update.",
+            filePath
+          );
+          event.reply("uploadqr", response);
+          return;
+        }
+      });
+    }
+
+    // update qr in locally and path save in db
+    if (oldfilePath) {
+      // check file is exits or not locally
+      if (fs.existsSync(oldfilePath)) {
+        // remove file for oldpath
+        fs.unlinkSync(oldfilePath);
+        // add new file and update path in db
+        fs.writeFile(filePath, base64Data, "base64", async (err) => {
+          if (err) {
+            throw new EventResponse(false, err.message, {});
+          } else {
+            await collection.updateOne(
+              { _id: setting[0]._id },
+              { $set: { logo: filePath } }
+            );
+
+            const response = new EventResponse(
+              true,
+              "Successfully logo update.",
+              filePath
+            );
+
+            event.reply("uploadqr", response);
+            return;
+          }
+        });
+      } else {
+        await collection.updateOne(
+          { _id: setting[0]._id },
+          { $unset: { logo: 1 } }
+        );
+      }
+    }
+  } catch (err) {
+    event.reply("upload-logo", err);
+  }
+});
+
+// Get Logo Event
+ipcMain.on("get-logo", async (event) => {
+  try {
+    const db = client.db("reckonup");
+    const collection = db.collection("settings");
+
+    const setting = await collection.find().toArray();
+    const filePath = setting[0].logo;
+
+    if (!filePath || filePath === null) {
+      throw new EventResponse(false, "Failed!", {});
+    }
+
+    const imageBuffer = fs.readFileSync(filePath);
+    const logoSrc = `data:/image/png;base64, ${imageBuffer.toString("base64")}`;
+
+    // create response and emmit event
+    const response = new EventResponse(true, "Success", logoSrc);
+    event.reply("get-logo", response);
+  } catch (err) {
+    event.reply("get-logo", err);
   }
 });
 

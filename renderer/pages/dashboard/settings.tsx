@@ -13,6 +13,9 @@ import ExportToExel from "../../components/settings/ExportToExel";
 
 const SettingPage: NextPageWithLayout = () => {
   const router = useRouter();
+  const [logo, setlogo] = useState(undefined);
+  const [logoPreview, setlogoPreview] = useState(undefined);
+  const [logoUploaded, setLogoUploaded] = useState(false);
 
   const [settingData, setSettingData] = useState({
     ownerName: "",
@@ -42,6 +45,42 @@ const SettingPage: NextPageWithLayout = () => {
     });
   };
 
+  const handleFileChange = (e) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      setlogo(undefined);
+      return;
+    }
+    setlogo(e.target.files[0]);
+
+    const Updatelogo = async (file) => {
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          window.ipc.send("upload-logo", {
+            fileName: file.name,
+            logo: reader.result,
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    Updatelogo(e.target.files[0]);
+    setLogoUploaded(true);
+  };
+
+  useEffect(() => {
+    if (!logo) {
+      setlogo(undefined);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(logo);
+
+    setlogoPreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [logo]);
+
   useEffect(() => {
     const getSetting = async () => {
       window.ipc.send("fetchsetting", {});
@@ -61,6 +100,18 @@ const SettingPage: NextPageWithLayout = () => {
         }
       });
     };
+
+    const getLogo = async () => {
+      window.ipc.send("get-logo", {});
+
+      window.ipc.on("get-logo", (res: APiRes) => {
+        if (res.success) {
+          setLogoUploaded(true);
+          setlogoPreview(res.data);
+        }
+      });
+    };
+    getLogo();
 
     getSetting();
   }, [router]);
@@ -181,21 +232,36 @@ const SettingPage: NextPageWithLayout = () => {
 
             <div>
               <h2 className="text-lg font-semibold mb-4">Invoice Settings</h2>
-              <div className="space-y-4">
+              <div className="flex gap-10">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Payment QR:
                   </label>
                   <FileInput />
                 </div>
-              </div>
-              <div className="space-y-4 my-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Invoice Logo:
                   </label>
-                  <div className="w-[300px] h-[150px] border-2 border-dashed border-primary-900 rounded-lg p-2">
-                    here create invoice logo uploader
+                  <div className="w-[200px] h-[200px] border-2 border-dashed border-primary-900 rounded-lg p-1 flex justify-center items-center">
+                    <label htmlFor="logo">
+                      {!logoUploaded ? (
+                        <p>Upload Logo</p>
+                      ) : (
+                        <img
+                          src={logoPreview}
+                          alt="logo"
+                          className="w-[180px] h-[180px] object-contain"
+                        />
+                      )}
+                    </label>
+                    <input
+                      id="logo"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
                   </div>
                 </div>
               </div>

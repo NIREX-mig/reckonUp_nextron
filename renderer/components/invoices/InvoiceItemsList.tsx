@@ -2,9 +2,9 @@ import React from "react";
 
 const InvoiceItemsList = ({ productList }) => {
   return (
-    <div className="mb-3 rounded-xl border-[1px] border-[#f0f0f0] bg-white shadow-[0_15px_40px_-15px_rgba(67,24,209,0.1)] p-3">
+    <div className="mb-3 rounded-xl border-[1px] border-[#f0f0f0] bg-white p-3">
       <table className="w-full mb-3 ">
-        <thead className="bg-[#4318D1] bg-clip-text text-[15px] font-medium tracking-[2px] text-transparent capitalize">
+        <thead className="text-green-600 text-[13px] tracking-[1px]  capitalize">
           <tr className="border-b">
             <th className="text-center">SNo</th>
             <th className="text-center w-[12rem]">Product Name</th>

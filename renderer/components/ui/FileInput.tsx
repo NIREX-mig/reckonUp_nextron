@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { APiRes } from "../../types";
 
 const FileInput = () => {
-
   const [qrImage, setQrImage] = useState(undefined);
   const [imageUploded, setImageUploded] = useState(false);
   const [imagePreview, setImagePreview] = useState(undefined);
@@ -60,10 +59,10 @@ const FileInput = () => {
 
   return (
     <div
-      className="w-60 h-60 rounded-lg border-2 border-dashed border-primary-900 flex items-center
+      className="w-[200px] h-[200px] rounded-lg border-2 border-dashed border-primary-900 flex items-center
 justify-center"
     >
-      <label htmlFor="file" className="cursor-pointer text-center p-4 md:p-8">
+      <label htmlFor="file" className="cursor-pointer text-center p-2 md:p-1">
         {!imageUploded ? (
           <div>
             <svg
@@ -94,12 +93,10 @@ justify-center"
             </p>
           </div>
         ) : (
-          <Image
+          <img
             src={imagePreview}
             alt="Qr"
-            width={100}
-            height={100}
-            className="w-56 h-56 object-contain"
+            className="w-[180px] h-[180px] object-contain"
           />
         )}
       </label>

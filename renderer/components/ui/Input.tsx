@@ -10,7 +10,7 @@ interface InputFeild {
   disabled?: boolean;
   value: string | number;
   handleChangeText: (e) => void;
-  handleOnBlur?: (e) => void;
+  handleOnBlur?: () => void;
   otherStyle?: string;
   lableStyle?: string;
   placeholder?: string;
