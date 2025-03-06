@@ -467,8 +467,8 @@ ipcMain.on("fetchbycustomername", async (event, args) => {
     const collection = db.collection("invoices");
 
     const page = parseInt(pageNo) || 1; // Default to page 1
-    // const limit = 1; // Default to 40 items per page
-    const limit = 40; // Default to 40 items per page
+    const limit = 1; // Default to 40 items per page
+    // const limit = 40; // Default to 40 items per page
     const skip = (page - 1) * limit; // Calculate skip value
 
     const invoices = await collection
@@ -531,7 +531,7 @@ ipcMain.on("fetchbydaterange", async (event, args) => {
     const collection = db.collection("invoices");
 
     const page = parseInt(pageNo) || 1; // Default to page 1
-    const limit = 40; // Default to 40 items per page
+    const limit = 2; // Default to 40 items per page
     const skip = (page - 1) * limit; // Calculate skip value
 
     // Convert dates and subtract one day from startingDate
@@ -671,7 +671,7 @@ ipcMain.on("getallinvoice", async (event, args) => {
     const collection = db.collection("invoices");
 
     const page = parseInt(pageNo) || 1; // Default to page 1
-    const limit = 40; // Default to 40 items per page
+    const limit = 2; // Default to 40 items per page
     const skip = (page - 1) * limit; // Calculate skip value
 
     const invoices = await collection
