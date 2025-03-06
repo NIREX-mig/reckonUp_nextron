@@ -9,7 +9,7 @@ import Header from "../../components/ui/Header";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import toast from "react-hot-toast";
-import SearchPageTable from "../../components/ui/SearchPageTable";
+import SearchPageTable from "../../components/search/SearchPageTable";
 
 const SearchPage: NextPageWithLayout = () => {
   const { modalType, openModal, closeModal } = useModal();
@@ -106,7 +106,7 @@ const SearchPage: NextPageWithLayout = () => {
 
     getInvoices();
     setSearch("");
-  }, [selectedOption, currentPage]);
+  }, [selectedOption]);
 
   return (
     <React.Fragment>
