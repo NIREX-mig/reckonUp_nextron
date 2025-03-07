@@ -41,6 +41,10 @@ export default function HomePage() {
           router.push("/dashboard/");
         }, 500);
       } else {
+        setFormData((prev) => ({
+          ...prev,
+          password: "",
+        }));
         setLoading(false);
         toast.error(res.message);
       }

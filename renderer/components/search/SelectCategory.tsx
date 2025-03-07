@@ -14,8 +14,12 @@ const SelectCategory = ({
 
   const [search, setSearch] = useState("");
 
-  const handleFetchInvoiceBySelection = (e) => {
-    e.preventDefault();
+  const fetchInvoicesBySelection = async () => {
+    if (search.trim().length === 0) {
+      toast.error("Please Enter custormer Name or Invoice No");
+      return;
+    }
+
     if (selectedOption === "invoiceNo") {
       window.ipc.send("fetchbyinvoiceno", { invoiceNo: search.toUpperCase() });
 
@@ -28,9 +32,7 @@ const SelectCategory = ({
           toast.error(res.message);
         }
       });
-    }
-
-    if (selectedOption === "customerName") {
+    } else if (selectedOption === "customerName") {
       window.ipc.send("fetchbycustomername", {
         customerName: search.toLowerCase(),
         pageNo: currentPage,
@@ -48,9 +50,17 @@ const SelectCategory = ({
     }
   };
 
+  const handleFetchInvoiceBySelection = (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchInvoicesBySelection();
+  };
+
   useEffect(() => {
-    setSearch("");
-  }, [selectedOption]);
+    if (search) {
+      fetchInvoicesBySelection();
+    }
+  }, [currentPage]);
 
   return (
     <div>

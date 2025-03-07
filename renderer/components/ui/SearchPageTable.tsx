@@ -73,7 +73,7 @@ const SearchPageTable = ({
             </tr>
           </thead>
           <tbody className="bg-primary-50 divide-y divide-gray-200">
-            {data?.map((invoice, index) => {
+            {data?.map((invoice , index : number) => {
               return (
                 <tr key={index}>
                   <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
@@ -98,7 +98,8 @@ const SearchPageTable = ({
                   </td>
                   <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
                     {invoice?.paymentHistory.reduce(
-                      (sum, history) => sum + history.paidAmount,
+                      (sum: any, history: { paidAmount: any }) =>
+                        sum + history.paidAmount,
                       0
                     )}
                   </td>
@@ -160,7 +161,7 @@ const SearchPageTable = ({
 
         <button
           onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            setCurrentPage((prev: number) => Math.min(prev + 1, totalPages))
           }
           disabled={currentPage === totalPages}
           className="flex items-center px-5 py-2 text-sm text-white capitalize bg-btn border rounded-md gap-x-2 hover:bg-btn/95  disabled:bg-btn/50 cursor-pointer disabled:cursor-not-allowed active:scale-95 transition-all duration-300"

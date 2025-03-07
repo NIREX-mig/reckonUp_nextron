@@ -467,8 +467,7 @@ ipcMain.on("fetchbycustomername", async (event, args) => {
     const collection = db.collection("invoices");
 
     const page = parseInt(pageNo) || 1; // Default to page 1
-    const limit = 1; // Default to 40 items per page
-    // const limit = 40; // Default to 40 items per page
+    const limit = 40; // Default to 40 items per page
     const skip = (page - 1) * limit; // Calculate skip value
 
     const invoices = await collection
@@ -498,7 +497,7 @@ ipcMain.on("fetchbycustomername", async (event, args) => {
         },
         {
           $limit: limit,
-        },
+        }
       ])
       .toArray();
 
@@ -506,14 +505,15 @@ ipcMain.on("fetchbycustomername", async (event, args) => {
       throw new EventResponse(false, "Invalid Customer Name!", {});
     }
 
-    const total = await collection.countDocuments({});
+    const total = await collection
+      .find({ customerName: customerName })
+      .toArray();
 
     const data = {
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total.length / limit),
       currentPage: page,
       invoices: invoices,
     };
-
     // create response and emmit event
     const response = new EventResponse(true, "Success", data);
     event.reply("fetchbycustomername", response);
@@ -531,7 +531,7 @@ ipcMain.on("fetchbydaterange", async (event, args) => {
     const collection = db.collection("invoices");
 
     const page = parseInt(pageNo) || 1; // Default to page 1
-    const limit = 2; // Default to 40 items per page
+    const limit = 40; // Default to 40 items per page
     const skip = (page - 1) * limit; // Calculate skip value
 
     // Convert dates and subtract one day from startingDate
@@ -539,14 +539,15 @@ ipcMain.on("fetchbydaterange", async (event, args) => {
     adjustedStartDate.setDate(adjustedStartDate.getDate() - 1); // Subtract 1 day
 
     const adjustedEndDate = new Date(endingDate);
+    adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
 
     const invoices = await collection
       .aggregate([
         {
           $match: {
             createdAt: {
-              $gte: adjustedStartDate,
-              $lte: adjustedEndDate,
+              $gt: adjustedStartDate,
+              $lt: adjustedEndDate,
             },
           },
         },
@@ -574,10 +575,21 @@ ipcMain.on("fetchbydaterange", async (event, args) => {
       ])
       .toArray();
 
-    const total = await collection.countDocuments({});
+    const total = await collection
+      .aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: adjustedStartDate,
+              $lte: adjustedEndDate,
+            },
+          },
+        },
+      ])
+      .toArray();
 
     const data = {
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total.length / limit),
       currentPage: page,
       invoices: invoices,
     };
@@ -671,7 +683,7 @@ ipcMain.on("getallinvoice", async (event, args) => {
     const collection = db.collection("invoices");
 
     const page = parseInt(pageNo) || 1; // Default to page 1
-    const limit = 2; // Default to 40 items per page
+    const limit = 40; // Default to 40 items per page
     const skip = (page - 1) * limit; // Calculate skip value
 
     const invoices = await collection

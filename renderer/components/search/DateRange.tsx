@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
 import toast from "react-hot-toast";
@@ -9,6 +9,7 @@ const DateRange = ({
   setCurrentPage,
   setTotalPages,
   setFilteredData,
+  clear,
 }) => {
   const [date, setDate] = useState({
     start: "",
@@ -16,8 +17,12 @@ const DateRange = ({
   });
 
   // Fetch invoices by date range with pagination
-  const handleFetchInvoiceByDateRange = async (e) => {
-    e.preventDefault();
+  const fetchInvoicesByDateRange = async () => {
+    if (!date.start || !date.end) {
+      toast.error("Please select both start and end dates.");
+      return;
+    }
+
     window.ipc.send("fetchbydaterange", {
       startingDate: date.start,
       endingDate: date.end,
@@ -35,6 +40,17 @@ const DateRange = ({
     });
   };
 
+  const handleFetchInvoiceByDateRange = async (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchInvoicesByDateRange();
+  };
+
+  useEffect(() => {
+    if (date.start && date.end) {
+      fetchInvoicesByDateRange();
+    }
+  }, [currentPage]);
   return (
     <div>
       <form
@@ -69,6 +85,7 @@ const DateRange = ({
           type="button"
           onClick={() => {
             setDate({ start: "", end: "" });
+            clear();
           }}
           className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm sm:w-auto px-5 py-1.5 text-center active:scale-95 transition-all duration-300"
         >

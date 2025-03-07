@@ -17,8 +17,10 @@ const SearchPage: NextPageWithLayout = () => {
   const [currentPage, setCurrentPage] = useState(undefined);
   const [totalPages, setTotalPages] = useState(undefined);
 
-  const [invoices, setInvoices] = useState([]);
-  const [filteredData, setFilteredData] = useState(invoices);
+  const [filteredData, setFilteredData] = useState([]);
+
+  const [filterCurrentPage, setFilterCurrentPage] = useState(undefined);
+  const [filterTotalPage, setFilterTotalPage] = useState(undefined);
 
   const handleShowDetails = (invoice) => {
     openModal("Invoice-Details");
@@ -31,9 +33,11 @@ const SearchPage: NextPageWithLayout = () => {
 
     window.ipc.on("getallinvoice", (res: APiRes) => {
       if (res.success) {
-        setInvoices(res.data.invoices);
+        setFilteredData(res.data.invoices);
         setCurrentPage(res.data.currentPage);
         setTotalPages(res.data.totalPages);
+        setFilterCurrentPage(undefined);
+        setFilterTotalPage(undefined);
       } else {
         toast.error(res.message);
       }
@@ -55,16 +59,17 @@ const SearchPage: NextPageWithLayout = () => {
         <div className="rounded-lg bg-primary-200 border border-primary-500">
           <div className="flex justify-between">
             <DateRange
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
+              currentPage={filterCurrentPage}
+              setCurrentPage={setFilterCurrentPage}
               setFilteredData={setFilteredData}
-              setTotalPages={setTotalPages}
+              setTotalPages={setFilterTotalPage}
+              clear={getInvoices}
             />
             <SelectCategory
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
+              currentPage={filterCurrentPage}
+              setCurrentPage={setFilterCurrentPage}
               setFilteredData={setFilteredData}
-              setTotalPages={setTotalPages}
+              setTotalPages={setFilterTotalPage}
             />
           </div>
           <hr />
@@ -72,9 +77,19 @@ const SearchPage: NextPageWithLayout = () => {
             <SearchPageTable
               data={filteredData}
               handleTableRowClick={handleShowDetails}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              totalPages={totalPages}
+              currentPage={
+                filterCurrentPage === undefined
+                  ? currentPage
+                  : filterCurrentPage
+              }
+              setCurrentPage={
+                filterCurrentPage === undefined
+                  ? setCurrentPage
+                  : setFilterCurrentPage
+              }
+              totalPages={
+                filterTotalPage === undefined ? totalPages : filterTotalPage
+              }
               handlePaymentClick={(invoice) => {
                 openModal("Payment");
                 const jsonInvoice = JSON.stringify(invoice);
