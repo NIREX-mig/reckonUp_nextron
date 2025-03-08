@@ -234,13 +234,13 @@ const SettingPage: NextPageWithLayout = () => {
               <h2 className="text-lg font-semibold mb-4">Invoice Settings</h2>
               <div className="flex gap-10">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-primary-700 mb-1">
                     Payment QR:
                   </label>
                   <FileInput />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-primary-700 mb-1">
                     Invoice Logo:
                   </label>
                   <div className="w-[200px] h-[200px] border-2 border-dashed border-primary-900 rounded-lg p-1 flex justify-center items-center">

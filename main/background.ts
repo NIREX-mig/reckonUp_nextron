@@ -19,11 +19,25 @@ autoUpdater.autoDownload = false;
 let mainWindow;
 
 // mongodb variables
-
-const client = new MongoClient(MongoURI);
+let client;
 
 async function connectToDb() {
-  await client.connect();
+  try {
+    client = new MongoClient(MongoURI);
+  } catch (error) {
+    const dialogOpts = {
+      type: "error",
+      buttons: ["Exit"],
+      title: "Error Occured!",
+      message: "Something went wrong!",
+      detail: `${
+        error.message ? error.message : "Please Check database and try again."
+      }`,
+    };
+    dialog.showMessageBox(dialogOpts).then(() => {
+      app.quit();
+    });
+  }
 }
 
 async function checkUserIsExistOrNot() {
@@ -497,7 +511,7 @@ ipcMain.on("fetchbycustomername", async (event, args) => {
         },
         {
           $limit: limit,
-        }
+        },
       ])
       .toArray();
 

@@ -43,6 +43,23 @@ const Modal = ({ type, closeModal }) => {
     setinvoice();
   }, [type]);
 
+  useEffect(() => {
+    const handleCloseModalByKey = (event) => {
+      if (event.ctrlKey && event.key === "x") {
+        closeModal();
+      } else if (event.ctrlKey && event.key === "g") {
+        if (type === "Invoice-Details") {
+          handlGenrateInvoice();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleCloseModalByKey);
+    return () => {
+      window.removeEventListener("keydown", handleCloseModalByKey);
+    };
+  }, [type]);
+
   if (!type) return null;
   return (
     <>

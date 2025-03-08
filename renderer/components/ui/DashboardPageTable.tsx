@@ -1,5 +1,5 @@
 import moment from "moment";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FcMoneyTransfer } from "react-icons/fc";
 
 const DashboardPageTable = ({
@@ -7,6 +7,27 @@ const DashboardPageTable = ({
   handleTableRowClick,
   handlePaymentClick,
 }) => {
+  const [selectedRow, setSelectedRow] = useState(0);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "ArrowDown") {
+        setSelectedRow((prev) => Math.min(prev + 1, data.length - 1));
+      } else if (event.key === "ArrowUp") {
+        setSelectedRow((prev) => Math.max(prev - 1, 0));
+      } else if (event.key === "Enter") {
+        handleTableRowClick(data[selectedRow]);
+      } else if (event.ctrlKey && event.key === "p") {
+        handlePaymentClick(data[selectedRow]);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedRow, data, handleTableRowClick, handlePaymentClick]);
+
   return (
     <section className="">
       <div className="h-[calc(100vh-130px)] overflow-x-auto border border-primary-600 md:rounded-lg">
@@ -72,7 +93,12 @@ const DashboardPageTable = ({
           <tbody className="bg-primary-50 divide-y divide-gray-200">
             {data?.map((invoice, index) => {
               return (
-                <tr key={index}>
+                <tr
+                  key={index}
+                  className={`cursor-pointer ${
+                    selectedRow === index ? "bg-secondry-100" : ""
+                  }`}
+                >
                   <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
                     {invoice?.invoiceNo}
                   </td>
