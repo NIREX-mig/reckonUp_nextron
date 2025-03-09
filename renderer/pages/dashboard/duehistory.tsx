@@ -68,11 +68,11 @@ const DueHistoryPage: NextPageWithLayout = () => {
               return (
                 <article
                   key={index}
-                  className="border-[1px] border-[#666] w-[270px] rounded-3xl p-5 bg-primary-100"
+                  className="border-[1px] border-primary-800 w-[270px] rounded-3xl p-5 bg-primary-100 text-primary-800"
                 >
                   <p className=" capitalize font-semibold">
                     <span>InvoiceNo : </span>
-                    <span>{data.invoiceNo}</span>
+                    <span className="text-xl">{data.invoiceNo}</span>
                   </p>
                   <p className=" capitalize font-semibold">
                     <span>Name : </span>
@@ -92,15 +92,15 @@ const DueHistoryPage: NextPageWithLayout = () => {
                   </p>
                   <p className=" capitalize font-semibold">
                     <span>Paid : </span>
-                    <span>{data.paidAmount}</span>
+                    <span className="text-green-600">{data.paidAmount}</span>
                   </p>
                   <p className=" capitalize font-semibold">
                     <span>Discount : </span>
-                    <span>{data.discount}</span>
+                    <span className="text-blue-700">{data.discount}</span>
                   </p>
                   <p className=" capitalize font-semibold">
                     <span>Due : </span>
-                    <span>{data.due}</span>
+                    <span className="text-red-600">{data.due}</span>
                   </p>
                 </article>
               );

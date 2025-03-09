@@ -99,6 +99,7 @@ if (!fs.existsSync(uploadPath)) {
     alwaysOnTop: true,
     transparent: true,
     center: true,
+    resizable: false,
   });
 
   mainWindow = createWindow("main", {
@@ -1270,16 +1271,23 @@ ipcMain.on("export2excel", async (event, args) => {
     const db = client.db("reckonup");
     const collection = db.collection("invoices");
 
+    // Convert dates and subtract one day from startingDate
+    const adjustedStartDate = new Date(date.start);
+    adjustedStartDate.setDate(adjustedStartDate.getDate() - 1); // Subtract 1 day
+
+    const adjustedEndDate = new Date(date.end);
+    adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
+
     const invoices = await collection
       .aggregate([
-        // {
-        //   $match: {
-        //     createdAt: {
-        //       $gte: new Date(date.start),
-        //       $lte: new Date(date.end),
-        //     },
-        //   },
-        // },
+        {
+          $match: {
+            createdAt: {
+              $gt: adjustedStartDate,
+              $lt: adjustedEndDate,
+            },
+          },
+        },
         {
           $lookup: {
             from: "payments",
@@ -1374,23 +1382,23 @@ ipcMain.on("export2excel", async (event, args) => {
       merges.push({ s: { r: startRow, c: 6 }, e: { r: rowIndex - 1, c: 6 } }); // Merge exchangePercentage column
       merges.push({ s: { r: startRow, c: 7 }, e: { r: rowIndex - 1, c: 7 } }); // Merge exchangeAmount column
       merges.push({
-        s: { r: startRow, c: 11 },
-        e: { r: rowIndex - 1, c: 11 },
+        s: { r: startRow, c: 15 },
+        e: { r: rowIndex - 1, c: 15 },
       }); // Merge gst column
       merges.push({
-        s: { r: startRow, c: 12 },
-        e: { r: rowIndex - 1, c: 12 },
+        s: { r: startRow, c: 16 },
+        e: { r: rowIndex - 1, c: 16 },
       }); // Merge discount column
       merges.push({
-        s: { r: startRow, c: 13 },
-        e: { r: rowIndex - 1, c: 13 },
+        s: { r: startRow, c: 17 },
+        e: { r: rowIndex - 1, c: 17 },
       }); // Merge total column
     });
 
     // Step 4: Get Desktop Path
     const desktopPath = path.join(
       app.getPath("desktop"),
-      "Customer_Products.xlsx"
+      `exported_invoice_${date.start}-${date.end}.xlsx`
     );
 
     // Convert data to worksheet

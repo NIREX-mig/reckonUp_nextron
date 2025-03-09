@@ -438,25 +438,30 @@ const Modal = ({ type, closeModal }) => {
                     }`}</span>
                   </div>
 
-                  <div className="flex gap-2 items-center">
-                    <label htmlFor="pay" className="font-bold text-primary-900">
-                      Amount:{" "}
-                    </label>
-                    <input
-                      type="number"
-                      value={pay}
-                      min="0"
-                      autoFocus={true}
-                      onChange={(e) => setPay(e.target.value)}
-                      className={`bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-purple-800 inline-block py-1.5 px-2`}
+                  <form onSubmit={() => handlePayAmount(invoiceData)}>
+                    <div className="flex gap-2 items-center">
+                      <label
+                        htmlFor="pay"
+                        className="font-bold text-primary-900"
+                      >
+                        Amount:{" "}
+                      </label>
+                      <input
+                        type="number"
+                        value={pay}
+                        min="0"
+                        autoFocus={true}
+                        onChange={(e) => setPay(e.target.value)}
+                        className={`bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-purple-800 inline-block py-1.5 px-2`}
+                      />
+                    </div>
+                    <Button
+                      buttonType="submit"
+                      title="Pay or Add"
+                      extraClass="sm:w-auto mt-3"
+                      // handleClick={() => handlePayAmount(invoiceData)}
                     />
-                  </div>
-                  <Button
-                    buttonType="button"
-                    title="Pay or Add"
-                    extraClass="sm:w-auto mt-3"
-                    handleClick={() => handlePayAmount(invoiceData)}
-                  />
+                  </form>
                 </div>
                 <div>
                   <h2 className="font-bold mb-3">Payment History</h2>
