@@ -446,6 +446,7 @@ const Modal = ({ type, closeModal }) => {
                       type="number"
                       value={pay}
                       min="0"
+                      autoFocus={true}
                       onChange={(e) => setPay(e.target.value)}
                       className={`bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-purple-800 inline-block py-1.5 px-2`}
                     />

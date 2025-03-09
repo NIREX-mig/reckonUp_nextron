@@ -1,5 +1,5 @@
 import path from "path";
-import { app, ipcMain, dialog } from "electron";
+import { app, ipcMain, dialog, BrowserWindow } from "electron";
 import serve from "electron-serve";
 import { createWindow } from "./helpers";
 import EventResponse from "./helpers/EventResponse";
@@ -16,10 +16,11 @@ import { tempSecret, genrateOtp, MongoURI } from "./helpers/utils";
 autoUpdater.autoDownload = false;
 // autoUpdater.autoInstallOnAppQuit = true;
 
-let mainWindow;
+let mainWindow: BrowserWindow | null = null;
+let splashWindow: BrowserWindow | null = null;
 
 // mongodb variables
-let client;
+let client: MongoClient | null = null;
 
 async function connectToDb() {
   try {
@@ -88,10 +89,23 @@ if (!fs.existsSync(uploadPath)) {
   // check user is existed or not if not it create user
   await checkUserIsExistOrNot();
 
+  // Create the splash screen
+  splashWindow = new BrowserWindow({
+    width: 450,
+    height: 270,
+    frame: false,
+    backgroundColor: "#f9f7fd",
+    roundedCorners: true,
+    alwaysOnTop: true,
+    transparent: true,
+    center: true,
+  });
+
   mainWindow = createWindow("main", {
     title: "ReckonUp - Devloped by NIreX",
     width: 1366,
     height: 768,
+    show: false, // Hide initially
     webPreferences: {
       devTools: false, // Disable DevTools
       preload: path.join(__dirname, "preload.js"),
@@ -103,13 +117,25 @@ if (!fs.existsSync(uploadPath)) {
   mainWindow.setMinimumSize(1366, 768);
 
   if (isProd) {
+    await splashWindow.loadURL("app://./SplashScreen");
     await mainWindow.loadURL("app://./home");
     autoUpdater.checkForUpdatesAndNotify();
   } else {
     const port = process.argv[2];
+    await splashWindow.loadURL(`http://localhost:${port}/SplashScreen`);
     await mainWindow.loadURL(`http://localhost:${port}/home`);
     mainWindow.webContents.openDevTools();
   }
+
+  // Show the main window after splash screen timeout
+  setTimeout(() => {
+    if (splashWindow) {
+      splashWindow.close();
+    }
+    if (mainWindow) {
+      mainWindow.show();
+    }
+  }, 3000);
 })();
 
 app.on("window-all-closed", () => {

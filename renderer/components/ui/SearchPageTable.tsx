@@ -53,7 +53,7 @@ const SearchPageTable = ({
               <tr
                 key={index}
                 className={`cursor-pointer ${
-                  selectedRow === index ? "bg-secondry-100" : ""
+                  selectedRow === index ? "bg-primary-400" : ""
                 }`}
               >
                 <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
