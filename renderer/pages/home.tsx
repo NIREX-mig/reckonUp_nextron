@@ -70,6 +70,7 @@ export default function HomePage() {
             width={500}
             height={500}
             className=""
+            draggable="false"
             priority
             unoptimized
           />
@@ -137,7 +138,7 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <Link href="/forgot">
+            <Link href="/forgot" draggable="false">
               <p className=" font-semibold hover:underline inline-block mb-5 focus:outline-purple-600">
                 Forger Password
               </p>

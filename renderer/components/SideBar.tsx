@@ -17,7 +17,11 @@ const SideBar = () => {
 
   const menuItems = [
     { name: "Dashboard", path: "/dashboard/", icon: LuLayoutDashboard },
-    { name: "New Invoice", path: "/dashboard/invoice/", icon: MdOutlinePostAdd},
+    {
+      name: "New Invoice",
+      path: "/dashboard/invoice/",
+      icon: MdOutlinePostAdd,
+    },
     { name: "View Invoices", path: "/dashboard/search/", icon: FiFileText },
     { name: "settings", path: "/dashboard/settings/", icon: FiSettings },
   ];
@@ -32,7 +36,12 @@ const SideBar = () => {
         } absolute z-[150] h-screen bg-primary-100 border border-primary-700 transition-all duration-500`}
       >
         <div className={`flex items-center  border-b border-gray-200 p-2`}>
-          <img src="/app_logo.png" alt="logo" className="w-[40px]" />
+          <img
+            src="/app_logo.png"
+            alt="logo"
+            className="w-[40px]"
+            draggable="false"
+          />
           {!collapsed && (
             <p className="font-bold text-2xl duration-500">
               <span className="">Reckon</span>
@@ -50,9 +59,9 @@ const SideBar = () => {
             className="p-1.5 rounded-full border border-primary-800 bg-primary-300 hover:bg-primary-400"
           >
             {collapsed ? (
-              <FiChevronRight className="w-5 h-5" />
+              <FiChevronRight className="w-5 h-5"/>
             ) : (
-              <FiChevronLeft className="w-5 h-5" />
+              <FiChevronLeft className="w-5 h-5"/>
             )}
           </button>
         </div>
@@ -63,6 +72,7 @@ const SideBar = () => {
               <Link
                 key={index}
                 href={menu.path}
+                draggable="false"
                 className={`w-full flex items-center py-2 px-3 hover:bg-primary-300  ${
                   collapsed ? "hover:rounded-s-full" : "hover:rounded-s-full"
                 }

@@ -44,3 +44,7 @@ input[type="number"] {
   background-color: #b0b0b1;
   /* Color of the thumb on hover */
 }
+
+/* img {
+  pointer-events: none;
+} */

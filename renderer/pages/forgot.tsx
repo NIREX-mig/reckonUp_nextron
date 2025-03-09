@@ -114,6 +114,7 @@ export default function ForgotPage() {
           </h1>
           <Link
             href="/home"
+            draggable="false"
             className="px-7 py-2 bg-btn rounded-full text-white font-semibold"
           >
             Go Back
@@ -137,6 +138,7 @@ export default function ForgotPage() {
             width={500}
             height={500}
             className=""
+            draggable="false"
             priority
           />
         </div>

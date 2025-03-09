@@ -56,6 +56,7 @@ const ForgotContainer = ({
         Want Login in account{" "}
         <Link
           href="/home"
+          draggable="false"
           className="font-medium text-base mx-1 text-secondry-600 hover:underline"
         >
           Login

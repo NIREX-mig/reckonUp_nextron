@@ -17,7 +17,13 @@ export default function SplashScreen() {
 
   return (
     <div className="w-screen h-screen flex flex-col justify-center items-center bg-primary-50 text-xl">
-      <img src="/splash.png" alt="app_logo" width={180} height={180} />
+      <img
+        src="/splash.png"
+        alt="app_logo"
+        width={180}
+        height={180}
+        draggable="false"
+      />
       <div className="min-w-[90%] bg-gray-200 h-2 mx-auto mt-8">
         <div
           className={`bg-purple-900 h-2 transition-all duration-[3000]`}

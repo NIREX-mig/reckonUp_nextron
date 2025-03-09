@@ -15,6 +15,7 @@ const Header = ({ title, extraStyle }: Header) => {
       <h1 className="text-2xl font-bold text-primary-800 px-3 py-3">{title}</h1>
       <Link
         href="/dashboard/duehistory"
+        draggable="false"
         className="bg-btn mr-10 py-2 px-5 text-white rounded-lg flex justify-center items-center gap-2 active:scale-95 transition-all duration-300 "
       >
         <MdPendingActions size={20} />

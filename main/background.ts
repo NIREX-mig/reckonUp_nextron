@@ -11,6 +11,7 @@ import fs from "node:fs";
 import { autoUpdater } from "electron-updater";
 import * as XLSX from "xlsx";
 import { tempSecret, genrateOtp, MongoURI } from "./helpers/utils";
+import moment from "moment";
 
 // Basic flags for Electron updater
 autoUpdater.autoDownload = false;
@@ -1398,7 +1399,7 @@ ipcMain.on("export2excel", async (event, args) => {
     // Step 4: Get Desktop Path
     const desktopPath = path.join(
       app.getPath("desktop"),
-      `exported_invoice_${date.start}-${date.end}.xlsx`
+      `exported_invoice_(${moment(date.start).format("DD-MM-YYYY")}-${moment(date.end).format("DD-MMM-YYYY")}).xlsx`
     );
 
     // Convert data to worksheet
