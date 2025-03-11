@@ -1,26 +1,35 @@
 import { useState } from "react";
 
-const useModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [modalType, setModalType] = useState(null);
-  const [modalProps, setModalProps] = useState({});
+// Define modal type;
+export type ModalType = "Invoice-Details" | "Payment";
 
-  const openModal = (type: "Invoice-Details" | "Payment", props = {}) => {
-    setModalType(type);
-    setModalProps(props);
-    setIsOpen(true);
+// Modal state structure
+interface ModalState {
+  type: ModalType | null;
+  isOpen: boolean;
+}
+const useModal = () => {
+  const [modal, setModal] = useState<ModalState>({
+    type: null,
+    isOpen: false,
+  });
+
+  const openModal = (type: ModalType) => {
+    setModal({
+      type,
+      isOpen: true,
+    });
   };
 
   const closeModal = () => {
-    setIsOpen(false);
-    setModalType(null);
-    setModalProps({});
+    setModal({
+      type: null,
+      isOpen: false,
+    });
   };
 
   return {
-    isOpen,
-    modalType,
-    modalProps,
+    modal,
     openModal,
     closeModal,
   };

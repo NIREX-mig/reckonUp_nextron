@@ -30,6 +30,7 @@ export default function SplashScreen() {
           style={{ width: `${progress}%` }}
         ></div>
       </div>
+      <p className="text-base">Starting ReckonUp App....</p>
     </div>
   );
 }

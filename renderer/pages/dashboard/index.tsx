@@ -26,7 +26,7 @@ const ServerIconRenderer: React.FC<{ iconName: string }> = ({ iconName }) => {
 };
 
 const DashboardPage: NextPageWithLayout = () => {
-  const { modalType, openModal, closeModal } = useModal();
+  const { modal, openModal, closeModal } = useModal();
 
   const [search, setSearch] = useState("");
 
@@ -129,7 +129,7 @@ const DashboardPage: NextPageWithLayout = () => {
         <title>ReckonUp - Devloped by NIreX</title>
       </Head>
       <div className="px-4 py-2 bg-primary-50">
-      <Modal type={modalType} closeModal={closeModal} />
+        <Modal type={modal.type} isOpen={modal.isOpen} onClose={closeModal} />
         <Header title="Dashboard" extraStyle="mb-6" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-2">
           {stats.map((stat) => (

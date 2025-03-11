@@ -8,7 +8,6 @@ import { APiRes } from "../../types";
 import Header from "../../components/ui/Header";
 import FileInput from "../../components/ui/FileInput";
 import toast from "react-hot-toast";
-import Button from "../../components/ui/Button";
 import ExportToExel from "../../components/settings/ExportToExel";
 
 const SettingPage: NextPageWithLayout = () => {

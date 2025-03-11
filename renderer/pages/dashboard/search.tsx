@@ -12,7 +12,7 @@ import DateRange from "../../components/search/DateRange";
 import SelectCategory from "../../components/search/SelectCategory";
 
 const SearchPage: NextPageWithLayout = () => {
-  const { modalType, openModal, closeModal } = useModal();
+  const { modal, openModal, closeModal } = useModal();
 
   const [currentPage, setCurrentPage] = useState(undefined);
   const [totalPages, setTotalPages] = useState(undefined);
@@ -54,7 +54,7 @@ const SearchPage: NextPageWithLayout = () => {
         <title>ReckonUp - Devloped by NIreX</title>
       </Head>
       <section className="bg-primary-50 px-4 py-2 h-full">
-        <Modal type={modalType} closeModal={closeModal} />
+        <Modal type={modal.type} isOpen={modal.isOpen} onClose={closeModal} />
         <Header title="View Invoices" extraStyle="mb-3" />
         <div className="rounded-lg bg-primary-200 border border-primary-500">
           <div className="flex justify-between">

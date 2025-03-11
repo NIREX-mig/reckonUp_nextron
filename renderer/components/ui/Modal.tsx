@@ -6,8 +6,15 @@ import moment from "moment";
 import Button from "./Button";
 import toast from "react-hot-toast";
 import { APiRes } from "../../types";
+import { ModalType } from "../../hooks/useModal";
 
-const Modal = ({ type, closeModal }) => {
+interface ModalProps {
+  type: ModalType | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
   const [invoiceData, setInvoiceData] = useState(undefined);
   const [pay, setPay] = useState(undefined);
   const router = useRouter();
@@ -31,7 +38,7 @@ const Modal = ({ type, closeModal }) => {
       setPay(undefined);
       toast.success(res.message);
     });
-    closeModal();
+    onClose();
   };
 
   useEffect(() => {
@@ -46,7 +53,7 @@ const Modal = ({ type, closeModal }) => {
   useEffect(() => {
     const handleCloseModalByKey = (event) => {
       if (event.ctrlKey && event.key === "x") {
-        closeModal();
+        onClose();
       } else if (event.ctrlKey && event.key === "g") {
         if (type === "Invoice-Details") {
           handlGenrateInvoice();
@@ -60,10 +67,10 @@ const Modal = ({ type, closeModal }) => {
     };
   }, [type]);
 
-  if (!type) return null;
+  if (!isOpen) return null;
   return (
     <>
-      {type === "Invoice-Details" ? (
+      {type === "Invoice-Details" && (
         <div className="fixed z-[200] inset-0 bg-black/60 bg-opacity-75 flex items-center justify-center p-2">
           <div className="bg-primary-50 border border-primary-900 rounded-lg shadow-xl max-w-[75rem] w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
@@ -90,7 +97,7 @@ const Modal = ({ type, closeModal }) => {
                   <button
                     onClick={() => {
                       localStorage.removeItem("finalInvoice");
-                      closeModal();
+                      onClose();
                     }}
                     className="p-2 text-white bg-red-400  hover:bg-red-500 rounded-lg"
                     title="Close"
@@ -392,7 +399,9 @@ const Modal = ({ type, closeModal }) => {
             </div>
           </div>
         </div>
-      ) : (
+      )}
+
+      {type === "Payment" && (
         <div className="fixed inset-0 bg-black/60 bg-opacity-75 flex items-center justify-center p-4 z-[200]">
           <div className="bg-primary-50 border border-primary-900 rounded-lg shadow-xl max-w-[75rem] w-[500px]  max-h-[90vh] overflow-y-auto">
             <div className="p-6">
@@ -412,7 +421,7 @@ const Modal = ({ type, closeModal }) => {
                   <button
                     onClick={() => {
                       localStorage.removeItem("finalInvoice");
-                      closeModal();
+                      onClose();
                     }}
                     className="p-2 text-white bg-red-400  hover:bg-red-500 rounded-lg"
                     title="Close"
@@ -438,30 +447,25 @@ const Modal = ({ type, closeModal }) => {
                     }`}</span>
                   </div>
 
-                  <form onSubmit={() => handlePayAmount(invoiceData)}>
-                    <div className="flex gap-2 items-center">
-                      <label
-                        htmlFor="pay"
-                        className="font-bold text-primary-900"
-                      >
-                        Amount:{" "}
-                      </label>
-                      <input
-                        type="number"
-                        value={pay}
-                        min="0"
-                        autoFocus={true}
-                        onChange={(e) => setPay(e.target.value)}
-                        className={`bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-purple-800 inline-block py-1.5 px-2`}
-                      />
-                    </div>
-                    <Button
-                      buttonType="submit"
-                      title="Pay or Add"
-                      extraClass="sm:w-auto mt-3"
-                      // handleClick={() => handlePayAmount(invoiceData)}
+                  <div className="flex gap-2 items-center">
+                    <label htmlFor="pay" className="font-bold text-primary-900">
+                      Amount:{" "}
+                    </label>
+                    <input
+                      type="number"
+                      value={pay}
+                      min="0"
+                      autoFocus={true}
+                      onChange={(e) => setPay(e.target.value)}
+                      className={`bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-purple-800 inline-block py-1.5 px-2`}
                     />
-                  </form>
+                  </div>
+                  <Button
+                    buttonType="button"
+                    title="Pay or Add"
+                    extraClass="sm:w-auto mt-3"
+                    handleClick={() => handlePayAmount(invoiceData)}
+                  />
                 </div>
                 <div>
                   <h2 className="font-bold mb-3">Payment History</h2>
