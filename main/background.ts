@@ -6,7 +6,9 @@ import EventResponse from "./helpers/EventResponse";
 import bcrypt from "bcrypt";
 import { MongoClient } from "mongodb";
 import jwt from "jsonwebtoken";
-import sendForgotPasswordEmail from "./helpers/sendEmail";
+import sendForgotPasswordEmail, {
+  sendFeedbackEmail,
+} from "./helpers/sendEmail";
 import fs from "node:fs";
 import { autoUpdater } from "electron-updater";
 import * as XLSX from "xlsx";
@@ -1399,7 +1401,9 @@ ipcMain.on("export2excel", async (event, args) => {
     // Step 4: Get Desktop Path
     const desktopPath = path.join(
       app.getPath("desktop"),
-      `exported_invoice_(${moment(date.start).format("DD-MM-YYYY")}-${moment(date.end).format("DD-MMM-YYYY")}).xlsx`
+      `exported_invoice_(${moment(date.start).format("DD-MM-YYYY")}-${moment(
+        date.end
+      ).format("DD-MMM-YYYY")}).xlsx`
     );
 
     // Convert data to worksheet
@@ -1436,6 +1440,17 @@ ipcMain.on("export2excel", async (event, args) => {
     event.reply("export2excel", response);
   } catch (err) {
     event.reply("export2excel", err);
+  }
+});
+
+ipcMain.on("feedback", async (event, args) => {
+  try {
+    const { message } = await args;
+    await sendFeedbackEmail(message);
+    const response = new EventResponse(true, "Successfully Send Feedback.", {});
+    event.reply("feedback", response);
+  } catch (err) {
+    event.reply("feedback", err);
   }
 });
 

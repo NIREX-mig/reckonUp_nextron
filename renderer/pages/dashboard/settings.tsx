@@ -9,6 +9,7 @@ import Header from "../../components/ui/Header";
 import FileInput from "../../components/ui/FileInput";
 import toast from "react-hot-toast";
 import ExportToExel from "../../components/settings/ExportToExel";
+import FeedBack from "../../components/settings/FeedBack";
 
 const SettingPage: NextPageWithLayout = () => {
   const router = useRouter();
@@ -278,6 +279,7 @@ const SettingPage: NextPageWithLayout = () => {
           </div>
         </div>
         <ExportToExel />
+        <FeedBack />
       </div>
     </React.Fragment>
   );
