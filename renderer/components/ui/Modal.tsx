@@ -16,7 +16,7 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
   const [invoiceData, setInvoiceData] = useState(undefined);
-  const [pay, setPay] = useState(undefined);
+  const [pay, setPay] = useState(0);
   const router = useRouter();
 
   const handlGenrateInvoice = () => {
@@ -31,11 +31,11 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
 
     window.ipc.on("payment", (res: APiRes) => {
       if (!res.success) {
-        setPay(undefined);
+        setPay(0);
         toast.error(res.message);
         return;
       }
-      setPay(undefined);
+      setPay(0);
       toast.success(res.message);
     });
     onClose();
@@ -422,6 +422,7 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                     onClick={() => {
                       localStorage.removeItem("finalInvoice");
                       onClose();
+                      setPay(0);
                     }}
                     className="p-2 text-white bg-red-400  hover:bg-red-500 rounded-lg"
                     title="Close"
@@ -457,6 +458,7 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                       min="0"
                       autoFocus={true}
                       onChange={(e) => setPay(e.target.value)}
+                      onFocus={(e) => e.target.select()}
                       className={`bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-purple-800 inline-block py-1.5 px-2`}
                     />
                   </div>

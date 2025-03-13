@@ -25,6 +25,9 @@ import toast from "react-hot-toast";
 const InvoicePage: NextPageWithLayout = () => {
   const router = useRouter();
 
+  const [productSuggestion, setProductSugestion] = useState([]);
+  const [customerSuggestion, setCustomerSugestion] = useState([]);
+
   const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({
     name: "",
     phone: "",
@@ -51,7 +54,7 @@ const InvoicePage: NextPageWithLayout = () => {
     productName: "",
     netWeight: "",
     productCategory: "gold",
-    makingCost: undefined,
+    makingCost: 0,
   });
 
   const [invoiceNo, setInvoiceNo] = useState<string>("");
@@ -60,7 +63,7 @@ const InvoicePage: NextPageWithLayout = () => {
 
   const [grossAmt, setGrossAmt] = useState(0);
 
-  const [GST, setGST] = useState(undefined);
+  const [GST, setGST] = useState(0);
   const [GSTAMT, setGSTAMT] = useState(0);
 
   const [productList, setProductList] = useState([]);
@@ -231,7 +234,7 @@ const InvoicePage: NextPageWithLayout = () => {
       discount: 0,
     });
     setcheckedbox(false);
-    setGST("");
+    setGST(0);
     setGSTAMT(0);
     setGrossAmt(0);
     setProductList([]);
@@ -280,14 +283,14 @@ const InvoicePage: NextPageWithLayout = () => {
     }
 
     // convert gst percentage to rupees
-    const gstInRupee = (grossAmt * inputValue) / 100;
+    const gstInRupee = Number(((grossAmt * inputValue) / 100).toFixed(0));
 
     // set gst amount
     setGSTAMT(gstInRupee);
   };
 
   const handleGstBlur = () => {
-    if (GST === "") return; // Allow empty value
+    if (GST === undefined) return; // Allow empty value
     const numericValue = Number(GST);
     if (numericValue < 0.0) setGST(0);
     else if (numericValue > 100.0) setGST(100);
@@ -309,9 +312,33 @@ const InvoicePage: NextPageWithLayout = () => {
     }
   };
 
+  const handleGetCustomerSeggestion = () => {
+    window.ipc.send("customer-suggestion", {});
+    window.ipc.on("customer-suggestion", async (res: APiRes) => {
+      if (res.success) {
+        setCustomerSugestion(res.data);
+      } else {
+        toast.error(res.message);
+      }
+    });
+  };
+
+  const handleGetProductSeggestion = () => {
+    window.ipc.send("product-suggestion", {});
+    window.ipc.on("product-suggestion", async (res: APiRes) => {
+      if (res.success) {
+        setProductSugestion(res.data);
+      } else {
+        toast.error(res.message);
+      }
+    });
+  };
+
   useEffect(() => {
     genrateInvoiceNo();
     handleClearInvoice();
+    handleGetCustomerSeggestion();
+    handleGetProductSeggestion();
   }, [router]);
 
   return (
@@ -340,6 +367,13 @@ const InvoicePage: NextPageWithLayout = () => {
                     name: e.target.value,
                   }))
                 }
+                suggestions={customerSuggestion}
+                onSelect={(name) => {
+                  setCustomerDetails((prev) => ({
+                    ...prev,
+                    name: name,
+                  }));
+                }}
                 placeholder="Customer Name"
               />
 
@@ -584,6 +618,13 @@ const InvoicePage: NextPageWithLayout = () => {
                       productName: e.target.value,
                     }))
                   }
+                  suggestions={productSuggestion}
+                  onSelect={(name) => {
+                    setProductDetails((prev) => ({
+                      ...prev,
+                      productName: name,
+                    }));
+                  }}
                   placeholder="Product Name"
                 />
 
@@ -672,7 +713,7 @@ const InvoicePage: NextPageWithLayout = () => {
                 className="w-4 h-4 border border-primary-900 rounded bg-primary-100 focus:outline-purple-600 accent-primary-900"
                 onChange={() => {
                   setcheckedbox(!checkedbox);
-                  setGST("");
+                  setGST(0);
                   setGSTAMT(0);
                 }}
                 checked={checkedbox}
@@ -768,7 +809,7 @@ const InvoicePage: NextPageWithLayout = () => {
             {checkedbox && (
               <div className="flex justify-between font-semibold">
                 <span>{`GST(${
-                  GST === "" || GST === undefined ? 0 : GST
+                  GST === 0 || GST === undefined ? 0 : GST
                 }%)`}</span>
                 <span>{`₹ ${GSTAMT}`}</span>
               </div>

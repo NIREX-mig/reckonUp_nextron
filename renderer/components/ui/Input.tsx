@@ -34,10 +34,12 @@ const Input = ({
 }: InputFeild) => {
   return (
     <div className="flex items-center gap-2 justify-end">
-      <label htmlFor={title} className={`text-sm font-medium ${lableStyle}`}>
-        {title}
-        {type != "date" && ":"}
-      </label>
+      {title && (
+        <label htmlFor={title} className={`text-sm font-medium ${lableStyle}`}>
+          {title}
+          {type != "date" && ":"}
+        </label>
+      )}
 
       <input
         type={type}

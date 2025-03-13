@@ -111,7 +111,7 @@ if (!fs.existsSync(uploadPath)) {
     height: 768,
     show: false, // Hide initially
     webPreferences: {
-      devTools: false, // Disable DevTools
+      // devTools: false, // Disable DevTools
       preload: path.join(__dirname, "preload.js"),
     },
   });
@@ -1546,5 +1546,83 @@ ipcMain.on("payment", async (event, args) => {
     event.reply("payment", response);
   } catch (error) {
     event.reply("payment", error);
+  }
+});
+
+//---------------------------------
+//       Suggestion Events
+//---------------------------------
+ipcMain.on("customer-suggestion", async (event) => {
+  try {
+    const db = client.db("reckonup");
+    const collection = db.collection("invoices");
+
+    const suggestionName = await collection
+      .aggregate([
+        {
+          $group: {
+            _id: "$customerName", // Group by customer name
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            name: "$_id",
+          },
+        },
+      ])
+      .toArray();
+
+    if (suggestionName.length === 0) {
+      const response = new EventResponse(true, "No name avilable", []);
+      event.reply("customer-suggestion", response);
+      return;
+    }
+
+    const response = new EventResponse(true, "success", suggestionName);
+    event.reply("customer-suggestion", response);
+  } catch (err) {
+    event.reply("customer-suggestion", err);
+  }
+});
+
+ipcMain.on("product-suggestion", async (event) => {
+  try {
+    const db = client.db("reckonup");
+    const collection = db.collection("invoices");
+
+    const suggestionProduct = await collection
+      .aggregate([
+        {
+          $unwind: "$productList", // Flatten the productList array
+        },
+        {
+          $group: {
+            _id: "$productList.productName", // Group by product name to get unique values
+            phone: { $first: "$customerPhone" }, // get phone number
+            address: { $first: "$customerAddress" }, // get adress
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            name: "$_id",
+            phone: 1,
+            address: 1,
+          },
+        },
+      ])
+      .toArray();
+
+    if (suggestionProduct.length === 0) {
+      const response = new EventResponse(true, "No name avilable", []);
+      event.reply("product-suggestion", response);
+      return;
+    }
+
+    const response = new EventResponse(true, "success", suggestionProduct);
+    event.reply("product-suggestion", response);
+  } catch (err) {
+    event.reply("product-suggestion", err);
   }
 });
