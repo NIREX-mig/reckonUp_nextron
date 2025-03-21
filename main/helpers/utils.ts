@@ -3,6 +3,7 @@ export const tempSecret = "sdkfjasdkjfsifuoewfosadhfksdjfdjfdskjfue0iweu09230";
 
 export const MongoURI = "mongodb://localhost:27017/";
 
+
 export function genrateOtp(length: number) {
   const digits = "0123456789";
   let otp = "";

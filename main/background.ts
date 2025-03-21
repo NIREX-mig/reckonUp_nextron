@@ -14,6 +14,7 @@ import { autoUpdater } from "electron-updater";
 import * as XLSX from "xlsx";
 import { tempSecret, genrateOtp, MongoURI } from "./helpers/utils";
 import moment from "moment";
+import db from "./helpers/db";
 
 // Basic flags for Electron updater
 autoUpdater.autoDownload = false;
@@ -25,46 +26,65 @@ let splashWindow: BrowserWindow | null = null;
 // mongodb variables
 let client: MongoClient | null = null;
 
-async function connectToDb() {
-  try {
-    client = new MongoClient(MongoURI);
-  } catch (error) {
-    const dialogOpts = {
-      type: "error",
-      buttons: ["Exit"],
-      title: "Error Occured!",
-      message: "Something went wrong!",
-      detail: `${
-        error.message ? error.message : "Please Check database and try again."
-      }`,
-    };
-    dialog.showMessageBox(dialogOpts).then(() => {
-      app.quit();
-    });
-  }
-}
+// async function connectToDb() {
+//   try {
+//     client = new MongoClient(MongoURI);
+//   } catch (error) {
+//     const dialogOpts = {
+//       type: "error",
+//       buttons: ["Exit"],
+//       title: "Error Occured!",
+//       message: "Something went wrong!",
+//       detail: `${
+//         error.message ? error.message : "Please Check database and try again."
+//       }`,
+//     };
+//     dialog.showMessageBox(dialogOpts).then(() => {
+//       app.quit();
+//     });
+//   }
+// }
+
+// async function checkUserIsExistOrNot() {
+//   const db = client.db("reckonup");
+//   const collection = db.collection("users");
+
+//   const existedUser = await collection.findOne({ username: "app-admin" });
+
+//   if (!existedUser) {
+//     const salt = await bcrypt.genSalt(10);
+
+//     const newpassword = await bcrypt.hash("12345", salt);
+
+//     await collection.insertOne({
+//       username: "app-admin",
+//       email: "akay93796@gmail.com",
+//       password: newpassword,
+//     });
+
+//     return;
+//   }
+
+//   return;
+// }
 
 async function checkUserIsExistOrNot() {
-  const db = client.db("reckonup");
-  const collection = db.collection("users");
+  try {
+    const stmt = db.prepare("SELECT * FROM users WHERE username = ?");
+    const existedUser = stmt.get("app-admin");
 
-  const existedUser = await collection.findOne({ username: "app-admin" });
+    if (!existedUser) {
+      const salt = await bcrypt.genSalt(10);
+      const newpassword = await bcrypt.hash("12345", salt);
 
-  if (!existedUser) {
-    const salt = await bcrypt.genSalt(10);
-
-    const newpassword = await bcrypt.hash("12345", salt);
-
-    await collection.insertOne({
-      username: "app-admin",
-      email: "akay93796@gmail.com",
-      password: newpassword,
-    });
-
-    return;
+      const insertStmt = db.prepare(
+        "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
+      );
+      insertStmt.run("app-admin", "akay93796@gmail.com", newpassword);
+    }
+  } catch (error) {
+    console.error("Error checking user existence:", error);
   }
-
-  return;
 }
 
 const isProd = process.env.NODE_ENV === "production";
@@ -87,7 +107,7 @@ if (!fs.existsSync(uploadPath)) {
   await app.whenReady();
 
   // connecting with database
-  await connectToDb();
+  // await connectToDb();
 
   // check user is existed or not if not it create user
   await checkUserIsExistOrNot();
@@ -147,9 +167,9 @@ app.on("window-all-closed", () => {
   app.quit();
 });
 
-/* ------------------------------
-        Auto Update Section 
-------------------------------- */
+/*------------------------------
+    Auto Update Section 
+-------------------------------*/
 
 autoUpdater.on("update-available", () => {
   const dialogOpts = {
@@ -182,6 +202,8 @@ autoUpdater.on("update-downloaded", () => {
 // -----------------------------
 //     User Events
 // -----------------------------
+
+
 ipcMain.on("login", async (event, args) => {
   try {
     const db = client.db("reckonup");
@@ -443,7 +465,6 @@ ipcMain.on("createinvoice", async (event, args) => {
 
     await collection.insertOne(invoiceObj);
 
-    // create response and emmit event
     const response = new EventResponse(true, "Invoice Saved SuccessFully.", {});
     event.reply("createinvoice", response);
   } catch (err) {
@@ -772,7 +793,7 @@ ipcMain.on("getallinvoice", async (event, args) => {
   }
 });
 
-// tracks Event
+//tracks Event
 ipcMain.on("tracks", async (event) => {
   try {
     const db = client.db("reckonup");

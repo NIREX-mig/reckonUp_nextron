@@ -27,6 +27,7 @@ const InvoicePage: NextPageWithLayout = () => {
 
   const [productSuggestion, setProductSugestion] = useState([]);
   const [customerSuggestion, setCustomerSugestion] = useState([]);
+  const [filter, setFilter] = useState([]);
 
   const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({
     name: "",
@@ -367,13 +368,6 @@ const InvoicePage: NextPageWithLayout = () => {
                     name: e.target.value,
                   }))
                 }
-                suggestions={customerSuggestion}
-                onSelect={(name) => {
-                  setCustomerDetails((prev) => ({
-                    ...prev,
-                    name: name,
-                  }));
-                }}
                 placeholder="Customer Name"
               />
 
@@ -618,13 +612,6 @@ const InvoicePage: NextPageWithLayout = () => {
                       productName: e.target.value,
                     }))
                   }
-                  suggestions={productSuggestion}
-                  onSelect={(name) => {
-                    setProductDetails((prev) => ({
-                      ...prev,
-                      productName: name,
-                    }));
-                  }}
                   placeholder="Product Name"
                 />
 
