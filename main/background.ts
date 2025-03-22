@@ -14,7 +14,6 @@ import { autoUpdater } from "electron-updater";
 import * as XLSX from "xlsx";
 import { tempSecret, genrateOtp, MongoURI } from "./helpers/utils";
 import moment from "moment";
-import db from "./helpers/db";
 
 // Basic flags for Electron updater
 autoUpdater.autoDownload = false;
@@ -26,65 +25,46 @@ let splashWindow: BrowserWindow | null = null;
 // mongodb variables
 let client: MongoClient | null = null;
 
-// async function connectToDb() {
-//   try {
-//     client = new MongoClient(MongoURI);
-//   } catch (error) {
-//     const dialogOpts = {
-//       type: "error",
-//       buttons: ["Exit"],
-//       title: "Error Occured!",
-//       message: "Something went wrong!",
-//       detail: `${
-//         error.message ? error.message : "Please Check database and try again."
-//       }`,
-//     };
-//     dialog.showMessageBox(dialogOpts).then(() => {
-//       app.quit();
-//     });
-//   }
-// }
-
-// async function checkUserIsExistOrNot() {
-//   const db = client.db("reckonup");
-//   const collection = db.collection("users");
-
-//   const existedUser = await collection.findOne({ username: "app-admin" });
-
-//   if (!existedUser) {
-//     const salt = await bcrypt.genSalt(10);
-
-//     const newpassword = await bcrypt.hash("12345", salt);
-
-//     await collection.insertOne({
-//       username: "app-admin",
-//       email: "akay93796@gmail.com",
-//       password: newpassword,
-//     });
-
-//     return;
-//   }
-
-//   return;
-// }
+async function connectToDb() {
+  try {
+    client = new MongoClient(MongoURI);
+  } catch (error) {
+    const dialogOpts = {
+      type: "error",
+      buttons: ["Exit"],
+      title: "Error Occured!",
+      message: "Something went wrong!",
+      detail: `${
+        error.message ? error.message : "Please Check database and try again."
+      }`,
+    };
+    dialog.showMessageBox(dialogOpts).then(() => {
+      app.quit();
+    });
+  }
+}
 
 async function checkUserIsExistOrNot() {
-  try {
-    const stmt = db.prepare("SELECT * FROM users WHERE username = ?");
-    const existedUser = stmt.get("app-admin");
+  const db = client.db("reckonup");
+  const collection = db.collection("users");
 
-    if (!existedUser) {
-      const salt = await bcrypt.genSalt(10);
-      const newpassword = await bcrypt.hash("12345", salt);
+  const existedUser = await collection.findOne({ username: "app-admin" });
 
-      const insertStmt = db.prepare(
-        "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
-      );
-      insertStmt.run("app-admin", "akay93796@gmail.com", newpassword);
-    }
-  } catch (error) {
-    console.error("Error checking user existence:", error);
+  if (!existedUser) {
+    const salt = await bcrypt.genSalt(10);
+
+    const newpassword = await bcrypt.hash("12345", salt);
+
+    await collection.insertOne({
+      username: "app-admin",
+      email: "akay93796@gmail.com",
+      password: newpassword,
+    });
+
+    return;
   }
+
+  return;
 }
 
 const isProd = process.env.NODE_ENV === "production";
@@ -107,7 +87,7 @@ if (!fs.existsSync(uploadPath)) {
   await app.whenReady();
 
   // connecting with database
-  // await connectToDb();
+  await connectToDb();
 
   // check user is existed or not if not it create user
   await checkUserIsExistOrNot();
@@ -202,7 +182,6 @@ autoUpdater.on("update-downloaded", () => {
 // -----------------------------
 //     User Events
 // -----------------------------
-
 
 ipcMain.on("login", async (event, args) => {
   try {
