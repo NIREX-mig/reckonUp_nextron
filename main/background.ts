@@ -12,7 +12,7 @@ import sendForgotPasswordEmail, {
 import fs from "node:fs";
 import { autoUpdater } from "electron-updater";
 import * as XLSX from "xlsx";
-import { tempSecret, genrateOtp, MongoURI } from "./helpers/utils";
+import { tempSecret, genrateOtp, MongoURI, DbName } from "./helpers/utils";
 import moment from "moment";
 
 // Basic flags for Electron updater
@@ -83,8 +83,35 @@ if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath, { recursive: true });
 }
 
+async function checkMongoDB() {
+  try {
+    const client = new MongoClient(MongoURI);
+    await client.connect();
+    const db = client.db(DbName);
+    const collection = await db.listCollections().toArray();
+    await client.close();
+    return collection.length > 0;
+  } catch (err) {
+    const dialogOpts = {
+      type: "error",
+      buttons: ["Exit"],
+      title: "Error Occured!",
+      message: "Something went wrong!",
+      detail: `${
+        err.message ? err.message : "Please Check database and try again."
+      }`,
+    };
+    dialog.showMessageBox(dialogOpts).then(() => {
+      app.quit();
+    });
+  }
+}
+
 (async () => {
   await app.whenReady();
+
+  //check db
+  await checkMongoDB();
 
   // connecting with database
   await connectToDb();
