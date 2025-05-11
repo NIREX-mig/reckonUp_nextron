@@ -1,10 +1,10 @@
-import React from "react";
+import React from 'react';
 
 const InvoiceItemsList = ({ productList }) => {
   return (
-    <div className="mb-3 rounded-xl border-[1px] border-[#f0f0f0] bg-white p-3">
-      <table className="w-full mb-3 ">
-        <thead className="text-green-600 text-[13px] tracking-[1px]  capitalize">
+    <div className="mb-3 py-2">
+      <table className="w-full mb-3">
+        <thead className="text-green-600 text-[13px] capitalize">
           <tr className="border-b">
             <th className="text-center">SNo</th>
             <th className="text-center w-[12rem]">Product Name</th>
@@ -19,11 +19,11 @@ const InvoiceItemsList = ({ productList }) => {
         <tbody>
           {productList?.map((product, index) => {
             return (
-              <tr key={index} className="border-b">
+              <tr key={index} className="border-b text-[13px]">
                 <td className="text-center">{index + 1}</td>
-                <td className="text-center">{product.productName}</td>
-                <td className="text-center">{product.productCategory}</td>
-                <td className="text-center">{product.netWeight}</td>
+                <td className="text-center">{product.name}</td>
+                <td className="text-center">{product.category}</td>
+                <td className="text-center">{product.weight}</td>
                 <td className="text-center">{product.quantity}</td>
                 <td className="text-center">{product.rate}</td>
                 <td className="text-center">{product.makingCost}</td>

@@ -1,15 +1,15 @@
-import React, { ReactElement, useEffect, useState } from "react";
-import RootLayout from "../../components/rootLayout";
-import { NextPageWithLayout } from "../_app";
-import Head from "next/head";
-import { FaSave } from "react-icons/fa";
-import { useRouter } from "next/router";
-import { APiRes } from "../../types";
-import Header from "../../components/ui/Header";
-import FileInput from "../../components/ui/FileInput";
-import toast from "react-hot-toast";
-import ExportToExel from "../../components/settings/ExportToExel";
-import FeedBack from "../../components/settings/FeedBack";
+import React, { ReactElement, useEffect, useState } from 'react';
+import RootLayout from '../../components/rootLayout';
+import { NextPageWithLayout } from '../_app';
+import Head from 'next/head';
+import { FaSave } from 'react-icons/fa';
+import { useRouter } from 'next/router';
+import { APiRes } from '../../types';
+import Header from '../../components/ui/Header';
+import FileInput from '../../components/ui/FileInput';
+import toast from 'react-hot-toast';
+import ExportToExel from '../../components/settings/ExportToExel';
+import FeedBack from '../../components/settings/FeedBack';
 
 const SettingPage: NextPageWithLayout = () => {
   const router = useRouter();
@@ -18,25 +18,25 @@ const SettingPage: NextPageWithLayout = () => {
   const [logoUploaded, setLogoUploaded] = useState(false);
 
   const [settingData, setSettingData] = useState({
-    ownerName: "",
-    mobileNumber: "",
-    whatsappNumber: "",
-    address: "",
-    shopName: "",
-    GSTNO: "",
+    ownerName: '',
+    mobileNo: '',
+    whatsappNo: '',
+    address: '',
+    shopName: '',
+    GSTNO: '',
   });
 
   const handleSaveSettings = () => {
-    window.ipc.send("createsetting", {
+    window.ipc.send('createsetting', {
       ownerName: settingData.ownerName,
-      mobileNumber: settingData.mobileNumber,
-      whatsappNumber: settingData.whatsappNumber,
+      mobileNo: settingData.mobileNo,
+      whatsappNo: settingData.whatsappNo,
       address: settingData.address,
       shopName: settingData.shopName,
       GSTNO: settingData.GSTNO,
     });
 
-    window.ipc.on("createsetting", (res: APiRes) => {
+    window.ipc.on('createsetting', (res: APiRes) => {
       if (res.success) {
         toast.success(res.message);
       } else {
@@ -56,7 +56,7 @@ const SettingPage: NextPageWithLayout = () => {
       if (file) {
         const reader = new FileReader();
         reader.onload = () => {
-          window.ipc.send("upload-logo", {
+          window.ipc.send('upload-logo', {
             fileName: file.name,
             logo: reader.result,
           });
@@ -83,14 +83,14 @@ const SettingPage: NextPageWithLayout = () => {
 
   useEffect(() => {
     const getSetting = async () => {
-      window.ipc.send("fetchsetting", {});
+      window.ipc.send('fetchsetting', {});
 
-      window.ipc.on("fetchsetting", (res: APiRes) => {
+      window.ipc.on('fetchsetting', (res: APiRes) => {
         if (res.success) {
           setSettingData({
             ownerName: res.data.ownerName,
-            mobileNumber: res.data.mobileNumber,
-            whatsappNumber: res.data.whatsappNumber,
+            mobileNo: res.data.mobileNo,
+            whatsappNo: res.data.whatsappNo,
             address: res.data.address,
             shopName: res.data.shopName,
             GSTNO: res.data.GSTNO,
@@ -102,9 +102,9 @@ const SettingPage: NextPageWithLayout = () => {
     };
 
     const getLogo = async () => {
-      window.ipc.send("get-logo", {});
+      window.ipc.send('get-logo', {});
 
-      window.ipc.on("get-logo", (res: APiRes) => {
+      window.ipc.on('get-logo', (res: APiRes) => {
         if (res.success) {
           setLogoUploaded(true);
           setlogoPreview(res.data);
@@ -121,15 +121,13 @@ const SettingPage: NextPageWithLayout = () => {
       <Head>
         <title>ReckonUp - Devloped by NIreX</title>
       </Head>
-      <div className="px-4 py-2 bg-primary-50 h-full">
+      <div className="p-1 bg-primary-50 h-[calc(100%-16px)] overflow-auto rounded-xl m-2">
         <Header title="Settings" extraStyle="mb-3" />
 
-        <div className="bg-primary-200 border-primary-500 border text-primary-900 rounded-lg p-6">
+        <div className="bg-primary-50 border-primary-500 border text-primary-900 rounded-lg p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h2 className="text-lg font-semibold mb-4">
-                Business Information
-              </h2>
+              <h2 className="text-lg font-semibold mb-4">Business Information</h2>
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-primary-700 mb-2">
@@ -144,7 +142,7 @@ const SettingPage: NextPageWithLayout = () => {
                         shopName: e.target.value,
                       }))
                     }
-                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-primary-900"
                   />
                 </div>
                 <div>
@@ -160,7 +158,7 @@ const SettingPage: NextPageWithLayout = () => {
                         ownerName: e.target.value,
                       }))
                     }
-                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-primary-900"
                   />
                 </div>
                 <div>
@@ -176,13 +174,11 @@ const SettingPage: NextPageWithLayout = () => {
                         GSTNO: e.target.value,
                       }))
                     }
-                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-primary-900"
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-primary-700 mb-2">
-                    Address
-                  </label>
+                  <label className="block text-sm font-medium text-primary-700 mb-2">Address</label>
                   <textarea
                     value={settingData.address}
                     onChange={(e) =>
@@ -192,7 +188,7 @@ const SettingPage: NextPageWithLayout = () => {
                       }))
                     }
                     rows={3}
-                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-primary-900"
                   />
                 </div>
                 <div>
@@ -201,14 +197,14 @@ const SettingPage: NextPageWithLayout = () => {
                   </label>
                   <input
                     type="tel"
-                    value={settingData.mobileNumber}
+                    value={settingData.mobileNo}
                     onChange={(e) =>
                       setSettingData((prev) => ({
                         ...prev,
-                        mobileNumber: e.target.value,
+                        mobileNo: e.target.value,
                       }))
                     }
-                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-primary-900"
                   />
                 </div>
                 <div>
@@ -217,14 +213,14 @@ const SettingPage: NextPageWithLayout = () => {
                   </label>
                   <input
                     type="tel"
-                    value={settingData.whatsappNumber}
+                    value={settingData.whatsappNo}
                     onChange={(e) =>
                       setSettingData((prev) => ({
                         ...prev,
-                        whatsappNumber: e.target.value,
+                        whatsappNo: e.target.value,
                       }))
                     }
-                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-purple-800"
+                    className=" bg-primary-100 w-full px-4 py-2 rounded-lg border border-primary-800 text-primary-900 font-semibold focus:outline-primary-900"
                   />
                 </div>
               </div>
@@ -271,7 +267,7 @@ const SettingPage: NextPageWithLayout = () => {
           <div className="mt-6 flex justify-end">
             <button
               onClick={handleSaveSettings}
-              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-btn text-white hover:bg-btn/95 active:scale-95 transition-all duration-300 "
+              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-primary-900 text-white hover:bg-primary-800 active:scale-95 transition-all duration-300 "
             >
               <FaSave className="h-5 w-5" />
               Save Settings

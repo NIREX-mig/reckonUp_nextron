@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const Textarea = ({ title, row, value, handleTextChange, placeholder }) => {
   return (
@@ -11,7 +11,7 @@ const Textarea = ({ title, row, value, handleTextChange, placeholder }) => {
         autoComplete="off"
         value={value}
         onChange={handleTextChange}
-        className="bg-gray-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-purple-800 block py-1.5 px-2"
+        className="bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-primary-900 block py-1.5 px-2"
         placeholder={placeholder}
         required
       />

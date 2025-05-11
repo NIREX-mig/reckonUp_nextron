@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export default function SplashScreen() {
   const [progress, setProgress] = useState(0);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((oldProgress) => {
@@ -16,21 +17,22 @@ export default function SplashScreen() {
   }, []);
 
   return (
-    <div className="w-screen h-screen flex flex-col justify-center items-center bg-primary-50 text-xl">
+    <div className="flex flex-col justify-center items-center bg-primary-50 text-xl">
       <img
         src="/splash.png"
         alt="app_logo"
-        width={180}
-        height={180}
+        width={720}
+        height={480}
         draggable="false"
+        className=""
       />
-      <div className="min-w-[90%] bg-gray-200 h-2 mx-auto mt-8">
+      <div className=" absolute bottom-2 min-w-[90%] bg-gray-200 h-1 mx-auto">
         <div
-          className={`bg-purple-900 h-2 transition-all duration-[3000]`}
+          className={`bg-primary-900 h-1 transition-all duration-[3000]`}
           style={{ width: `${progress}%` }}
         ></div>
       </div>
-      <p className="text-base">Starting ReckonUp App....</p>
+      <p className=" absolute bottom-4 right-7 text-sm text-white">V1.03</p>
     </div>
   );
 }

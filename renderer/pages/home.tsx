@@ -1,13 +1,13 @@
-import React, { useCallback, useState } from "react";
-import Head from "next/head";
-import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/router";
-import { FaEye, FaEyeSlash, FaRegUser, FaUnlockAlt } from "react-icons/fa";
-import { APiRes } from "../types";
-import Button from "../components/ui/Button";
-import toast, { Toaster } from "react-hot-toast";
-import { AiOutlineLoading } from "react-icons/ai";
+import React, { useCallback, useState } from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { FaEye, FaEyeSlash, FaRegUser, FaUnlockAlt } from 'react-icons/fa';
+import { APiRes } from '../types';
+import Button from '../components/ui/Button';
+import toast, { Toaster } from 'react-hot-toast';
+import { AiOutlineLoading } from 'react-icons/ai';
 
 export default function HomePage() {
   const router = useRouter();
@@ -16,34 +16,34 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    username: "app-admin",
-    password: "",
+    username: 'app-admin',
+    password: '',
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    window.ipc.send("login", {
+    window.ipc.send('login', {
       username: formData.username,
       password: formData.password,
     });
 
-    window.ipc.on("login", (res: APiRes) => {
+    window.ipc.on('login', (res: APiRes) => {
       if (res?.success) {
         setLoading(false);
-        localStorage.setItem("logedinUser", JSON.stringify(res.data));
+        localStorage.setItem('logedinUser', JSON.stringify(res.data));
         toast.success(res.message);
         setFormData((prev) => ({
           ...prev,
-          password: "",
+          password: '',
         }));
         setTimeout(() => {
-          router.push("/dashboard/");
+          router.push('/dashboard/');
         }, 500);
       } else {
         setFormData((prev) => ({
           ...prev,
-          password: "",
+          password: '',
         }));
         setLoading(false);
         toast.error(res.message);
@@ -51,19 +51,16 @@ export default function HomePage() {
     });
   };
 
-  const handlePasswordHidden = useCallback(
-    () => setPasswordHidden((prev) => !prev),
-    []
-  );
+  const handlePasswordHidden = useCallback(() => setPasswordHidden((prev) => !prev), []);
 
   return (
     <React.Fragment>
       <Head>
         <title>ReckonUp - Devloped by NIreX</title>
       </Head>
-      <section className="bg-primary-100 h-screen flex justify-center gap-5 items-center">
+      <section className="bg-primary-50 h-screen flex justify-center gap-5 items-center">
         <Toaster />
-        <div className="bg-primary-100 rounded-lg p-4">
+        <div className="bg-primary-50 rounded-lg p-4">
           <Image
             src="/LoginAnimation.gif"
             alt="loginanimationgif"
@@ -79,41 +76,33 @@ export default function HomePage() {
           <h1 className="text-center font-bold text-4xl mb-10  text-primary-950">
             Welcome To ReckonUp
           </h1>
-          <h3 className="text-center font-bold text-3xl mb-4 text-primary-900">
-            Sign In
-          </h3>
+          <h3 className="text-center font-bold text-3xl mb-4 text-primary-900">Sign In</h3>
           <p className="text-center text-lg mb-5 text-primary-800">
             Enter your Username and Password to Sign In.
           </p>
 
           <form onSubmit={handleSubmit} className="p-4 w-[27rem] mx-auto">
             <div className="mb-5">
-              <label
-                htmlFor="username"
-                className="block mb-2 text-sm font-semibold  text-gray-900"
-              >
+              <label htmlFor="username" className="block mb-2 text-sm font-semibold  text-gray-900">
                 Username
               </label>
               <div className="relative">
                 <FaRegUser className="absolute left-3 top-2.5 h-5 w-5 text-gray-900" />
                 <input
                   value={formData.username}
-                  className="bg-primary-50 border border-primary-900 text-primary-900 rounded-md focus:outline-purple-600 block w-full p-2 font-semibold indent-8"
+                  className="bg-primary-50 border border-primary-900 text-primary-900 rounded-md focus:outline-primary-900 block w-full p-2 font-semibold indent-8"
                   readOnly
                 />
               </div>
             </div>
             <div>
-              <label
-                htmlFor="password"
-                className="block mb-2 text-sm font-semibold text-gray-900"
-              >
+              <label htmlFor="password" className="block mb-2 text-sm font-semibold text-gray-900">
                 Password
               </label>
               <div className="relative">
                 <FaUnlockAlt className="absolute left-3 top-2.5 h-5 w-5 text-gray-900" />
                 <input
-                  type={isPasswordHidden ? "password" : "text"}
+                  type={isPasswordHidden ? 'password' : 'text'}
                   autoComplete="off"
                   value={formData.password}
                   onChange={(e) =>
@@ -123,7 +112,7 @@ export default function HomePage() {
                     }))
                   }
                   autoFocus={true}
-                  className="bg-primary-50 border border-primary-900 text-primary-800 rounded-md focus:outline-purple-600 block w-full p-2 mb-3 font-semibold indent-8"
+                  className="bg-primary-50 border border-primary-900 text-primary-800 rounded-md focus:outline-primary-900 block w-full p-2 mb-3 font-semibold indent-8"
                   placeholder="•••••••••"
                   required
                 />
@@ -139,16 +128,17 @@ export default function HomePage() {
               </div>
             </div>
             <Link href="/forgot" draggable="false">
-              <p className=" font-semibold hover:underline inline-block mb-5 focus:outline-purple-600">
+              <p className=" font-semibold hover:underline inline-block mb-5 focus:outline-primary-900">
                 Forger Password
               </p>
             </Link>
             <Button
-              title={loading ? "Wait..." : "Sign In"}
+              title={loading ? 'Wait...' : 'Sign In'}
               buttonType="submit"
               loading={loading}
               disabled={loading}
               icon={<AiOutlineLoading size={20} />}
+              extraClass="py-2"
             />
           </form>
         </div>

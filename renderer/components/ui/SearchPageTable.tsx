@@ -1,6 +1,6 @@
-import moment from "moment";
-import React, { useState, useEffect } from "react";
-import { FcMoneyTransfer } from "react-icons/fc";
+import moment from 'moment';
+import React, { useState, useEffect } from 'react';
+import { FcMoneyTransfer } from 'react-icons/fc';
 
 const SearchPageTable = ({
   data,
@@ -14,90 +14,84 @@ const SearchPageTable = ({
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === "ArrowDown") {
+      if (event.key === 'ArrowDown') {
         setSelectedRow((prev) => Math.min(prev + 1, data.length - 1));
-      } else if (event.key === "ArrowUp") {
+      } else if (event.key === 'ArrowUp') {
         setSelectedRow((prev) => Math.max(prev - 1, 0));
-      } else if (event.key === "Enter") {
+      } else if (event.key === 'Enter') {
         handleTableRowClick(data[selectedRow]);
-      } else if (event.ctrlKey && event.key === "p") {
+      } else if (event.ctrlKey && event.key === 'p') {
         handlePaymentClick(data[selectedRow]);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedRow, data, handleTableRowClick, handlePaymentClick]);
 
   return (
-    <section className="px-4">
-      <div className="h-[calc(100vh-230px)] overflow-x-auto border border-primary-600 md:rounded-lg">
+    <section className="px-2">
+      <div className="h-[calc(100vh-190px)] overflow-x-auto border border-primary-600 md:rounded-lg">
         <table className="min-w-full divide-y divide-primary-600">
           <thead className="bg-primary-800 text-white sticky top-0">
             <tr>
-              <th className="px-3 py-2 text-sm text-left">Invoice No</th>
-              <th className="px-3 py-2 text-sm text-left">Name</th>
-              <th className="px-3 py-2 text-sm text-left">Address</th>
-              <th className="px-3 py-2 text-sm text-left">Mobile</th>
-              <th className="px-3 py-2 text-sm text-left">Date</th>
-              <th className="px-3 py-2 text-sm text-left">Total</th>
-              <th className="px-3 py-2 text-sm text-left">Total Paid</th>
-              <th className="px-3 py-2 text-sm text-left">Dues</th>
-              <th className="px-3 py-2 text-sm text-left">Details</th>
+              <th className="px-3 py-[2px] text-sm font-normal text-left">Invoice No</th>
+              <th className="px-3 py-[2px] text-sm font-normal text-left">Name</th>
+              <th className="px-3 py-[2px] text-sm font-normal text-left">Address</th>
+              <th className="px-3 py-[2px] text-sm font-normal text-left">Mobile</th>
+              <th className="px-3 py-[2px] text-sm font-normal text-left">Date</th>
+              <th className="px-3 py-[2px] text-sm font-normal text-left">Total</th>
+              <th className="px-3 py-[2px] text-sm font-normal text-left">Total Paid</th>
+              <th className="px-3 py-[2px] text-sm font-normal text-left">Dues</th>
+              <th className="px-3 py-[2px] text-sm font-normal text-left">Details</th>
             </tr>
           </thead>
           <tbody className="bg-primary-50 divide-y divide-gray-200">
             {data?.map((invoice, index) => (
               <tr
                 key={index}
-                className={`cursor-pointer ${
-                  selectedRow === index ? "bg-primary-400" : ""
+                className={`cursor-pointer hover:bg-primary-200 ${
+                  selectedRow === index ? 'bg-primary-300' : ''
                 }`}
               >
-                <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
+                <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
                   {invoice?.invoiceNo}
                 </td>
-                <td className="px-2 py-2 text-sm font-medium capitalize whitespace-nowrap">
-                  {invoice?.customerName}
+                <td className="px-2 py-[2px] text-sm font-medium capitalize whitespace-nowrap">
+                  {invoice?.name}
                 </td>
-                <td className="px-2 py-2 text-sm font-medium capitalize whitespace-nowrap">
-                  {invoice?.customerAddress}
+                <td className="px-2 py-[2px] text-sm font-medium capitalize whitespace-nowrap">
+                  {invoice?.address}
                 </td>
-                <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
-                  {invoice.customerPhone || "N/A"}
+                <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
+                  {invoice.phone}
                 </td>
-                <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
-                  {moment(invoice.createdAt).format("MMM DD, YYYY")}
+                <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
+                  {moment(invoice.createdAt).format('MMM DD, YYYY')}
                 </td>
-                <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
-                  {`₹ ${invoice.totalAmt}`}
+                <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
+                  {`₹ ${invoice.totalAmount}`}
                 </td>
-                <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
-                  {invoice?.paymentHistory.reduce(
-                    (sum, history) => sum + history.paidAmount,
-                    0
-                  )}
+                <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
+                  {invoice?.payments.reduce((sum, history) => sum + history.paidAmount, 0)}
                 </td>
-                <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
-                  {
-                    invoice?.paymentHistory[invoice.paymentHistory.length - 1]
-                      ?.dueAmount
-                  }
+                <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
+                  {invoice?.dueAmount}
                 </td>
-                <td className="flex justify-center gap-2 px-2 py-2 text-sm font-normal whitespace-nowrap">
+                <td className="flex justify-center gap-2 px-2 py-[2px] text-sm font-normal whitespace-nowrap">
                   <button
                     type="button"
                     onClick={() => handleTableRowClick(invoice)}
-                    className="bg-btn text-white px-4 py-1 rounded-md active:scale-95 transition-all duration-300"
+                    className="bg-primary-900 hover:bg-primary-800 text-white px-4 py-1 rounded-md active:scale-95 transition-all duration-300"
                   >
                     Details
                   </button>
                   <button
                     type="button"
                     onClick={() => handlePaymentClick(invoice)}
-                    className="bg-btn text-white px-4 py-1 rounded-md active:scale-95 transition-all duration-300"
+                    className="bg-primary-900 hover:bg-primary-800 text-white px-4 py-1 rounded-md active:scale-95 transition-all duration-300"
                   >
                     <FcMoneyTransfer size={20} />
                   </button>
@@ -108,11 +102,11 @@ const SearchPageTable = ({
         </table>
       </div>
 
-      <div className="flex items-center justify-between mt-4">
+      <div className="flex items-center justify-between mt-1">
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className="flex items-center px-5 py-2 text-sm text-white capitalize bg-btn border rounded-md gap-x-2 hover:bg-btn/95 disabled:bg-btn/50 cursor-pointer disabled:cursor-not-allowed active:scale-95 transition-all duration-300"
+          className="flex items-center px-5 py-2 text-sm text-white capitalize bg-primary-900 border rounded-md gap-x-2 hover:bg-btn/95 disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed active:scale-95 transition-all duration-300"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -136,11 +130,9 @@ const SearchPageTable = ({
         </div>
 
         <button
-          onClick={() =>
-            setCurrentPage((prev: number) => Math.min(prev + 1, totalPages))
-          }
+          onClick={() => setCurrentPage((prev: number) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className="flex items-center px-5 py-2 text-sm text-white capitalize bg-btn border rounded-md gap-x-2 hover:bg-btn/95  disabled:bg-btn/50 cursor-pointer disabled:cursor-not-allowed active:scale-95 transition-all duration-300"
+          className="flex items-center px-5 py-2 text-sm text-white capitalize bg-primary-900 border rounded-md gap-x-2 hover:bg-primary-950  disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed active:scale-95 transition-all duration-300"
         >
           <span>Next</span>
           <svg

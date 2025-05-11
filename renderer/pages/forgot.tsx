@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
-import Head from "next/head";
-import Image from "next/image";
-import NewPasswordContainer from "../components/forgotpassword/NewPasswordContainer";
-import OtpContainer from "../components/forgotpassword/OtpContainer";
-import ForgotContainer from "../components/forgotpassword/ForgotContainer";
-import { useRouter } from "next/router";
-import { APiRes } from "../types";
-import toast, { Toaster } from "react-hot-toast";
-import { useIsOnline } from "react-use-is-online";
-import Link from "next/link";
+import React, { useEffect, useState } from 'react';
+import Head from 'next/head';
+import Image from 'next/image';
+import NewPasswordContainer from '../components/forgotpassword/NewPasswordContainer';
+import OtpContainer from '../components/forgotpassword/OtpContainer';
+import ForgotContainer from '../components/forgotpassword/ForgotContainer';
+import { useRouter } from 'next/router';
+import { APiRes } from '../types';
+import toast, { Toaster } from 'react-hot-toast';
+import { useIsOnline } from 'react-use-is-online';
+import Link from 'next/link';
 
 export default function ForgotPage() {
   const router = useRouter();
@@ -17,11 +17,11 @@ export default function ForgotPage() {
 
   const [loading, setLoading] = useState(false);
 
-  const [username, setUsername] = useState("");
-  const [finalOtp, setFinalOtp] = useState("");
+  const [username, setUsername] = useState('');
+  const [finalOtp, setFinalOtp] = useState('');
   const [formData, setFormData] = useState({
-    newpassword: "",
-    comfirmpassword: "",
+    newpassword: '',
+    comfirmpassword: '',
   });
   const [fpContainer, setFPContainer] = useState(true);
   const [otpContainer, setOtpContainer] = useState(false);
@@ -34,12 +34,12 @@ export default function ForgotPage() {
   const handleUsernameSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    window.ipc.send("forgotpasswordemail", { username });
+    window.ipc.send('forgotpasswordemail', { username });
 
-    window.ipc.on("forgotpasswordemail", (res: APiRes) => {
+    window.ipc.on('forgotpasswordemail', (res: APiRes) => {
       if (res.success) {
         setLoading(false);
-        localStorage.setItem("tempToken", res.data);
+        localStorage.setItem('tempToken', res.data);
         toast.success(res.message);
         setFPContainer(false);
         setOtpContainer(true);
@@ -57,10 +57,10 @@ export default function ForgotPage() {
   const handleOtpSumbmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const token = localStorage.getItem("tempToken");
-    window.ipc.send("validateotp", { otp: finalOtp, token });
+    const token = localStorage.getItem('tempToken');
+    window.ipc.send('validateotp', { otp: finalOtp, token });
 
-    window.ipc.on("validateotp", (res: APiRes) => {
+    window.ipc.on('validateotp', (res: APiRes) => {
       if (res.success) {
         setLoading(false);
         toast.success(res.message);
@@ -80,20 +80,20 @@ export default function ForgotPage() {
   const handleNewPasswordSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const token = localStorage.getItem("tempToken");
+    const token = localStorage.getItem('tempToken');
 
-    window.ipc.send("forgotpassword", {
+    window.ipc.send('forgotpassword', {
       newpassword: formData.newpassword,
       token,
     });
 
-    window.ipc.on("forgotpassword", (res: APiRes) => {
+    window.ipc.on('forgotpassword', (res: APiRes) => {
       if (res.success) {
         setLoading(false);
-        localStorage.removeItem("tempToken");
+        localStorage.removeItem('tempToken');
         toast.success(res.message);
         setTimeout(() => {
-          router.push("/home");
+          router.push('/home');
         }, 500);
       } else {
         setLoading(false);
@@ -109,9 +109,7 @@ export default function ForgotPage() {
     return (
       <section className="w-full h-screen flex justify-center items-center">
         <div className="flex flex-col justify-center items-center gap-10">
-          <h1 className="text-red-500 text-3xl font-bold">
-            Please First Connect To The Internet
-          </h1>
+          <h1 className="text-red-500 text-3xl font-bold">Please First Connect To The Internet</h1>
           <Link
             href="/home"
             draggable="false"

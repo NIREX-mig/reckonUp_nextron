@@ -10,7 +10,7 @@ files:
       - package.json
       - app
 publish: { provider: github, owner: Nirex-mig, repo: reckonUp_nextron }
-extraResources: { from: "database.sqlite", to: "database.sqlite" }
+extraResources: { from: 'database.sqlite', to: 'database.sqlite' }
 # win:
 #   {
 #     target: "nsis",

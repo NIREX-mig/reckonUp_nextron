@@ -8,7 +8,7 @@ ReckonUp is an Electron-based desktop application built using Nextron, integrati
 
 - Export all invoices to Excel
 - Auto-update functionality using `electron-updater`
-- Integration with MongoDB for invoice-related event handling
+- Integration with postgresql for invoice-related event handling
 
 ## Installation
 

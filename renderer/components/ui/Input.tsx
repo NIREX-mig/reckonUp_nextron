@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import React, { useState } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 interface InputFeild {
   title?: string;
-  type: "text" | "number" | "date";
+  type: 'text' | 'number' | 'date';
   min?: string | number;
   max?: string | number;
   step?: string | number;
@@ -37,7 +37,7 @@ const Input = ({
       {title && (
         <label htmlFor={title} className={`text-sm font-medium ${lableStyle}`}>
           {title}
-          {type != "date" && ":"}
+          {type != 'date' && ':'}
         </label>
       )}
 
@@ -51,7 +51,7 @@ const Input = ({
         max={`${max}`}
         onChange={handleChangeText}
         onBlur={handleOnBlur}
-        className={`bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-purple-800 inline-block py-1.5 px-2 ${otherStyle}`}
+        className={`bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-primary-900 inline-block py-1.5 px-2 ${otherStyle}`}
         placeholder={placeholder}
         disabled={disabled}
         required

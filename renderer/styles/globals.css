@@ -16,11 +16,11 @@ input::-webkit-inner-spin-button {
 }
 
 /* Firefox */
-input[type="number"] {
+input[type='number'] {
   -moz-appearance: textfield;
 }
 *:focus {
-  outline-color: #6b21a8;
+  outline-color: #155230;
 }
 
 ::-webkit-scrollbar {
@@ -29,7 +29,8 @@ input[type="number"] {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #3e514c;
+  /* background-color: #3e514c; */
+  display: none;
   /* Color of the scrollbar thumb */
   border-radius: 4px;
   /* Rounded corners of the thumb */
@@ -44,7 +45,3 @@ input[type="number"] {
   background-color: #b0b0b1;
   /* Color of the thumb on hover */
 }
-
-/* img {
-  pointer-events: none;
-} */

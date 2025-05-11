@@ -1,22 +1,22 @@
-import React, { ReactElement, useEffect, useState } from "react";
-import RootLayout from "../../components/rootLayout";
-import type { NextPageWithLayout } from "../_app";
-import Head from "next/head";
-import { FaDollarSign } from "react-icons/fa";
-import { ImStatsDots } from "react-icons/im";
-import { TfiStatsUp } from "react-icons/tfi";
-import { FiFileText } from "react-icons/fi";
-import useModal from "../../hooks/useModal";
-import Modal from "../../components/ui/Modal";
-import { APiRes } from "../../types";
-import Header from "../../components/ui/Header";
-import toast from "react-hot-toast";
-import DashboardPageTable from "../../components/ui/DashboardPageTable";
+import React, { ReactElement, useEffect, useState } from 'react';
+import RootLayout from '../../components/rootLayout';
+import type { NextPageWithLayout } from '../_app';
+import Head from 'next/head';
+import { FaDollarSign } from 'react-icons/fa';
+import { FiFileText } from 'react-icons/fi';
+import { MdPaid } from 'react-icons/md';
+import { IoMdWarning } from 'react-icons/io';
+import useModal from '../../hooks/useModal';
+import Modal from '../../components/ui/Modal';
+import { APiRes } from '../../types';
+import Header from '../../components/ui/Header';
+import toast from 'react-hot-toast';
+import DashboardPageTable from '../../components/ui/DashboardPageTable';
 
 const iconMap: { [key: string]: JSX.Element } = {
   FaDollarSign: <FaDollarSign />,
-  ImStatsDots: <ImStatsDots />,
-  TfiStatsUp: <TfiStatsUp />,
+  MdPaid: <MdPaid />,
+  IoMdWarning: <IoMdWarning />,
   FiFileText: <FiFileText />,
 };
 
@@ -28,33 +28,33 @@ const ServerIconRenderer: React.FC<{ iconName: string }> = ({ iconName }) => {
 const DashboardPage: NextPageWithLayout = () => {
   const { modal, openModal, closeModal } = useModal();
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
   const [invoices, setInvoices] = useState([]);
   const [filteredData, setFilterdData] = useState([]);
 
-  const [selectedOption, setSelectedOption] = useState("invoiceNo");
+  const [selectedOption, setSelectedOption] = useState('invoiceNo');
 
   const [stats, setStats] = useState([
     {
-      title: "Total Sales",
-      value: "₹0",
-      icon: "FaDollarSign",
+      title: 'Outstanding',
+      value: '₹0',
+      icon: 'FaDollarSign',
     },
     {
-      title: "Total Invoices",
-      value: "0",
-      icon: "FiFileText",
+      title: 'Total Invoices',
+      value: '0',
+      icon: 'FiFileText',
     },
     {
-      title: "Today Growth",
-      value: "₹0",
-      icon: "ImStatsDots",
+      title: 'Paid Inovices',
+      value: '0',
+      icon: 'MdPaid',
     },
     {
-      title: "Monthly Growth",
-      value: "₹0",
-      icon: "TfiStatsUp",
+      title: 'Due Invoices',
+      value: '0',
+      icon: 'IoMdWarning',
     },
   ]);
 
@@ -64,40 +64,37 @@ const DashboardPage: NextPageWithLayout = () => {
 
     // search functionality
 
-    if (selectedOption === "invoiceNo") {
+    if (selectedOption === 'invoiceNo') {
       const searchedData =
         searchValue.length === 0
           ? invoices
-          : invoices.filter((item) =>
-              item.invoiceNo.toLowerCase().includes(searchValue)
-            );
+          : invoices.filter((item) => item.invoiceNo.toLowerCase().includes(searchValue));
 
       setFilterdData(searchedData);
     }
 
-    if (selectedOption === "customerName") {
+    if (selectedOption === 'customerName') {
       const searchedData =
         searchValue.length === 0
           ? invoices
-          : invoices.filter((item) =>
-              item.customerName.toLowerCase().includes(searchValue)
-            );
+          : invoices.filter((item) => item.customerName.toLowerCase().includes(searchValue));
 
       setFilterdData(searchedData);
     }
   };
 
   const handleShowDetails = (invoice) => {
-    openModal("Invoice-Details");
+    openModal('Invoice-Details');
     const jsonInvoice = JSON.stringify(invoice);
-    localStorage.setItem("finalInvoice", jsonInvoice);
+    localStorage.setItem('finalInvoice', jsonInvoice);
   };
 
   useEffect(() => {
-    const getTracks = () => {
-      window.ipc.send("tracks", {});
+    const getStats = () => {
+      window.ipc.send('tracks', {});
 
-      window.ipc.on("tracks", (res: APiRes) => {
+      window.ipc.on('tracks', (res: APiRes) => {
+        console.log(res);
         if (res.success) {
           setStats(res.data);
         } else {
@@ -107,9 +104,9 @@ const DashboardPage: NextPageWithLayout = () => {
     };
 
     const getMonthlyInvoice = () => {
-      window.ipc.send("fetchmonthlyinvoice", {});
+      window.ipc.send('fetchmonthlyinvoice', {});
 
-      window.ipc.on("fetchmonthlyinvoice", (res: APiRes) => {
+      window.ipc.on('fetchmonthlyinvoice', (res: APiRes) => {
         if (res.success) {
           setInvoices(res.data);
           setFilterdData(res.data);
@@ -120,7 +117,7 @@ const DashboardPage: NextPageWithLayout = () => {
     };
 
     getMonthlyInvoice();
-    getTracks();
+    getStats();
   }, []);
 
   return (
@@ -128,23 +125,19 @@ const DashboardPage: NextPageWithLayout = () => {
       <Head>
         <title>ReckonUp - Devloped by NIreX</title>
       </Head>
-      <div className="px-4 py-2 bg-primary-50">
+      <div className="px-2 py-2 bg-primary-50 h-[calc(100%-16px)] overflow-auto rounded-xl m-2">
         <Modal type={modal.type} isOpen={modal.isOpen} onClose={closeModal} />
-        <Header title="Dashboard" extraStyle="mb-6" />
+        <Header title="Dashboard" extraStyle="mb-3" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-2">
           {stats.map((stat) => (
             <div key={stat.title} className="bg-primary-900 rounded-lg ">
               <div className=" -translate-x-[3px] -translate-y-[3px] bg-primary-200 rounded-lg p-4  border border-primary-500">
                 <div className="flex items-center justify-between mb-4">
-                  <div
-                    className={`p-3 rounded-lg bg-primary-800 text-primary-50`}
-                  >
+                  <div className={`p-3 rounded-lg bg-primary-800 text-primary-50`}>
                     <ServerIconRenderer iconName={stat.icon} />
                   </div>
                   <div className=" text-center">
-                    <h3 className="text-primary-800 text-md font-bold mb-1">
-                      {stat.title}
-                    </h3>
+                    <h3 className="text-primary-800 text-md font-bold mb-1">{stat.title}</h3>
                     <p className="text-2xl font-bold">{stat.value}</p>
                   </div>
                 </div>
@@ -153,12 +146,10 @@ const DashboardPage: NextPageWithLayout = () => {
           ))}
         </div>
 
-        <div className="rounded-lg bg-primary-200 mb-3 border border-primary-500 p-2">
+        <div className="rounded-lg bg-primary-50 mb-1 border border-primary-500 p-2">
           <div className="flex justify-between">
-            <h2 className="text-xl font-bold ml-2 text-primary-950">
-              Monthly Invoices
-            </h2>
-            <form className=" p-4 flex gap-2">
+            <h2 className="text-xl font-bold ml-2 text-primary-950">Monthly Invoices</h2>
+            <form className=" p-1 flex gap-2">
               <select
                 id="search"
                 className="bg-primary-100 border border-primary-800 text-primary-800 text-sm rounded-md focus:outline-primary-900 block w-30 p-1.5"
@@ -185,9 +176,9 @@ const DashboardPage: NextPageWithLayout = () => {
             data={filteredData}
             handleTableRowClick={handleShowDetails}
             handlePaymentClick={(invoice) => {
-              openModal("Payment");
+              openModal('Payment');
               const jsonInvoice = JSON.stringify(invoice);
-              localStorage.setItem("finalInvoice", jsonInvoice);
+              localStorage.setItem('finalInvoice', jsonInvoice);
             }}
           />
         </div>

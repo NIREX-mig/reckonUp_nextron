@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { IoCloseSharp } from "react-icons/io5";
-import { TbFileInvoice } from "react-icons/tb";
-import { useRouter } from "next/router";
-import moment from "moment";
-import Button from "./Button";
-import toast from "react-hot-toast";
-import { APiRes } from "../../types";
-import { ModalType } from "../../hooks/useModal";
+import React, { useEffect, useState } from 'react';
+import { IoCloseSharp } from 'react-icons/io5';
+import { TbFileInvoice } from 'react-icons/tb';
+import { useRouter } from 'next/router';
+import moment from 'moment';
+import Button from './Button';
+import toast from 'react-hot-toast';
+import { APiRes } from '../../types';
+import { ModalType } from '../../hooks/useModal';
 
 interface ModalProps {
   type: ModalType | null;
@@ -20,16 +20,17 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
   const router = useRouter();
 
   const handlGenrateInvoice = () => {
-    router.push("/dashboard/viewInvoice/");
+    router.push('/dashboard/viewInvoice/');
   };
 
   const handlePayAmount = (invoiceData) => {
-    window.ipc.send("payment", {
+    window.ipc.send('payment', {
       invoiceNo: invoiceData?.invoiceNo,
       paidAmount: pay,
     });
 
-    window.ipc.on("payment", (res: APiRes) => {
+    window.ipc.on('payment', (res: APiRes) => {
+      console.log(res);
       if (!res.success) {
         setPay(0);
         toast.error(res.message);
@@ -43,7 +44,7 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
 
   useEffect(() => {
     const setinvoice = async () => {
-      const jsonInvoice = localStorage.getItem("finalInvoice");
+      const jsonInvoice = localStorage.getItem('finalInvoice');
       const ObjInvoice = await JSON.parse(jsonInvoice);
       setInvoiceData(ObjInvoice);
     };
@@ -52,25 +53,25 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
 
   useEffect(() => {
     const handleCloseModalByKey = (event) => {
-      if (event.ctrlKey && event.key === "x") {
+      if (event.ctrlKey && event.key === 'x') {
         onClose();
-      } else if (event.ctrlKey && event.key === "g") {
-        if (type === "Invoice-Details") {
+      } else if (event.ctrlKey && event.key === 'g') {
+        if (type === 'Invoice-Details') {
           handlGenrateInvoice();
         }
       }
     };
 
-    window.addEventListener("keydown", handleCloseModalByKey);
+    window.addEventListener('keydown', handleCloseModalByKey);
     return () => {
-      window.removeEventListener("keydown", handleCloseModalByKey);
+      window.removeEventListener('keydown', handleCloseModalByKey);
     };
   }, [type]);
 
   if (!isOpen) return null;
   return (
     <>
-      {type === "Invoice-Details" && (
+      {type === 'Invoice-Details' && (
         <div className="fixed z-[200] inset-0 bg-black/60 bg-opacity-75 flex items-center justify-center p-2">
           <div className="bg-primary-50 border border-primary-900 rounded-lg shadow-xl max-w-[75rem] w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
@@ -81,14 +82,12 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                     <span>Reckon</span>
                     <span className="text-primary-900">Up</span>
                   </h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Jewellery Billing Software
-                  </p>
+                  <p className="text-sm text-gray-500 mt-1">Jewellery Billing Software</p>
                 </div>
                 <div className="flex space-x-2">
                   <button
                     onClick={handlGenrateInvoice}
-                    className="p-2 text-primary-50 bg-btn/95 hover:bg-btn rounded-lg flex gap-1 items-center active:scale-95 transition-all duration-300"
+                    className="p-2 text-primary-100 bg-primary-900 hover:bg-primary-950 rounded-lg flex gap-1 items-center active:scale-95 transition-all duration-300"
                     title="Genrate Invoice"
                   >
                     <TbFileInvoice className="w-5 h-5" />
@@ -96,7 +95,7 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                   </button>
                   <button
                     onClick={() => {
-                      localStorage.removeItem("finalInvoice");
+                      localStorage.removeItem('finalInvoice');
                       onClose();
                     }}
                     className="p-2 text-white bg-red-400  hover:bg-red-500 rounded-lg"
@@ -112,42 +111,32 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                 <div className="w-1/2">
                   <div className="flex gap-2">
                     {/* Customer Details */}
-                    <div className="w-1/2 bg-primary-200 border border-primary-800 text-primary-900 rounded-lg p-4">
-                      <h5 className="font-bold text-primary-950">
-                        Customer Details
-                      </h5>
+                    <div className="w-1/2 bg-primary-100 border border-primary-500 text-primary-900 rounded-lg p-4">
+                      <h5 className="font-bold text-primary-950">Customer Details</h5>
                       <div className="p-2 flex flex-col gap-1">
                         <div className="text-sm font-semibold">
                           <span>Name: </span>
-                          <span className="capitalize">
-                            {invoiceData?.customerName}
-                          </span>
+                          <span className="capitalize">{invoiceData?.name}</span>
                         </div>
                         <div className="text-sm font-semibold">
                           <span>Number: </span>
-                          <span className="capitalize">
-                            {invoiceData?.customerPhone}
-                          </span>
+                          <span className="capitalize">{invoiceData?.phone}</span>
                         </div>
                         <div className="text-sm font-semibold">
                           <span>Address: </span>
-                          <span className="capitalize">
-                            {invoiceData?.customerAddress}
-                          </span>
+                          <span className="capitalize">{invoiceData?.address}</span>
                         </div>
                       </div>
                     </div>
                     {/* Exchange Details */}
-                    <div className="w-1/2 bg-primary-200 border border-primary-800 text-primary-900 rounded-lg p-4">
-                      <h5 className="font-bold text-primary-950">
-                        Exchange Details
-                      </h5>
+                    <div className="w-1/2 bg-primary-100 border border-primary-500 text-primary-900 rounded-lg p-4">
+                      <h5 className="font-bold text-primary-950">Exchange Details</h5>
                       <div className="p-2 flex flex-col gap-1">
                         <div className="text-sm font-semibold">
                           <span>Category: </span>
                           <span className="capitalize">
-                            {invoiceData?.exchangeCategory === "select"
-                              ? "N/A"
+                            {invoiceData?.exchangeCategory === 'select'
+                              ? 'N/A'
                               : invoiceData?.exchangeCategory}
                           </span>
                         </div>
@@ -155,8 +144,8 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                           <span>Weight: </span>
                           <span className="capitalize">
                             {`${
-                              invoiceData?.exchangeWeight === "N/A"
-                                ? "N/A"
+                              invoiceData?.exchangeWeight === 'N/A'
+                                ? 'N/A'
                                 : `${invoiceData?.exchangeWeight} gram`
                             }`}
                           </span>
@@ -165,8 +154,8 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                           <span>Percentage: </span>
                           <span className="capitalize">
                             {`${
-                              invoiceData?.exchangePercentage === "N/A"
-                                ? "N/A"
+                              invoiceData?.exchangePercentage === 'N/A'
+                                ? 'N/A'
                                 : `${invoiceData?.exchangePercentage}%`
                             }`}
                           </span>
@@ -175,9 +164,9 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                           <span>Amount: </span>
                           <span className="capitalize">
                             {`₹ ${
-                              invoiceData?.exchangeAmt === "N/A"
-                                ? "N/A"
-                                : invoiceData?.exchangeAmt
+                              invoiceData?.exchangeAmount === 'N/A'
+                                ? 'N/A'
+                                : invoiceData?.exchangeAmount
                             }`}
                           </span>
                         </div>
@@ -186,61 +175,47 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                   </div>
                   <div className="flex gap-2">
                     {/* Other Details */}
-                    <div className="w-1/2 bg-primary-200 border border-primary-800 text-primary-900 mt-2 rounded-lg p-4">
-                      <h5 className="font-bold text-primary-950">
-                        Other Details
-                      </h5>
+                    <div className="w-1/2 bg-primary-100 border border-primary-500 text-primary-900 mt-2 rounded-lg p-4">
+                      <h5 className="font-bold text-primary-950">Other Details</h5>
                       <div className="p-2 flex flex-col gap-1">
                         <div className="text-sm font-semibold">
                           <span>Invoice No: </span>
-                          <span className="capitalize">
-                            {invoiceData?.invoiceNo}
-                          </span>
+                          <span className="capitalize">{invoiceData?.invoiceNo}</span>
                         </div>
                         <div className="text-sm font-semibold">
                           <span>Gross Amount: </span>
-                          <span className="capitalize">
-                            {`₹${invoiceData?.grossAmt}`}
-                          </span>
+                          <span className="capitalize">{`₹${invoiceData?.grossAmount}`}</span>
                         </div>
                         <div className="text-sm font-semibold">
                           <span>GST(%): </span>
                           <span className="capitalize">
                             {`${
-                              invoiceData?.GSTPercentage === "N/A"
-                                ? "0"
-                                : `${invoiceData?.GSTPercentage}%`
+                              invoiceData?.gstPercentage === 'N/A'
+                                ? '0'
+                                : `${invoiceData?.gstPercentage}%`
                             }     (₹${
-                              invoiceData?.GSTAMT === 0
-                                ? "0"
-                                : `${invoiceData?.GSTAMT}`
+                              invoiceData?.gstAmount === 0 ? '0' : `${invoiceData?.gstAmount}`
                             })`}
                           </span>
                         </div>
                         <div className="text-sm font-semibold">
                           <span>Total Amount: </span>
-                          <span className="capitalize">
-                            {`₹${invoiceData?.totalAmt}`}
-                          </span>
+                          <span className="capitalize">{`₹${invoiceData?.totalAmount}`}</span>
                         </div>
                       </div>
                     </div>
                     {/* payment Details */}
-                    <div className="w-1/2 bg-primary-200 border border-primary-800 text-primary-900 mt-2 rounded-lg p-4">
-                      <h5 className="font-bold text-primary-950">
-                        Payment Details
-                      </h5>
+                    <div className="w-1/2 bg-primary-100 border border-primary-500 text-primary-900 mt-2 rounded-lg p-4">
+                      <h5 className="font-bold text-primary-950">Payment Details</h5>
                       <div className="p-2 flex flex-col gap-1">
                         <div className="text-sm font-semibold">
                           <span>Total Amount: </span>
-                          <span className="capitalize">
-                            {`₹${invoiceData?.totalAmt}`}
-                          </span>
+                          <span className="capitalize">{`₹${invoiceData?.totalAmount}`}</span>
                         </div>
                         <div className="text-sm font-semibold">
                           <span>Paid Amount: </span>
                           <span className="capitalize">
-                            {`₹${invoiceData?.paymentHistory.reduce(
+                            {`₹${invoiceData?.payments.reduce(
                               (sum, history) => sum + history.paidAmount,
                               0
                             )}`}
@@ -248,21 +223,11 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                         </div>
                         <div className="text-sm font-semibold">
                           <span>Discount: </span>
-                          <span className="capitalize">
-                            {`₹${invoiceData?.discount}`}
-                          </span>
+                          <span className="capitalize">{`₹${invoiceData?.discount}`}</span>
                         </div>
                         <div className="text-sm font-semibold">
                           <span>Due Amount: </span>
-                          <span className="capitalize">
-                            {`₹
-                        ${
-                          invoiceData?.paymentHistory[
-                            invoiceData.paymentHistory.length - 1
-                          ]?.dueAmount
-                        }
-                        `}
-                          </span>
+                          <span className="capitalize">{`₹${invoiceData?.dueAmount}`}</span>
                         </div>
                       </div>
                     </div>
@@ -274,28 +239,21 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                       Payment Status
                       <p
                         className={`text-sm font-normal px-3 rounded-full py-0.5 ${
-                          invoiceData?.paymentHistory[
-                            invoiceData.paymentHistory.length - 1
-                          ]?.dueAmount === 0
-                            ? "bg-green-500 text-white"
-                            : " bg-red-600 text-white"
+                          invoiceData?.dueAmount === 0
+                            ? 'bg-green-500 text-white'
+                            : ' bg-red-600 text-white'
                         }`}
                       >
-                        {" "}
-                        {invoiceData?.paymentHistory[
-                          invoiceData.paymentHistory.length - 1
-                        ]?.dueAmount === 0
-                          ? "Full Paid"
-                          : "Due Amount"}
+                        {invoiceData?.paymentStatus}
                       </p>
                     </h5>
                     <div className="h-[85px] overflow-auto">
-                      {invoiceData?.paymentHistory.map((payment, index) => {
+                      {invoiceData?.payments.map((payment, index) => {
                         return (
                           <div key={index} className="flex h-14">
                             <div
                               className={`${
-                                index === 0 ? "bg-green-600" : "bg-gray-400"
+                                index === 0 ? 'bg-green-600' : 'bg-gray-400'
                               } w-[5px] h-[85%] my-auto rounded-full`}
                             ></div>
                             <div className="w-full -translate-x-1">
@@ -305,13 +263,9 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                               </div>
                               <div className="flex justify-between px-3 font-bold text-primary-800 text-sm mt-1">
                                 <p className="">
-                                  {moment(payment.createdAt).format(
-                                    "MMM DD, YYYY"
-                                  )}
+                                  {moment(payment.createdAt).format('MMM DD, YYYY')}
                                 </p>
-                                <p className="text-green-500  capitalize">
-                                  paid
-                                </p>
+                                <p className="text-green-500  capitalize">paid</p>
                               </div>
                             </div>
                           </div>
@@ -321,10 +275,8 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                   </div>
                 </div>
                 <div className="">
-                  <div className="overflow-y-auto h-[484px] bg-primary-200 border border-primary-900 rounded-lg p-4">
-                    <p className="mb-3 font-bold text-primary-950">
-                      Product List:
-                    </p>
+                  <div className="overflow-y-auto h-[484px] bg-primary-100 border border-primary-900 rounded-lg p-4">
+                    <p className="mb-3 font-bold text-primary-950">Product List:</p>
                     <table className="min-w-full ">
                       <thead className="bg-primary-800 text-white sticky top-0 ">
                         <tr>
@@ -367,17 +319,17 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {invoiceData?.productList?.map((product, index) => {
+                        {invoiceData?.products?.map((product, index) => {
                           return (
                             <tr key={index}>
                               <td className="px-2 py-2  text-sm font-medium whitespace-nowrap ">
-                                {product?.productName}
+                                {product?.name}
                               </td>
                               <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
-                                {product?.productCategory}
+                                {product?.category}
                               </td>
                               <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
-                                {product?.netWeight}
+                                {product?.weight}
                               </td>
                               <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
                                 {product?.quantity}
@@ -401,7 +353,7 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
         </div>
       )}
 
-      {type === "Payment" && (
+      {type === 'Payment' && (
         <div className="fixed inset-0 bg-black/60 bg-opacity-75 flex items-center justify-center p-4 z-[200]">
           <div className="bg-primary-50 border border-primary-900 rounded-lg shadow-xl max-w-[75rem] w-[500px]  max-h-[90vh] overflow-y-auto">
             <div className="p-6">
@@ -412,15 +364,13 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                     <span>Reckon</span>
                     <span className="text-primary-900">Up</span>
                   </h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Jewellery Billing Software
-                  </p>
+                  <p className="text-sm text-gray-500 mt-1">Jewellery Billing Software</p>
                 </div>
 
                 <div className="flex space-x-2">
                   <button
                     onClick={() => {
-                      localStorage.removeItem("finalInvoice");
+                      localStorage.removeItem('finalInvoice');
                       onClose();
                       setPay(0);
                     }}
@@ -437,24 +387,20 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                 <div className="border border-primary-900 p-3 rounded-lg bg-primary-100">
                   <div className="text-base font-semibold">
                     <span>Total: </span>
-                    <span>{`₹${invoiceData?.totalAmt}`}</span>
+                    <span>{`₹${invoiceData?.totalAmount}`}</span>
                   </div>
                   <div className="text-base font-semibold">
                     <span>Due: </span>
-                    <span>{`₹${
-                      invoiceData?.paymentHistory[
-                        invoiceData.paymentHistory.length - 1
-                      ]?.dueAmount
-                    }`}</span>
+                    <span>{`₹${invoiceData?.dueAmount}`}</span>
                   </div>
 
                   <div className="flex gap-2 items-center">
                     <label htmlFor="pay" className="font-bold text-primary-900">
-                      Amount:{" "}
+                      Amount:{' '}
                     </label>
                     <input
                       type="number"
-                      value={pay}
+                      value={isNaN(pay) ? '' : pay}
                       min="0"
                       autoFocus={true}
                       onChange={(e) => setPay(e.target.valueAsNumber)}
@@ -472,12 +418,12 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                 <div>
                   <h2 className="font-bold mb-3">Payment History</h2>
                   <div className="h-[100px] overflow-auto">
-                    {invoiceData?.paymentHistory.map((payment, index) => {
+                    {invoiceData?.payments.map((payment, index) => {
                       return (
                         <div key={index} className="flex h-14">
                           <div
                             className={`${
-                              index === 0 ? "bg-green-600" : "bg-gray-400"
+                              index === 0 ? 'bg-green-600' : 'bg-gray-400'
                             } w-[5px] h-[85%] my-auto rounded-full`}
                           ></div>
                           <div className="w-full -translate-x-1">
@@ -486,11 +432,7 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
                               <p>{`₹${payment.paidAmount}`}</p>
                             </div>
                             <div className="flex justify-between px-3 font-bold /text-primary-800 text-sm mt-1">
-                              <p className="">
-                                {moment(payment.createdAt).format(
-                                  "MMM DD, YYYY"
-                                )}
-                              </p>
+                              <p className="">{moment(payment.createdAt).format('MMM DD, YYYY')}</p>
                               <p className="text-green-500  capitalize">paid</p>
                             </div>
                           </div>

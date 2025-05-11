@@ -1,48 +1,36 @@
-import React, { ReactElement, useEffect, useState } from "react";
-import RootLayout from "../../components/rootLayout";
-import { NextPageWithLayout } from "../_app";
-import Head from "next/head";
-import { HiRefresh } from "react-icons/hi";
-import { MdDownloadDone } from "react-icons/md";
-import { useRouter } from "next/router";
-import ProductTable from "../../components/ui/ProductTable";
-import {
-  APiRes,
-  CustomerDetails,
-  ExchangeDetails,
-  finalInvoice,
-  PaymentDetails,
-  Product,
-  SingleProduct,
-} from "../../types";
-import Header from "../../components/ui/Header";
-import Input from "../../components/ui/Input";
-import Textarea from "../../components/ui/Textarea";
-import Button from "../../components/ui/Button";
-import Switch from "../../components/ui/Switch";
-import toast from "react-hot-toast";
+import React, { ReactElement, useEffect, useState } from 'react';
+import RootLayout from '../../components/rootLayout';
+import { NextPageWithLayout } from '../_app';
+import Head from 'next/head';
+import { HiRefresh } from 'react-icons/hi';
+import { MdDownloadDone } from 'react-icons/md';
+import { useRouter } from 'next/router';
+import ProductTable from '../../components/ui/ProductTable';
+import { APiRes, CustomerDetails, ExchangeDetails, finalInvoice, Product } from '../../types';
+import Header from '../../components/ui/Header';
+import Input from '../../components/ui/Input';
+import Textarea from '../../components/ui/Textarea';
+import Button from '../../components/ui/Button';
+import Switch from '../../components/ui/Switch';
+import toast from 'react-hot-toast';
 
 const InvoicePage: NextPageWithLayout = () => {
   const router = useRouter();
 
-  const [productSuggestion, setProductSugestion] = useState([]);
-  const [customerSuggestion, setCustomerSugestion] = useState([]);
-  const [filter, setFilter] = useState([]);
-
   const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({
-    name: "",
-    phone: "",
-    address: "",
+    name: '',
+    phone: '',
+    address: '',
   });
 
   const [exchangeDetails, setExchangeDetails] = useState<ExchangeDetails>({
-    exchangeCategory: "select",
-    weight: "",
-    percentage: "",
-    exchangeAmt: "",
+    exchangeCategory: 'select',
+    exchangeWeight: 0,
+    exchangePercentage: 0,
+    exchangeAmount: 0,
   });
 
-  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
+  const [paymentDetails, setPaymentDetails] = useState({
     pay: 0,
     discount: 0,
   });
@@ -50,15 +38,15 @@ const InvoicePage: NextPageWithLayout = () => {
   const [exchange, setExchange] = useState(false);
 
   const [productDetails, setProductDetails] = useState<Product>({
-    rate: "",
-    quantity: "",
-    productName: "",
-    netWeight: "",
-    productCategory: "gold",
+    name: '',
+    category: 'gold',
+    weight: 0,
+    quantity: 0,
+    rate: 0,
     makingCost: 0,
   });
 
-  const [invoiceNo, setInvoiceNo] = useState<string>("");
+  const [invoiceNo, setInvoiceNo] = useState<string>('');
 
   const [checkedbox, setcheckedbox] = useState(false);
 
@@ -69,21 +57,15 @@ const InvoicePage: NextPageWithLayout = () => {
 
   const [productList, setProductList] = useState([]);
 
-  let totalAmt = grossAmt + GSTAMT - Number(exchangeDetails.exchangeAmt);
-  let due = Number(
-    (
-      totalAmt -
-      Number(paymentDetails.pay) -
-      Number(paymentDetails.discount)
-    ).toFixed(0)
-  );
+  let totalAmt = grossAmt + GSTAMT - exchangeDetails.exchangeAmount;
+  let due = Number((totalAmt - paymentDetails.pay - paymentDetails.discount).toFixed(0));
 
   const genrateInvoiceNo = async () => {
-    window.ipc.send("totalcountofinvoice", {});
+    window.ipc.send('totalcountofinvoice', {});
 
-    window.ipc.on("totalcountofinvoice", (res: APiRes) => {
+    window.ipc.on('totalcountofinvoice', (res: APiRes) => {
       if (res.success) {
-        const invoiceno = `INV${(res.data + 1).toString().padStart(3, "0")}`;
+        const invoiceno = `INV${(res.data + 1).toString().padStart(3, '0')}`;
         setInvoiceNo(invoiceno);
       } else {
         toast.error(res.message);
@@ -95,9 +77,9 @@ const InvoicePage: NextPageWithLayout = () => {
     e.preventDefault();
 
     // convert rate, weight and quentity for preform find amount calculation
-    let rate = parseFloat(productDetails.rate);
-    let weight = parseFloat(productDetails.netWeight);
-    let quantity = parseFloat(productDetails.quantity);
+    let rate = productDetails.rate;
+    let weight = productDetails.weight;
+    let quantity = productDetails.quantity;
     let makingCostPercentage = productDetails.makingCost;
 
     // calculate product amount using <(rate / 10) * weight> formula
@@ -108,14 +90,14 @@ const InvoicePage: NextPageWithLayout = () => {
     amount = parseFloat((amount + makingCostInRupee).toFixed(2));
 
     // create a single final product with all calculation
-    let singleProduct: SingleProduct = {
-      productName: productDetails.productName,
-      productCategory: productDetails.productCategory,
-      netWeight: weight,
-      quantity: quantity,
-      rate: rate,
-      amount: amount,
-      makingCost: productDetails.makingCost,
+    let singleProduct: Product = {
+      name: String(productDetails.name),
+      category: String(productDetails.category),
+      weight: Number(weight),
+      quantity: Number(quantity),
+      rate: Number(rate),
+      amount: Number(amount),
+      makingCost: Number(productDetails.makingCost),
     };
 
     // set singleProduct object in productList array
@@ -123,19 +105,16 @@ const InvoicePage: NextPageWithLayout = () => {
 
     // After set singleProduct in array clear product section
     setProductDetails({
-      rate: "",
-      quantity: "",
-      productName: "",
-      netWeight: "",
-      productCategory: "gold",
+      rate: 0,
+      quantity: 0,
+      name: '',
+      weight: 0,
+      category: 'gold',
       makingCost: 0,
     });
 
     // calculate grossAmount
-    let grossamount = productList.reduce(
-      (total, item) => total + item.amount,
-      0
-    );
+    let grossamount = productList.reduce((total, item) => total + item.amount, 0);
 
     // set GrossAmount and totalAmount
     setGrossAmt(parseFloat(grossamount.toFixed(2)));
@@ -143,66 +122,62 @@ const InvoicePage: NextPageWithLayout = () => {
 
   const handleGenrateInvoice = () => {
     if (customerDetails.name.length === 0) {
-      toast.error("Add Customer Details!");
+      toast.error('Add Customer Details!');
       return;
     }
 
     /// check before submit productList is not Empty
     if (productList.length === 0) {
-      toast.error("Add Atleast One Product!");
+      toast.error('Add Atleast One Product!');
       return;
     }
 
     let invoiceData: finalInvoice = {
       // customer Details
-      customerName: customerDetails.name.toLowerCase(),
-      customerPhone: customerDetails.phone,
-      customerAddress: customerDetails.address,
+      name: customerDetails.name.toLowerCase(),
+      phone: customerDetails.phone,
+      address: customerDetails.address,
 
       // exchange Details
-      exchange: exchange,
+      exchange: String(exchange),
       exchangeCategory: exchangeDetails.exchangeCategory,
-      exchangeWeight: exchangeDetails.weight,
-      exchangePercentage: exchangeDetails.percentage,
-      exchangeAmt: exchangeDetails.exchangeAmt,
+      exchangeWeight: exchangeDetails.exchangeWeight,
+      exchangePercentage: exchangeDetails.exchangePercentage,
+      exchangeAmount: exchangeDetails.exchangeAmount,
 
       // product Details
-      productList: productList,
+      products: productList,
 
       // gst Details
-      GST: checkedbox,
-      GSTPercentage: GST,
-      GSTAMT: GSTAMT,
+      gst: String(checkedbox),
+      gstPercentage: GST,
+      gstAmount: GSTAMT,
 
-      // invoice Details
-      invoiceNo: invoiceNo,
-      grossAmt: grossAmt,
-      totalAmt: totalAmt,
-      createdAt: Date.now(),
+      // invoice Details,
+      grossAmount: grossAmt,
+      totalAmount: totalAmt,
 
       // payment details
       discount: paymentDetails.discount,
-      paymentHistory: [
-        {
-          paidAmount: paymentDetails.pay,
-          dueAmount: due,
-        },
-      ],
+      payments: {
+        paidAmount: paymentDetails.pay,
+        dueAmount: due,
+      },
     };
 
     // set invoice Data in localStorage
     const jsonInvoice = JSON.stringify(invoiceData);
-    localStorage.setItem("finalInvoice", jsonInvoice);
+    localStorage.setItem('finalInvoice', jsonInvoice);
 
     // save invoice in database
-    window.ipc.send("createinvoice", { invoiceData });
+    window.ipc.send('createinvoice', { invoiceData });
 
-    window.ipc.on("createinvoice", (res: APiRes) => {
+    window.ipc.on('createinvoice', (res: APiRes) => {
       console.log(res);
       if (res.success) {
         toast.success(res.message);
         setTimeout(() => {
-          router.push("/dashboard/viewInvoice/");
+          router.push('/dashboard/viewInvoice/');
         }, 500);
       } else {
         toast.error(res.message);
@@ -212,22 +187,22 @@ const InvoicePage: NextPageWithLayout = () => {
 
   const handleClearInvoice = () => {
     setCustomerDetails({
-      name: "",
-      phone: "",
-      address: "",
+      name: '',
+      phone: '',
+      address: '',
     });
     setExchangeDetails({
-      exchangeCategory: "select",
-      weight: "",
-      percentage: "",
-      exchangeAmt: "",
+      exchangeCategory: 'select',
+      exchangeWeight: 0,
+      exchangePercentage: 0,
+      exchangeAmount: 0,
     });
     setProductDetails({
-      rate: "",
-      quantity: "",
-      productName: "",
-      netWeight: "",
-      productCategory: "gold",
+      name: '',
+      category: 'gold',
+      weight: 0,
+      rate: 0,
+      quantity: 0,
       makingCost: 0,
     });
     setPaymentDetails({
@@ -245,10 +220,7 @@ const InvoicePage: NextPageWithLayout = () => {
     const inputValue = e.target.value;
 
     // Allow empty input or numbers between 0 and 100
-    if (
-      inputValue === "" ||
-      (Number(inputValue) >= 0 && Number(inputValue) <= 100)
-    ) {
+    if (inputValue === '' || (Number(inputValue) >= 0 && Number(inputValue) <= 100)) {
       setProductDetails((prev) => ({
         ...prev,
         makingCost: inputValue,
@@ -276,10 +248,7 @@ const InvoicePage: NextPageWithLayout = () => {
     const inputValue = e.target.value;
 
     // Allow empty input or numbers between 0 and 100
-    if (
-      inputValue === "" ||
-      (parseFloat(inputValue) >= 0.0 && parseFloat(inputValue) <= 100)
-    ) {
+    if (inputValue === '' || (parseFloat(inputValue) >= 0.0 && parseFloat(inputValue) <= 100)) {
       setGST(inputValue);
     }
 
@@ -313,33 +282,9 @@ const InvoicePage: NextPageWithLayout = () => {
     }
   };
 
-  const handleGetCustomerSeggestion = () => {
-    window.ipc.send("customer-suggestion", {});
-    window.ipc.on("customer-suggestion", async (res: APiRes) => {
-      if (res.success) {
-        setCustomerSugestion(res.data);
-      } else {
-        toast.error(res.message);
-      }
-    });
-  };
-
-  const handleGetProductSeggestion = () => {
-    window.ipc.send("product-suggestion", {});
-    window.ipc.on("product-suggestion", async (res: APiRes) => {
-      if (res.success) {
-        setProductSugestion(res.data);
-      } else {
-        toast.error(res.message);
-      }
-    });
-  };
-
   useEffect(() => {
     genrateInvoiceNo();
     handleClearInvoice();
-    handleGetCustomerSeggestion();
-    handleGetProductSeggestion();
   }, [router]);
 
   return (
@@ -347,12 +292,12 @@ const InvoicePage: NextPageWithLayout = () => {
       <Head>
         <title>ReckonUp - Devloped by NIreX</title>
       </Head>
-      <section className=" py-2 px-4 bg-primary-50 h-full">
+      <section className="p-1 bg-primary-50 h-[calc(100%-16px)] overflow-auto rounded-xl m-2">
         <Header title="Create Invoice" extraStyle="" />
 
         {/* Invoice Details section */}
-        <section className="flex-col lg:flex-row w-full lg:h-[14rem] mt-3 flex gap-2">
-          <div className="p-2 bg-primary-200 rounded-lg border border-primary-500 lg:w-[22rem] w-full ">
+        <section className="flex-col lg:flex-row w-full lg:h-[14rem] mt-2 flex gap-1">
+          <div className="p-2 bg-primary-50 rounded-lg border border-primary-500 lg:w-[22rem] w-full ">
             <h2 className="font-bold text-primary-800">Customer Details</h2>
             {/* customer detail  */}
             <div className="py-4 w-[19rem]">
@@ -403,7 +348,7 @@ const InvoicePage: NextPageWithLayout = () => {
           </div>
 
           {/* Exchange Detail section  */}
-          <div className="p-2 bg-primary-200 rounded-lg border border-primary-500 w-full">
+          <div className="p-2 bg-primary-50 rounded-lg border border-primary-500 w-[300px]">
             <div className="flex justify-between">
               <h2 className="font-bold text-primary-800">Exchange Details</h2>
               <Switch
@@ -420,7 +365,7 @@ const InvoicePage: NextPageWithLayout = () => {
                     <label
                       htmlFor="category"
                       className={`text-sm font-medium ${
-                        !exchange ? "text-gray-300" : "text-primary-900"
+                        !exchange ? 'text-gray-300' : 'text-primary-900'
                       }`}
                     >
                       Product Category:
@@ -434,7 +379,7 @@ const InvoicePage: NextPageWithLayout = () => {
                         }))
                       }
                       disabled={!exchange}
-                      className="bg-primary-100 border border-primary-800 disabled:border-gray-300 text-gray-900 text-sm rounded-md focus:outline-purple-600 block py-1.5 px-5 "
+                      className="bg-primary-100 border border-primary-800 disabled:border-gray-300 text-gray-900 text-sm rounded-md focus:outline-primary-900 block py-1.5 px-5"
                     >
                       <option defaultValue="select" className="p-2">
                         Select
@@ -451,18 +396,16 @@ const InvoicePage: NextPageWithLayout = () => {
                   {/* exchange product weight section */}
                   <Input
                     title="Weight"
-                    lableStyle={
-                      !exchange ? "text-gray-300" : "text-primary-900"
-                    }
+                    lableStyle={!exchange ? 'text-gray-300' : 'text-primary-900'}
                     otherStyle="disabled:border-gray-300 mb-2 "
                     type="number"
                     min="0"
                     step="0.01"
-                    value={exchangeDetails.weight}
+                    value={exchangeDetails.exchangeWeight}
                     handleChangeText={(e) =>
                       setExchangeDetails((prev) => ({
                         ...prev,
-                        weight: e.target.value,
+                        exchangeWeight: e.target.value,
                       }))
                     }
                     placeholder="Weight"
@@ -471,13 +414,11 @@ const InvoicePage: NextPageWithLayout = () => {
                   {/* exchange product percentage section  */}
                   <Input
                     title="percentage"
-                    lableStyle={
-                      !exchange ? "text-gray-300" : "text-primary-900"
-                    }
+                    lableStyle={!exchange ? 'text-gray-300' : 'text-primary-900'}
                     otherStyle="disabled:border-gray-300 mb-2 "
                     type="number"
                     min="0"
-                    value={exchangeDetails.percentage}
+                    value={exchangeDetails.exchangePercentage}
                     handleChangeText={(e) =>
                       setExchangeDetails((prev) => ({
                         ...prev,
@@ -492,17 +433,15 @@ const InvoicePage: NextPageWithLayout = () => {
                 <div className="flex ">
                   <Input
                     title="Amount"
-                    lableStyle={
-                      !exchange ? "text-gray-300" : "text-primary-900"
-                    }
+                    lableStyle={!exchange ? 'text-gray-300' : 'text-primary-900'}
                     otherStyle="w-[100px] disabled:border-gray-300 mb-2 "
                     type="number"
                     min="0"
-                    value={exchangeDetails.exchangeAmt}
+                    value={exchangeDetails.exchangeAmount}
                     handleChangeText={(e) => {
                       setExchangeDetails((prev) => ({
                         ...prev,
-                        exchangeAmt: e.target.value,
+                        exchangeAmount: e.target.value,
                       }));
                     }}
                     disabled={!exchange}
@@ -514,17 +453,13 @@ const InvoicePage: NextPageWithLayout = () => {
           </div>
 
           {/* Product Detail Section  */}
-          <div className="p-3 bg-primary-200 rounded-lg border border-primary-500 w-full">
+          <div className="p-3 bg-primary-50 rounded-lg border border-primary-500 w-full">
             <div className="flex justify-between">
               <h2 className="font-bold text-primary-800">Product Details</h2>
               {/* invoice number  */}
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium text-primary-900">
-                  Invoice No:
-                </span>
-                <span className="font-semibold text-primary-800">
-                  {invoiceNo}
-                </span>
+                <span className="text-sm font-medium text-primary-900">Invoice No:</span>
+                <span className="font-semibold text-primary-800">{invoiceNo}</span>
 
                 <HiRefresh
                   size={25}
@@ -542,7 +477,7 @@ const InvoicePage: NextPageWithLayout = () => {
                   <Input
                     title="Rate(10g)"
                     lableStyle="text-primary-800"
-                    otherStyle="w-[130px]"
+                    otherStyle="w-[120px]"
                     type="number"
                     min="0"
                     value={productDetails.rate}
@@ -557,24 +492,25 @@ const InvoicePage: NextPageWithLayout = () => {
 
                   {/*  product category  */}
                   <div className="flex items-center gap-2 mb-2">
-                    <label
-                      htmlFor="product"
-                      className="text-sm font-medium text-gray-900"
-                    >
+                    <label htmlFor="product" className="text-sm font-medium text-primary-800">
                       Category:
                     </label>
                     <select
-                      value={productDetails.productCategory}
+                      value={productDetails.category}
                       onChange={(e) =>
                         setProductDetails((prev) => ({
                           ...prev,
-                          productCategory: e.target.value,
+                          category: e.target.value,
                         }))
                       }
-                      className="bg-gray-50 border border-gray-400 text-gray-900 text-sm rounded-md focus:outline-purple-600 block p-1.5"
+                      className="bg-primary-50 font-medium border border-primary-800 text-primary-900 text-sm rounded-md focus:outline-primary-900 block p-1.5"
                     >
-                      <option defaultValue="gold">gold</option>
-                      <option value="silver">silver</option>
+                      <option defaultValue="gold" className="font-medium">
+                        gold
+                      </option>
+                      <option value="silver" className="font-medium">
+                        silver
+                      </option>
                     </select>
                   </div>
 
@@ -582,7 +518,7 @@ const InvoicePage: NextPageWithLayout = () => {
                   <Input
                     title="Quantity"
                     lableStyle="text-primary-800"
-                    otherStyle="w-[130px]"
+                    otherStyle="w-[60px]"
                     type="number"
                     min="0"
                     value={productDetails.quantity}
@@ -605,11 +541,11 @@ const InvoicePage: NextPageWithLayout = () => {
                   lableStyle="text-primary-800"
                   otherStyle="w-[200px]"
                   type="text"
-                  value={productDetails.productName}
+                  value={productDetails.name}
                   handleChangeText={(e) =>
                     setProductDetails((prev) => ({
                       ...prev,
-                      productName: e.target.value,
+                      name: e.target.value,
                     }))
                   }
                   placeholder="Product Name"
@@ -617,7 +553,7 @@ const InvoicePage: NextPageWithLayout = () => {
 
                 {/* making cost */}
                 <Input
-                  title="Making Cost (in %)"
+                  title="Making Cost(in %)"
                   lableStyle="text-primary-800"
                   otherStyle="w-[150px] mb-2"
                   type="number"
@@ -632,16 +568,16 @@ const InvoicePage: NextPageWithLayout = () => {
                 <div className="flex justify-between">
                   {/* product weight  */}
                   <Input
-                    title="Net Weight (in gram)"
+                    title="Net Weight(gram)"
                     lableStyle="text-primary-800"
                     type="number"
                     min="0"
                     step="0.001"
-                    value={productDetails.netWeight}
+                    value={productDetails.weight}
                     handleChangeText={(e) =>
                       setProductDetails((prev) => ({
                         ...prev,
-                        netWeight: e.target.value,
+                        weight: e.target.value,
                       }))
                     }
                     placeholder="Net Weight"
@@ -662,7 +598,7 @@ const InvoicePage: NextPageWithLayout = () => {
         </section>
 
         {/* add invoice tabel  */}
-        <section className="mt-2">
+        <section className="mt-1">
           <ProductTable
             productList={productList}
             setProductList={setProductList}
@@ -674,7 +610,7 @@ const InvoicePage: NextPageWithLayout = () => {
         </section>
 
         {/* total Amount section  */}
-        <section className="w-full h-[130px] p-2 border rounded-lg mt-2 flex justify-between bg-primary-200 border-primary-500">
+        <section className="w-full h-[130px] p-2 border rounded-lg mt-1 flex justify-between bg-primary-50 border-primary-500">
           {/* print and clear Button section */}
           <div className="my-auto flex gap-3 ">
             <Button
@@ -714,9 +650,7 @@ const InvoicePage: NextPageWithLayout = () => {
               <div className="flex items-center gap-2">
                 <label
                   htmlFor="gst"
-                  className={`text-sm font-medium inline-block ${
-                    !checkedbox && "text-gray-300"
-                  }`}
+                  className={`text-sm font-medium inline-block ${!checkedbox && 'text-gray-300'}`}
                 >
                   GST(%):
                 </label>
@@ -728,7 +662,7 @@ const InvoicePage: NextPageWithLayout = () => {
                   onChange={handleGstChange}
                   onBlur={handleGstBlur}
                   className={`bg-white border border-gray-400 text-gray-900 text-sm rounded-md block w-full py-1 px-2 mb-0.5 ${
-                    !checkedbox && "text-gray-300"
+                    !checkedbox && 'text-gray-300'
                   } focus:outline-purple-600`}
                   disabled={!checkedbox}
                 />
@@ -795,9 +729,7 @@ const InvoicePage: NextPageWithLayout = () => {
             {/* Gst  */}
             {checkedbox && (
               <div className="flex justify-between font-semibold">
-                <span>{`GST(${
-                  GST === 0 || GST === undefined ? 0 : GST
-                }%)`}</span>
+                <span>{`GST(${GST === 0 || GST === undefined ? 0 : GST}%)`}</span>
                 <span>{`₹ ${GSTAMT}`}</span>
               </div>
             )}
@@ -807,9 +739,7 @@ const InvoicePage: NextPageWithLayout = () => {
               <div className="flex justify-between font-semibold">
                 <span>Exchange Amount :</span>
                 <span>{`₹ ${
-                  exchangeDetails.exchangeAmt === ""
-                    ? 0
-                    : exchangeDetails.exchangeAmt
+                  exchangeDetails.exchangeAmount === 0 ? 0 : exchangeDetails.exchangeAmount
                 }`}</span>
               </div>
             )}

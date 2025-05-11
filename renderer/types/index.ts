@@ -7,15 +7,16 @@ export interface APiRes {
 export interface ModalProps {
   isOpen: boolean;
   closeModal: () => void;
-  type: "invoice-detalils" | "payment-status";
+  type: 'invoice-detalils' | 'payment-status';
 }
 
 export interface Product {
-  rate: string;
-  quantity: string;
-  productName: string;
-  netWeight: string;
-  productCategory: string;
+  name: string;
+  category: string;
+  weight: number;
+  quantity: number;
+  rate: number;
+  amount?: number;
   makingCost: number;
 }
 
@@ -26,59 +27,31 @@ export interface CustomerDetails {
 }
 
 export interface ExchangeDetails {
+  exchange?: string;
   exchangeCategory: string;
-  weight: string;
-  percentage: string;
-  exchangeAmt: string;
+  exchangeWeight: number;
+  exchangePercentage: number;
+  exchangeAmount: number;
 }
 
-export interface SingleProduct {
-  rate: number;
-  quantity: number;
-  productName: string;
-  netWeight: number;
-  productCategory: string;
-  makingCost: number;
-  amount: number;
+export interface Payment {
+  paidAmount: number;
+  dueAmount: number;
 }
 
-export interface PaymentDetails {
-  pay: number;
-  discount: number;
-}
-
-export interface finalInvoice {
-  customerName: string;
-  customerPhone: string;
-  customerAddress: string;
-
-  // exchange Details
-  exchange: boolean;
-  exchangeCategory: string;
-  exchangeWeight: string;
-  exchangePercentage: string;
-  exchangeAmt: string;
-
+export interface finalInvoice extends CustomerDetails, ExchangeDetails {
   // product Details
-  productList: SingleProduct[];
+  products: Product[];
+  payments: Payment;
 
   // gst Details
-  GST: boolean;
-  GSTPercentage: number;
-  GSTAMT: number;
+  gst: string;
+  gstPercentage: number;
+  gstAmount: number;
+  discount: number;
 
   // invoice Details
-  invoiceNo: string;
-  grossAmt: number;
-  totalAmt: number;
-  createdAt: any;
-
-  // payment details
-  discount: number;
-  paymentHistory: [
-    {
-      paidAmount: number;
-      dueAmount: number;
-    }
-  ];
+  grossAmount: number;
+  totalAmount: number;
+  createdAt?: any;
 }

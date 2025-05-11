@@ -1,6 +1,6 @@
-import Image from "next/image";
-import React, { useEffect, useState } from "react";
-import { APiRes } from "../../types";
+import Image from 'next/image';
+import React, { useEffect, useState } from 'react';
+import { APiRes } from '../../types';
 
 const FileInput = () => {
   const [qrImage, setQrImage] = useState(undefined);
@@ -22,9 +22,9 @@ const FileInput = () => {
 
   useEffect(() => {
     const getQr = async () => {
-      window.ipc.send("getqr", {});
+      window.ipc.send('getqr', {});
 
-      window.ipc.on("getqr", (res: APiRes) => {
+      window.ipc.on('getqr', (res: APiRes) => {
         if (res.success) {
           setImageUploded(true);
           setImagePreview(res.data);
@@ -45,7 +45,7 @@ const FileInput = () => {
       if (file) {
         const reader = new FileReader();
         reader.onload = () => {
-          window.ipc.send("uploadqr", {
+          window.ipc.send('uploadqr', {
             fileName: file.name,
             qrimg: reader.result,
           });
@@ -85,19 +85,12 @@ justify-center"
               />
             </svg>
             <p className="mt-3 text-gray-700 max-w-xs mx-auto">
-              Click to{" "}
-              <span className="font-medium text-indigo-600">
-                Upload your file
-              </span>{" "}
-              or drag and drop your file here
+              Click to <span className="font-medium text-indigo-600">Upload your file</span> or drag
+              and drop your file here
             </p>
           </div>
         ) : (
-          <img
-            src={imagePreview}
-            alt="Qr"
-            className="w-[180px] h-[180px] object-contain"
-          />
+          <img src={imagePreview} alt="Qr" className="w-[180px] h-[180px] object-contain" />
         )}
       </label>
       <input

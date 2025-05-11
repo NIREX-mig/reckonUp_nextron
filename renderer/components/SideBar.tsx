@@ -1,110 +1,84 @@
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React, { useCallback, useState } from "react";
-import { LuLayoutDashboard } from "react-icons/lu";
-import {
-  FiFileText,
-  FiSettings,
-  FiChevronRight,
-  FiChevronLeft,
-} from "react-icons/fi";
-import { MdOutlinePostAdd } from "react-icons/md";
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { LuLayoutDashboard } from 'react-icons/lu';
+import { FiFileText, FiLogOut, FiSettings } from 'react-icons/fi';
+import { ImStatsBars } from 'react-icons/im';
+import { MdOutlinePostAdd, MdPayment } from 'react-icons/md';
 
 const SideBar = () => {
   const pathname = usePathname();
 
-  const [collapsed, setCollapsed] = useState(true);
-
   const menuItems = [
-    { name: "Dashboard", path: "/dashboard/", icon: LuLayoutDashboard },
+    { name: 'Dashboard', path: '/dashboard/', icon: LuLayoutDashboard },
     {
-      name: "New Invoice",
-      path: "/dashboard/invoice/",
+      name: 'New Invoice',
+      path: '/dashboard/invoice/',
       icon: MdOutlinePostAdd,
     },
-    { name: "View Invoices", path: "/dashboard/search/", icon: FiFileText },
-    { name: "settings", path: "/dashboard/settings/", icon: FiSettings },
+    { name: 'View Invoices', path: '/dashboard/search/', icon: FiFileText },
+    { name: 'Due Payments', path: '/dashboard/duehistory/', icon: MdPayment },
+    { name: 'Reports', path: '/dashboard/reports/', icon: ImStatsBars },
+    { name: 'Settings', path: '/dashboard/settings/', icon: FiSettings },
   ];
 
-  const toggleSidebar = useCallback(() => setCollapsed((prev) => !prev), []);
+  const handleLogOut = () => {};
 
   return (
     <section className="flex">
-      <aside
-        className={`${
-          collapsed ? "w-16" : "w-48"
-        } absolute z-[150] h-screen bg-primary-100 border border-primary-700 transition-all duration-500`}
-      >
-        <div className={`flex items-center  border-b border-gray-200 p-2`}>
-          <img
-            src="/app_logo.png"
-            alt="logo"
-            className="w-[40px]"
-            draggable="false"
-          />
-          {!collapsed && (
-            <p className="font-bold text-2xl duration-500">
-              <span className="">Reckon</span>
-              <span className="text-primary-800">Up</span>
-            </p>
-          )}
-        </div>
-        <div
-          className={`absolute ${
-            collapsed ? "translate-x-10" : "translate-x-[172px]"
-          } -translate-y-5 p-1 duration-500 z-10`}
-        >
-          <button
-            onClick={toggleSidebar}
-            className="p-1.5 rounded-full border border-primary-800 bg-primary-300 hover:bg-primary-400"
-          >
-            {collapsed ? (
-              <FiChevronRight className="w-5 h-5"/>
-            ) : (
-              <FiChevronLeft className="w-5 h-5"/>
-            )}
-          </button>
+      <aside className="w-44 h-screen bg-primary-950">
+        <div className={`flex items-center  border-b border-primary-800 p-2`}>
+          <img src="/app_logo.png" alt="logo" className="w-[40px]" draggable="false" />
+          <p className="font-bold text-2xl">
+            <span className="text-primary-400">Reckon</span>
+            <span className="text-primary-200">Up</span>
+          </p>
         </div>
 
-        <nav className={`flex items-center flex-1 flex-col gap-y-3 py-2 mt-3`}>
+        <nav className={`flex items-center flex-1 flex-col gap-y-1 p-2`}>
           {menuItems.map((menu, index) => {
             return (
               <Link
                 key={index}
                 href={menu.path}
                 draggable="false"
-                className={`w-full flex items-center py-2 px-3 hover:bg-primary-300  ${
-                  collapsed ? "hover:rounded-s-full" : "hover:rounded-s-full"
-                }
+                className={`w-full flex items-center py-2 px-3 hover:bg-primary-300 hover:rounded-lg group
                 ${
                   pathname === menu.path &&
-                  "rounded-s-full bg-primary-300 before:absolute before:content-[''] before:w-[3px] before:h-5 before:bg-primary-800"
+                  "rounded-lg bg-primary-300 before:absolute before:content-[''] before:w-[3px] before:h-5 before:bg-primary-700"
                 }
                 `}
               >
                 <menu.icon
-                  size={37}
-                  className={`rounded-xl p-2 ${
-                    pathname === menu.path
-                      ? "text-primary-900"
-                      : "text-primary-700"
+                  size={26}
+                  className={`rounded-lg p-1 group-hover:text-primary-900  ${
+                    pathname === menu.path ? 'text-primary-900' : 'text-primary-200'
                   }`}
                 />
-                {!collapsed && (
-                  <span
-                    className={`ml-3 font-semibold ${
-                      pathname === menu.path
-                        ? "text-primary-900"
-                        : "text-primary-700"
-                    }`}
-                  >
-                    {menu.name}
-                  </span>
-                )}
+                <span
+                  className={`ml-1 font-medium group-hover:text-primary-900 ${
+                    pathname === menu.path ? 'text-primary-950' : 'text-primary-200'
+                  }`}
+                >
+                  {menu.name}
+                </span>
               </Link>
             );
           })}
         </nav>
+
+        <button
+          onClick={handleLogOut}
+          className="flex w-[155px] items-center gap-1 p-2  group bg-primary-600 hover:bg-primary-300 rounded-lg py-2 px-3 mx-2 absolute bottom-5"
+        >
+          <FiLogOut
+            size={26}
+            className="rounded-lg p-1 group-hover:text-primary-900 text-primary-200"
+          />
+          <span className="ml-1 font-medium text-primary-200 group-hover:text-primary-900">
+            Logout
+          </span>
+        </button>
       </aside>
     </section>
   );

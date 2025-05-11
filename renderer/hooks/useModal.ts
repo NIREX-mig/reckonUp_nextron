@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 // Define modal type;
-export type ModalType = "Invoice-Details" | "Payment";
+export type ModalType = 'Invoice-Details' | 'Payment';
 
 // Modal state structure
 interface ModalState {

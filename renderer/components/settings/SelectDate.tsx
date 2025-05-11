@@ -1,5 +1,5 @@
-import React from "react";
-import Input from "../ui/Input";
+import React from 'react';
+import Input from '../ui/Input';
 
 const SelectDate = ({ date, setDate }) => {
   return (
