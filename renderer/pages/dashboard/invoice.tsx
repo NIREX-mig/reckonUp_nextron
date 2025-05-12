@@ -173,7 +173,6 @@ const InvoicePage: NextPageWithLayout = () => {
     window.ipc.send('createinvoice', { invoiceData });
 
     window.ipc.on('createinvoice', (res: APiRes) => {
-      console.log(res);
       if (res.success) {
         toast.success(res.message);
         setTimeout(() => {
@@ -401,11 +400,11 @@ const InvoicePage: NextPageWithLayout = () => {
                     type="number"
                     min="0"
                     step="0.01"
-                    value={exchangeDetails.exchangeWeight}
+                    value={isNaN(exchangeDetails.exchangeWeight) ? "" : exchangeDetails.exchangeWeight}
                     handleChangeText={(e) =>
                       setExchangeDetails((prev) => ({
                         ...prev,
-                        exchangeWeight: e.target.value,
+                        exchangeWeight: e.target.valueAsNumber,
                       }))
                     }
                     placeholder="Weight"
@@ -418,11 +417,11 @@ const InvoicePage: NextPageWithLayout = () => {
                     otherStyle="disabled:border-gray-300 mb-2 "
                     type="number"
                     min="0"
-                    value={exchangeDetails.exchangePercentage}
+                    value={isNaN(exchangeDetails.exchangePercentage) ? "" : exchangeDetails.exchangePercentage}
                     handleChangeText={(e) =>
                       setExchangeDetails((prev) => ({
                         ...prev,
-                        percentage: e.target.value,
+                        exchangePercentage : e.target.valueAsNumber,
                       }))
                     }
                     disabled={!exchange}
@@ -437,11 +436,11 @@ const InvoicePage: NextPageWithLayout = () => {
                     otherStyle="w-[100px] disabled:border-gray-300 mb-2 "
                     type="number"
                     min="0"
-                    value={exchangeDetails.exchangeAmount}
+                    value={isNaN(exchangeDetails.exchangeAmount) ? "" : exchangeDetails.exchangeAmount}
                     handleChangeText={(e) => {
                       setExchangeDetails((prev) => ({
                         ...prev,
-                        exchangeAmount: e.target.value,
+                        exchangeAmount: e.target.valueAsNumber,
                       }));
                     }}
                     disabled={!exchange}
@@ -675,11 +674,11 @@ const InvoicePage: NextPageWithLayout = () => {
               otherStyle=""
               type="number"
               min="0"
-              value={paymentDetails.discount}
+              value={isNaN(paymentDetails.discount)? "" : paymentDetails.discount}
               handleChangeText={(e) => {
                 setPaymentDetails((prev) => ({
                   ...prev,
-                  discount: e.target.value,
+                  discount: e.target.valueAsNumber,
                 }));
               }}
               placeholder="discont"

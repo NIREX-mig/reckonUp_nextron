@@ -34,7 +34,6 @@ const DueHistoryPage: NextPageWithLayout = () => {
     window.ipc.send('getdueinvoices', { pageNo: page.currentPage });
 
     window.ipc.on('getdueinvoices', async (res: APiRes) => {
-      console.log(res);
       if (res.success) {
         setDueInvoices(res.data.invoices);
         setFilterdData(res.data.invoices);

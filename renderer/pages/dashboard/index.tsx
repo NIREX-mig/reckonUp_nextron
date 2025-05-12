@@ -77,7 +77,7 @@ const DashboardPage: NextPageWithLayout = () => {
       const searchedData =
         searchValue.length === 0
           ? invoices
-          : invoices.filter((item) => item.customerName.toLowerCase().includes(searchValue));
+          : invoices.filter((item) => item.name.toLowerCase().includes(searchValue));
 
       setFilterdData(searchedData);
     }
@@ -94,7 +94,6 @@ const DashboardPage: NextPageWithLayout = () => {
       window.ipc.send('tracks', {});
 
       window.ipc.on('tracks', (res: APiRes) => {
-        console.log(res);
         if (res.success) {
           setStats(res.data);
         } else {

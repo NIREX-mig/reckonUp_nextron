@@ -30,7 +30,6 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose }) => {
     });
 
     window.ipc.on('payment', (res: APiRes) => {
-      console.log(res);
       if (!res.success) {
         setPay(0);
         toast.error(res.message);
