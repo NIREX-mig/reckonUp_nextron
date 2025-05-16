@@ -4,7 +4,6 @@ import RootLayout from "../../components/rootLayout";
 import Head from "next/head";
 import Header from "../../components/ui/Header";
 import InvoiceSatatusChart from "../../components/reports/InvoiceSatatusChart";
-import TotalRevenueChart from "../../components/reports/TotalRevenueChart";
 import { FaFileInvoiceDollar, FaRegCreditCard } from "react-icons/fa";
 import { MdPaid } from "react-icons/md";
 import { IoMdWarning } from "react-icons/io";
