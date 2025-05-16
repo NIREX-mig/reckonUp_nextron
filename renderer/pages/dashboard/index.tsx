@@ -125,7 +125,7 @@ const DashboardPage: NextPageWithLayout = () => {
         <title>ReckonUp - Devloped by NIreX</title>
       </Head>
       <div className="px-2 py-2 bg-primary-50 h-[calc(100%-16px)] overflow-auto rounded-xl m-2">
-        <Modal type={modal.type} isOpen={modal.isOpen} onClose={closeModal} />
+        <Modal type={modal.type} isOpen={modal.isOpen} onClose={closeModal} modalData={filteredData} />
         <Header title="Dashboard" extraStyle="mb-3" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-2">
           {stats.map((stat) => (

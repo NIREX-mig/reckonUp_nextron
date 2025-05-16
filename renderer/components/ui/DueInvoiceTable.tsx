@@ -1,6 +1,7 @@
 import React from 'react';
+import { FcMoneyTransfer } from 'react-icons/fc';
 
-const DueInvoiceTable = ({ invoiceData }) => {
+const DueInvoiceTable = ({ invoiceData, handlePaymentClick }) => {
   return (
     <section>
       <div className="h-[calc(100vh-190px)] overflow-x-auto border border-primary-600 md:rounded-lg">
@@ -15,6 +16,7 @@ const DueInvoiceTable = ({ invoiceData }) => {
               <th className="px-3 py-[2px] text-sm font-normal text-left">Paid Amt</th>
               <th className="px-3 py-[2px] text-sm font-normal text-left">Discount</th>
               <th className="px-3 py-[2px] text-sm font-normal text-left">Dues</th>
+              <th className="px-3 py-[2px] text-center text-sm font-normal">Action</th>
             </tr>
           </thead>
           <tbody className="bg-primary-50 divide-y divide-gray-200">
@@ -36,7 +38,7 @@ const DueInvoiceTable = ({ invoiceData }) => {
                   {`₹${invoice?.totalAmount}`}
                 </td>
                 <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
-                  {`₹${invoice.paidAmount}`}
+                  {`₹${invoice?.payments?.reduce((sum, history) => sum + history.paidAmount, 0)}`}
                 </td>
                 <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
                   {invoice?.discount}
@@ -44,22 +46,21 @@ const DueInvoiceTable = ({ invoiceData }) => {
                 <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
                   {invoice?.dueAmount}
                 </td>
-                {/* <td className="flex justify-center gap-2 px-2 py-[2px] text-sm font-normal whitespace-nowrap">
-                          <button
+                <td className="flex justify-center gap-2 px-2 py-[2px] text-sm font-normal whitespace-nowrap">
+                          {/* <button
                             type="button"
                             onClick={() => handleTableRowClick(invoice)}
                             className="bg-primary-900 hover:bg-primary-800 text-white px-4 py-1 rounded-md active:scale-95 transition-all duration-300"
                           >
                             Details
-                          </button>
+                          </button> */}
                           <button
                             type="button"
                             onClick={() => handlePaymentClick(invoice)}
                             className="bg-primary-900 hover:bg-primary-800 text-white px-4 py-1 rounded-md active:scale-95 transition-all duration-300"
-                          >
-                            <FcMoneyTransfer size={20} />
+                          > Pay
                           </button>
-                        </td> */}
+                        </td>
               </tr>
             ))}
           </tbody>

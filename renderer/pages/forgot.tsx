@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import NewPasswordContainer from '../components/forgotpassword/NewPasswordContainer';
@@ -12,10 +12,9 @@ import Link from 'next/link';
 
 export default function ForgotPage() {
   const router = useRouter();
+  const [loading , setLoading] = useState(false);
 
   const { isOnline, isOffline, error } = useIsOnline();
-
-  const [loading, setLoading] = useState(false);
 
   const [username, setUsername] = useState('');
   const [finalOtp, setFinalOtp] = useState('');

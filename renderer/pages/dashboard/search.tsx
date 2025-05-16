@@ -1,15 +1,15 @@
-import React, { ReactElement, useEffect, useState } from 'react';
-import RootLayout from '../../components/rootLayout';
-import { NextPageWithLayout } from '../_app';
-import Head from 'next/head';
-import Modal from '../../components/ui/Modal';
-import useModal from '../../hooks/useModal';
-import { APiRes } from '../../types';
-import Header from '../../components/ui/Header';
-import toast from 'react-hot-toast';
-import SearchPageTable from '../../components/ui/SearchPageTable';
-import DateRange from '../../components/search/DateRange';
-import SelectCategory from '../../components/search/SelectCategory';
+import React, { ReactElement, useEffect, useState } from "react";
+import RootLayout from "../../components/rootLayout";
+import { NextPageWithLayout } from "../_app";
+import Head from "next/head";
+import Modal from "../../components/ui/Modal";
+import useModal from "../../hooks/useModal";
+import { APiRes } from "../../types";
+import Header from "../../components/ui/Header";
+import toast from "react-hot-toast";
+import SearchPageTable from "../../components/ui/SearchPageTable";
+import DateRange from "../../components/search/DateRange";
+import SelectCategory from "../../components/search/SelectCategory";
 
 const SearchPage: NextPageWithLayout = () => {
   const { modal, openModal, closeModal } = useModal();
@@ -18,20 +18,23 @@ const SearchPage: NextPageWithLayout = () => {
   const [totalPages, setTotalPages] = useState(undefined);
 
   const [filteredData, setFilteredData] = useState([]);
+  const [search, setSearch] = useState("");
 
   const [filterCurrentPage, setFilterCurrentPage] = useState(undefined);
   const [filterTotalPage, setFilterTotalPage] = useState(undefined);
 
   const handleShowDetails = (invoice) => {
-    openModal('Invoice-Details');
+    openModal("Invoice-Details");
     const jsonInvoice = JSON.stringify(invoice);
-    localStorage.setItem('finalInvoice', jsonInvoice);
+    localStorage.setItem("finalInvoice", jsonInvoice);
   };
 
   const getInvoices = () => {
-    window.ipc.send('getallinvoice', { pageNo: currentPage });
+    setSearch("");
 
-    window.ipc.on('getallinvoice', (res: APiRes) => {
+    window.ipc.send("getallinvoice", { pageNo: currentPage });
+
+    window.ipc.on("getallinvoice", (res: APiRes) => {
       if (res.success) {
         setFilteredData(res.data.invoices);
         setCurrentPage(res.data.currentPage);
@@ -54,7 +57,12 @@ const SearchPage: NextPageWithLayout = () => {
         <title>ReckonUp - Devloped by NIreX</title>
       </Head>
       <section className="p-1 bg-primary-50 h-[calc(100%-16px)] overflow-auto rounded-xl m-2">
-        <Modal type={modal.type} isOpen={modal.isOpen} onClose={closeModal} />
+        <Modal
+          type={modal.type}
+          isOpen={modal.isOpen}
+          onClose={closeModal}
+          modalData={filteredData}
+        />
         <Header title="View Invoices" extraStyle="mb-2" />
         <div className="rounded-lg bg-primary-50 border border-primary-500">
           <div className="flex justify-between">
@@ -70,6 +78,8 @@ const SearchPage: NextPageWithLayout = () => {
               setCurrentPage={setFilterCurrentPage}
               setFilteredData={setFilteredData}
               setTotalPages={setFilterTotalPage}
+              search={search}
+              setSearch={setSearch}
             />
           </div>
           <hr />
@@ -77,15 +87,23 @@ const SearchPage: NextPageWithLayout = () => {
             <SearchPageTable
               data={filteredData}
               handleTableRowClick={handleShowDetails}
-              currentPage={filterCurrentPage === undefined ? currentPage : filterCurrentPage}
-              setCurrentPage={
-                filterCurrentPage === undefined ? setCurrentPage : setFilterCurrentPage
+              currentPage={
+                filterCurrentPage === undefined
+                  ? currentPage
+                  : filterCurrentPage
               }
-              totalPages={filterTotalPage === undefined ? totalPages : filterTotalPage}
+              setCurrentPage={
+                filterCurrentPage === undefined
+                  ? setCurrentPage
+                  : setFilterCurrentPage
+              }
+              totalPages={
+                filterTotalPage === undefined ? totalPages : filterTotalPage
+              }
               handlePaymentClick={(invoice) => {
-                openModal('Payment');
+                openModal("Payment");
                 const jsonInvoice = JSON.stringify(invoice);
-                localStorage.setItem('finalInvoice', jsonInvoice);
+                localStorage.setItem("finalInvoice", jsonInvoice);
               }}
             />
           </div>

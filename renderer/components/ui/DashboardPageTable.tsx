@@ -1,11 +1,11 @@
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { FcMoneyTransfer } from 'react-icons/fc';
 
 const DashboardPageTable = ({ data, handleTableRowClick, handlePaymentClick }) => {
   const [selectedRow, setSelectedRow] = useState(0);
 
   useEffect(() => {
+    
     const handleKeyDown = (event) => {
       if (event.key === 'ArrowDown') {
         setSelectedRow((prev) => Math.min(prev + 1, data.length - 1));
@@ -22,6 +22,7 @@ const DashboardPageTable = ({ data, handleTableRowClick, handlePaymentClick }) =
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
+
   }, [selectedRow, data, handleTableRowClick, handlePaymentClick]);
 
   return (
@@ -132,7 +133,7 @@ const DashboardPageTable = ({ data, handleTableRowClick, handlePaymentClick }) =
                       onClick={() => handlePaymentClick(invoice)}
                       className="bg-primary-900 hover:bg-primary-800 text-white px-4 py-[2px] rounded-md active:scale-95 transition-all duration-300"
                     >
-                      <FcMoneyTransfer size={20} />
+                      Pay
                     </button>
                   </td>
                 </tr>

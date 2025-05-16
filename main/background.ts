@@ -4,7 +4,7 @@ env.config();
 import path from "path";
 import { app, ipcMain, dialog, BrowserWindow } from "electron";
 import serve from "electron-serve";
-import { ConvertIntoArray, createWindow, genrateOtp } from "./helpers";
+import { createWindow, genrateOtp } from "./helpers";
 import EventResponse from "./helpers/EventResponse";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -14,17 +14,12 @@ import sendForgotPasswordEmail, {
 import fs from "node:fs";
 import { autoUpdater } from "electron-updater";
 import * as XLSX from "xlsx";
-import moment from "moment";
 import { configDB, dataDB } from "./helpers/sqllite/db";
 import {
-  startOfToday,
-  subDays,
   formatISO,
   format,
-  parseISO,
   startOfYear,
   endOfYear,
-  subMonths,
   isAfter,
   addDays,
   startOfMonth,
@@ -117,7 +112,7 @@ if (!fs.existsSync(uploadPath)) {
       buttons: ["Cancel", "Yes"],
       defaultId: 0,
       cancelId: 0,
-      title: "Confirm Exit",
+      title: "ReckonUp Exit",
       message: "Are you sure you want to quit?",
     });
 
@@ -163,9 +158,9 @@ autoUpdater.on("update-available", () => {
   const dialogOpts: any = {
     type: "info",
     buttons: ["Ok"],
-    title: "Application Update",
-    message: "New Update Avilable",
-    detail: "ReckonUp have new Update Released",
+    title: "ReckonUp Update",
+    message: "New Update Available",
+    detail: "ReckonUp has a new Update Released",
   };
   dialog.showMessageBox(mainWindow, dialogOpts).then(() => {
     autoUpdater.downloadUpdate();
@@ -176,7 +171,7 @@ autoUpdater.on("update-downloaded", () => {
   const dialogOpts: any = {
     type: "info",
     buttons: ["Restart", "Later"],
-    title: "Application Update",
+    title: "ReckonUp Update",
     message: "Update Download Successfully",
     detail:
       "A new version has been downloaded. Restart the application to apply the updates.",
@@ -337,6 +332,26 @@ ipcMain.on("forgotpassword", async (event, args) => {
   }
 });
 
+// logout Event
+ipcMain.on("logout", async (event) => {
+  try {
+    const choice = dialog.showMessageBoxSync(null, {
+      type: "question",
+      buttons: ["Cancel", "Yes"],
+      defaultId: 0,
+      cancelId: 0,
+      title: "ReckonUp Logout",
+      message: "Are you sure you want to Logout",
+    });
+
+    if (choice === 1) {
+      event.reply("logout", new EventResponse(true, "Success", {}));
+    }
+  } catch (err) {
+    event.reply("logout", err);
+  }
+});
+
 // -----------------------------
 //     Invoice Events
 // ----------------------------
@@ -432,7 +447,6 @@ ipcMain.on("createinvoice", (event, args) => {
     `);
 
     paymentStmt.run(invoiceId, payments.paidAmount);
-
 
     const response = new EventResponse(true, "Invoice Saved Successfully.", {
       invoiceId,
@@ -795,20 +809,6 @@ ipcMain.on("fetchbydaterange", async (event, args) => {
       }
     }
 
-    // // Compute paidAmount and dueAmount for each invoice
-    // invoiceMap.forEach((invoice) => {
-    //   invoice.payments.sort(
-    //     (a, b) =>
-    //       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    //   );
-    //   const totalPaid = invoice.payments.reduce(
-    //     (sum, p) => sum + (p.paidAmount || 0),
-    //     0
-    //   );
-    //   invoice.paidAmount = totalPaid;
-    //   invoice.dueAmount = invoice.totalAmount - totalPaid;
-    // });
-
     const totalCount = dataDB
       .prepare(
         `
@@ -929,20 +929,6 @@ ipcMain.on("fetchmonthlyinvoice", async (event) => {
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
     });
-
-    //Compute paidAmount and dueAmount
-    // invoiceMap.forEach((invoice) => {
-    //   invoice.payments.sort(
-    //     (a, b) =>
-    //       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    //   );
-    //   const totalPaid = invoice.payments.reduce(
-    //     (sum, p) => sum + (p.paidAmount || 0),
-    //     0
-    //   );
-    //   invoice.paidAmount = totalPaid;
-    //   invoice.dueAmount = invoice.totalAmount - totalPaid;
-    // });
 
     event.reply(
       "fetchmonthlyinvoice",
@@ -1155,10 +1141,14 @@ ipcMain.on("tracks", async (event) => {
   }
 });
 
+//---------------------------------
+//       Due Inovice Events
+//---------------------------------
+
 // Get Due Invoices Event
 ipcMain.on("getdueinvoices", async (event, args) => {
   try {
-    const { pageNo } = await args;
+    const { pageNo, year } = await args;
 
     const page = parseInt(pageNo) || 1; // Default to page 1
     const limit = 40; // Default to 40 items per page
@@ -1166,36 +1156,39 @@ ipcMain.on("getdueinvoices", async (event, args) => {
 
     // Step 1: Get all payments with dueAmount > 0 using subquery join
     const stmt = dataDB.prepare(`
-        SELECT
-          i.invoiceNo,
-		      i.name,
-		      i.address,
-		      i.phone,
-		      i.totalAmount,
-          i.discount,
-          i.dueAmount,
-          i.createdAt,
-          pay.id AS paymentId,
-          pay.paidAmount
-        FROM invoices i
-        LEFT JOIN payments pay ON pay.invoiceId = i.invoiceNo
-        WHERE i.paymentStatus = ?
-        ORDER BY i.createdAt ASC
-        LIMIT ? OFFSET ?;
-      `);
+      SELECT
+        i.invoiceNo,
+        i.name,
+        i.address,
+        i.phone,
+        i.totalAmount,
+        i.discount,
+        i.dueAmount,
+        i.createdAt,
+        pay.id AS paymentId,
+        pay.paidAmount,
+        pay.createdAt AS paymentCreatedAt
+      FROM invoices i
+      LEFT JOIN payments pay ON pay.invoiceId = i.invoiceNo
+      WHERE i.paymentStatus = ?
+        AND strftime('%Y', i.createdAt) = ?
+      ORDER BY i.createdAt ASC
+      LIMIT ? OFFSET ?;
+    `);
 
-    const rows: any = stmt.all("Due Amount", limit, offset);
+    const rows: any = stmt.all("Due Amount", year.toString(), limit, offset);
 
-    // Step 2: Get total count of due invoices (grouped by invoiceNo)
-    const total = dataDB
+    // Step 2: Get total count of due invoices for the year
+    const total: any = dataDB
       .prepare(
         `
         SELECT COUNT(*) AS count
-        FROM invoices i
-        WHERE i.paymentStatus = ?
+        FROM invoices
+        WHERE paymentStatus = ?
+          AND strftime('%Y', createdAt) = ?
       `
       )
-      .get("Due Amount").count;
+      .get("Due Amount", year.toString()).count;
 
     // Step 3: Group rows by invoice
     const invoiceMap = new Map();
@@ -1210,14 +1203,36 @@ ipcMain.on("getdueinvoices", async (event, args) => {
           totalAmount: row.totalAmount,
           createdAt: row.createdAt,
           discount: row.discount,
-          paidAmount: row.paidAmount,
           dueAmount: row.dueAmount,
+          payments: [],
+        });
+      }
+
+      const invoice = invoiceMap.get(row.invoiceNo);
+
+      if (
+        row.paymentId &&
+        !invoice.payments.find((p) => p.id === row.paymentId)
+      ) {
+        invoice.payments.push({
+          id: row.paymentId,
+          paidAmount: row.paidAmount,
+          createdAt: row.paymentCreatedAt,
         });
       }
     }
+
+    // Sort payments by date
+    invoiceMap.forEach((invoice) => {
+      invoice.payments.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    });
+
     const data = {
       totalPages: Math.ceil(total / limit),
-      currentPage: pageNo,
+      currentPage: page,
       invoices: Array.from(invoiceMap.values()),
     };
 
@@ -1225,6 +1240,112 @@ ipcMain.on("getdueinvoices", async (event, args) => {
   } catch (err) {
     console.error(err);
     event.reply("getdueinvoices", new EventResponse(false, "Error", err));
+  }
+});
+
+ipcMain.on("dueInvoice-name", async (event, args) => {
+  try {
+    const { pageNo, name } = await args;
+
+    const page = parseInt(pageNo) || 1; // Default to page 1
+    const limit = 40; // Default to 40 items per page
+    const offset = (page - 1) * limit; // Calculate skip value
+
+    // Check if customer exists
+    const checkCustomer: any = dataDB
+      .prepare(
+        `
+      SELECT COUNT(*) AS total FROM invoices
+      WHERE name LIKE ? AND paymentStatus = ?
+    `
+      )
+      .get(`%${name}%`, "Due Amount").total;
+
+    if (checkCustomer === 0) {
+      throw new EventResponse(false, "This Name have Not due Invoice", {});
+    }
+
+    const stmt = dataDB.prepare(`
+      SELECT 
+        i.invoiceNo,
+        i.name,
+        i.address,
+        i.phone,
+        i.totalAmount,
+        i.discount,
+        i.dueAmount,
+        i.createdAt,
+        pay.id AS paymentId,
+        pay.paidAmount,
+        pay.createdAt AS paymentCreatedAt
+      FROM invoices i
+      LEFT JOIN payments pay ON pay.invoiceId = i.invoiceNo
+      WHERE i.paymentStatus = ? AND i.name LIKE ? 
+      LIMIT ? OFFSET ?;
+    `);
+
+    const rows: any = stmt.all("Due Amount", `%${name}%`, limit, offset);
+
+    // Step 2: Get total count of due invoices for the year
+    const total: any = dataDB
+      .prepare(
+        `
+        SELECT COUNT(*) AS count
+        FROM invoices
+        WHERE paymentStatus = ? AND name = ?
+      `
+      )
+      .get("Due Amount", `%${name}%`).count;
+
+    // Step 3: Group rows by invoice
+    const invoiceMap = new Map();
+
+    for (const row of rows) {
+      if (!invoiceMap.has(row.invoiceNo)) {
+        invoiceMap.set(row.invoiceNo, {
+          invoiceNo: row.invoiceNo,
+          name: row.name,
+          phone: row.phone,
+          address: row.address,
+          totalAmount: row.totalAmount,
+          createdAt: row.createdAt,
+          discount: row.discount,
+          dueAmount: row.dueAmount,
+          payments: [],
+        });
+      }
+
+      const invoice = invoiceMap.get(row.invoiceNo);
+
+      if (
+        row.paymentId &&
+        !invoice.payments.find((p) => p.id === row.paymentId)
+      ) {
+        invoice.payments.push({
+          id: row.paymentId,
+          paidAmount: row.paidAmount,
+          createdAt: row.paymentCreatedAt,
+        });
+      }
+    }
+
+    // Sort payments by date
+    invoiceMap.forEach((invoice) => {
+      invoice.payments.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    });
+
+    const data = {
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      invoices: Array.from(invoiceMap.values()),
+    };
+
+    event.reply("dueInvoice-name", new EventResponse(true, "success,", data));
+  } catch (error) {
+    event.reply("dueInvoice-name", error);
   }
 });
 
@@ -1464,163 +1585,6 @@ ipcMain.on("get-logo", async (event) => {
 });
 
 // Exprt to excel Event
-// ipcMain.on("export2excel", async (event, args) => {
-//   try {
-//     const { date } = args;
-
-//     // Convert dates and subtract one day from startingDate
-//     const adjustedStartDate = new Date(date.start);
-//     adjustedStartDate.setDate(adjustedStartDate.getDate() - 1); // Subtract 1 day
-
-//     const adjustedEndDate = new Date(date.end);
-//     adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
-
-//     // Fetch invoice data from SQLite with JOINs
-//     const invoices: any = dataDB
-//       .prepare(
-//         `
-//       SELECT
-//         i.invoiceNo,
-//         i.customerName,
-//         i.customerPhone,
-//         i.customerAddress,
-//         i.exchangeCategory,
-//         i.exchangeWeight,
-//         i.exchangePercentage,
-//         i.exchangeAmount,
-//         i.GSTPercentage,
-//         i.discount,
-//         i.totalAmount,
-//         p.id AS productId,
-//         p.name AS productName,
-//         p.category AS productCategory,
-//         p.weight AS productWeight,
-//         p.quantity AS productQuantity,
-//         p.rate AS productRate,
-//         p.amount AS productAmount,
-//         p.makingCost AS productMakingCost
-//       FROM invoices i
-//       LEFT JOIN products p ON i.invoiceNo = p.invoiceId
-//       WHERE i.createdAt BETWEEN ? AND ?
-//     `
-//       )
-//       .all(adjustedStartDate.toISOString(), adjustedEndDate.toISOString());
-
-//     if (invoices.length === 0) {
-//       throw new EventResponse(false, "Don't have Any Invoice!", {});
-//     }
-
-//     let headerData = [
-//       [
-//         "InvoiceNO",
-//         "Name",
-//         "PhoneNo",
-//         "Address",
-//         "exchangeCategory",
-//         "exchangeWeight",
-//         "exchangePercentage",
-//         "exchangeAmount",
-//         "ProName",
-//         "ProCategory",
-//         "ProRate",
-//         "ProWeight",
-//         "ProQuantity",
-//         "ProMaking",
-//         "ProAmount",
-//         "Gst(%)",
-//         "Discount",
-//         "Total",
-//       ],
-//     ];
-
-//     let merges = [];
-//     let rowIndex = 1; // Start after the header
-
-//     // Organize the data for export
-//     invoices.forEach((invoice) => {
-//       let startRow = rowIndex;
-
-//       headerData.push([
-//         invoice.invoiceNo,
-//         invoice.name,
-//         invoice.phone,
-//         invoice.address,
-//         invoice.exchangeCategory,
-//         invoice.exchangeWeight,
-//         invoice.exchangePercentage,
-//         invoice.exchangeAmount,
-//         invoice.productName,
-//         invoice.productCategory,
-//         invoice.productRate.toString(),
-//         invoice.productWeight.toString(),
-//         invoice.productQuantity.toString(),
-//         invoice.productMakingCost.toString(),
-//         invoice.productAmount.toString(),
-//         invoice.GSTPercentage.toString(),
-//         invoice.discount.toString(),
-//         invoice.totalAmount.toString(),
-//       ]);
-//       rowIndex++;
-
-//       // Merge columns for better visual in Excel
-//       merges.push({ s: { r: startRow, c: 0 }, e: { r: rowIndex - 1, c: 0 } }); // Merge invoiceNO column
-//       merges.push({ s: { r: startRow, c: 1 }, e: { r: rowIndex - 1, c: 1 } }); // Merge name column
-//       merges.push({ s: { r: startRow, c: 2 }, e: { r: rowIndex - 1, c: 2 } }); // Merge phoneNo column
-//       merges.push({ s: { r: startRow, c: 3 }, e: { r: rowIndex - 1, c: 3 } }); // Merge address column
-//       merges.push({ s: { r: startRow, c: 4 }, e: { r: rowIndex - 1, c: 4 } }); // Merge exchangeCategory column
-//       merges.push({ s: { r: startRow, c: 5 }, e: { r: rowIndex - 1, c: 5 } }); // Merge exchangeWeight column
-//       merges.push({ s: { r: startRow, c: 6 }, e: { r: rowIndex - 1, c: 6 } }); // Merge exchangePercentage column
-//       merges.push({ s: { r: startRow, c: 7 }, e: { r: rowIndex - 1, c: 7 } }); // Merge exchangeAmount column
-//       merges.push({ s: { r: startRow, c: 15 }, e: { r: rowIndex - 1, c: 15 } }); // Merge gst column
-//       merges.push({ s: { r: startRow, c: 16 }, e: { r: rowIndex - 1, c: 16 } }); // Merge discount column
-//       merges.push({ s: { r: startRow, c: 17 }, e: { r: rowIndex - 1, c: 17 } }); // Merge total column
-//     });
-
-//     // Step 4: Get Desktop Path
-//     const desktopPath = path.join(
-//       app.getPath("documents"),
-//       `exported_invoice_(${moment(date.start).format("DD-MMM-YYYY")}-${moment(
-//         date.end
-//       ).format("DD-MMM-YYYY")}).xlsx`
-//     );
-
-//     // Convert data to worksheet
-//     const ws = XLSX.utils.aoa_to_sheet(headerData);
-//     ws["!merges"] = merges; // Apply merging
-//     ws["!cols"] = [
-//       { wch: 15 },
-//       { wch: 20 },
-//       { wch: 15 },
-//       { wch: 20 },
-//       { wch: 20 },
-//       { wch: 20 },
-//       { wch: 20 },
-//       { wch: 20 },
-//       { wch: 15 },
-//       { wch: 15 },
-//       { wch: 15 },
-//       { wch: 15 },
-//       { wch: 15 },
-//       { wch: 20 },
-//       { wch: 10 },
-//       { wch: 10 },
-//       { wch: 20 },
-//     ];
-
-//     // Create workbook
-//     const wb = XLSX.utils.book_new();
-//     XLSX.utils.book_append_sheet(wb, ws, "Invoices");
-
-//     // Step 5: Write the Excel file to Desktop
-//     XLSX.writeFile(wb, desktopPath);
-
-//     const response = new EventResponse(true, "Successfully Saved!", {});
-//     event.reply("export2excel", response);
-//   } catch (err) {
-//     event.reply("export2excel", err);
-//   }
-// });
-
 ipcMain.on("export2excel", async (event, args) => {
   try {
     const { date } = args;
@@ -1854,66 +1818,6 @@ ipcMain.on("payment", async (event, args) => {
 //       Reports Events
 //---------------------------------
 
-ipcMain.on("getWeeklyRevenueChart", async (event, year: number) => {
-  try {
-    const result: any[] = [];
-
-    const yearStart = startOfYear(new Date(year, 0, 1));
-    const yearEnd = endOfYear(new Date(year, 11, 31));
-
-    let current = yearStart;
-
-    while (!isAfter(current, yearEnd)) {
-      const dayStart =
-        formatISO(current, { representation: "date" }) + "T00:00:00";
-      const dayEnd =
-        formatISO(current, { representation: "date" }) + "T23:59:59";
-
-      // Total revenue (payments made) on this day
-      const revenueRow: any = dataDB
-        .prepare(
-          `
-        SELECT SUM(paidAmount) AS totalRevenue, COUNT(*) AS paymentCount
-        FROM payments
-        WHERE datetime(createdAt) BETWEEN datetime(?) AND datetime(?)
-      `
-        )
-        .get(dayStart, dayEnd);
-
-      // Total invoices created on this day
-      const invoiceRow: any = dataDB
-        .prepare(
-          `
-        SELECT COUNT(*) AS invoiceCount
-        FROM invoices
-        WHERE datetime(createdAt) BETWEEN datetime(?) AND datetime(?)
-      `
-        )
-        .get(dayStart, dayEnd);
-
-      result.push({
-        date: format(current, "yyyy-MM-dd"),
-        day: format(current, "EEEE"), // e.g., "Monday"
-        totalRevenue: revenueRow.totalRevenue || 0,
-        invoiceCount: invoiceRow.invoiceCount || 0,
-        paymentCount: revenueRow.paymentCount || 0,
-      });
-
-      current = addDays(current, 1); // Move to next day
-    }
-
-    const response = new EventResponse(
-      true,
-      `Weekly revenue chart for ${year}`,
-      result
-    );
-
-    event.reply("getWeeklyRevenueChart", response);
-  } catch (err) {
-    event.reply("getWeeklyRevenueChart", err);
-  }
-});
-
 ipcMain.on("getYearlyRevenueChart", async (event, args) => {
   try {
     const { year } = await args;
@@ -2046,5 +1950,68 @@ ipcMain.on("getReportStats", async (event, year: number) => {
     event.reply("getReportStats", response);
   } catch (error) {
     event.reply("getReportStats", error);
+  }
+});
+
+ipcMain.on("getYearlyGrowthPercentage", async (event, args) => {
+  try {
+    const year = parseInt(args?.year);
+
+    if (isNaN(year)) {
+      throw new Error("Invalid or missing 'year' in arguments.");
+    }
+
+    const getYearRange = (targetYear: number) => {
+      const baseDate = new Date(); // today
+      const start = formatISO(startOfYear(setYear(baseDate, targetYear)), {
+        representation: "complete",
+      });
+      const end = formatISO(endOfYear(setYear(baseDate, targetYear)), {
+        representation: "complete",
+      });
+      return { start, end };
+    };
+
+    const { start: currentStart, end: currentEnd } = getYearRange(year);
+    const { start: prevStart, end: prevEnd } = getYearRange(year - 1);
+
+    const currentYearRevenueRow: any = dataDB
+      .prepare(
+        `
+        SELECT SUM(paidAmount) AS totalRevenue
+        FROM payments
+        WHERE datetime(createdAt) BETWEEN datetime(?) AND datetime(?)
+      `
+      )
+      .get(currentStart, currentEnd);
+
+    const previousYearRevenueRow: any = dataDB
+      .prepare(
+        `
+        SELECT SUM(paidAmount) AS totalRevenue
+        FROM payments
+        WHERE datetime(createdAt) BETWEEN datetime(?) AND datetime(?)
+      `
+      )
+      .get(prevStart, prevEnd);
+
+    const currentRevenue = currentYearRevenueRow?.totalRevenue || 0;
+    const previousRevenue = previousYearRevenueRow?.totalRevenue || 0;
+
+    let growthPercentage = 0;
+    if (previousRevenue !== 0) {
+      growthPercentage =
+        ((currentRevenue - previousRevenue) / previousRevenue) * 100;
+    }
+
+    const response = new EventResponse(
+      true,
+      `Growth from ${year - 1} to ${year}`,
+      parseFloat(growthPercentage.toFixed(2))
+    );
+
+    event.reply("getYearlyGrowthPercentage", response);
+  } catch (error) {
+    event.reply("getYearlyGrowthPercentage", error);
   }
 });

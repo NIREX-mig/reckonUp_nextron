@@ -1,49 +1,50 @@
-import React, { useCallback, useState } from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { FaEye, FaEyeSlash, FaRegUser, FaUnlockAlt } from 'react-icons/fa';
-import { APiRes } from '../types';
-import Button from '../components/ui/Button';
-import toast, { Toaster } from 'react-hot-toast';
-import { AiOutlineLoading } from 'react-icons/ai';
+import React, { useCallback, useState } from "react";
+import Head from "next/head";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { FaEye, FaEyeSlash, FaRegUser, FaUnlockAlt } from "react-icons/fa";
+import { APiRes } from "../types";
+import Button from "../components/ui/Button";
+import toast, { Toaster } from "react-hot-toast";
+import { AiOutlineLoading } from "react-icons/ai";
 
 export default function HomePage() {
   const router = useRouter();
 
-  const [isPasswordHidden, setPasswordHidden] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
-    username: 'app-admin',
-    password: '',
+  const [isPasswordHidden, setPasswordHidden] = useState(true);
+
+  const [loginData, setLoginData] = useState({
+    username: "app-admin",
+    password: "",
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    window.ipc.send('login', {
-      username: formData.username,
-      password: formData.password,
+    window.ipc.send("login", {
+      username: loginData.username,
+      password: loginData.password,
     });
 
-    window.ipc.on('login', (res: APiRes) => {
+    window.ipc.on("login", (res: APiRes) => {
       if (res?.success) {
         setLoading(false);
-        localStorage.setItem('logedinUser', JSON.stringify(res.data));
+        localStorage.setItem("logedinUser", JSON.stringify(res.data));
         toast.success(res.message);
-        setFormData((prev) => ({
+        setLoginData((prev) => ({
           ...prev,
-          password: '',
+          password: "",
         }));
         setTimeout(() => {
-          router.push('/dashboard/');
+          router.push("/dashboard/");
         }, 500);
       } else {
-        setFormData((prev) => ({
+        setLoginData((prev) => ({
           ...prev,
-          password: '',
+          password: "",
         }));
         setLoading(false);
         toast.error(res.message);
@@ -51,7 +52,10 @@ export default function HomePage() {
     });
   };
 
-  const handlePasswordHidden = useCallback(() => setPasswordHidden((prev) => !prev), []);
+  const handlePasswordHidden = useCallback(
+    () => setPasswordHidden((prev) => !prev),
+    []
+  );
 
   return (
     <React.Fragment>
@@ -76,37 +80,45 @@ export default function HomePage() {
           <h1 className="text-center font-bold text-4xl mb-10  text-primary-950">
             Welcome To ReckonUp
           </h1>
-          <h3 className="text-center font-bold text-3xl mb-4 text-primary-900">Sign In</h3>
+          <h3 className="text-center font-bold text-3xl mb-4 text-primary-900">
+            Sign In
+          </h3>
           <p className="text-center text-lg mb-5 text-primary-800">
             Enter your Username and Password to Sign In.
           </p>
 
           <form onSubmit={handleSubmit} className="p-4 w-[27rem] mx-auto">
             <div className="mb-5">
-              <label htmlFor="username" className="block mb-2 text-sm font-semibold  text-gray-900">
+              <label
+                htmlFor="username"
+                className="block mb-2 text-sm font-semibold  text-gray-900"
+              >
                 Username
               </label>
               <div className="relative">
                 <FaRegUser className="absolute left-3 top-2.5 h-5 w-5 text-gray-900" />
                 <input
-                  value={formData.username}
+                  value={loginData.username}
                   className="bg-primary-50 border border-primary-900 text-primary-900 rounded-md focus:outline-primary-900 block w-full p-2 font-semibold indent-8"
                   readOnly
                 />
               </div>
             </div>
             <div>
-              <label htmlFor="password" className="block mb-2 text-sm font-semibold text-gray-900">
+              <label
+                htmlFor="password"
+                className="block mb-2 text-sm font-semibold text-gray-900"
+              >
                 Password
               </label>
               <div className="relative">
                 <FaUnlockAlt className="absolute left-3 top-2.5 h-5 w-5 text-gray-900" />
                 <input
-                  type={isPasswordHidden ? 'password' : 'text'}
+                  type={isPasswordHidden ? "password" : "text"}
                   autoComplete="off"
-                  value={formData.password}
+                  value={loginData.password}
                   onChange={(e) =>
-                    setFormData((prev) => ({
+                    setLoginData((prev) => ({
                       ...prev,
                       password: e.target.value,
                     }))
@@ -133,7 +145,7 @@ export default function HomePage() {
               </p>
             </Link>
             <Button
-              title={loading ? 'Wait...' : 'Sign In'}
+              title={loading ? "Wait..." : "Sign In"}
               buttonType="submit"
               loading={loading}
               disabled={loading}

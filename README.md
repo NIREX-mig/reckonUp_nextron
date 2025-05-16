@@ -2,25 +2,19 @@
 
 ## Overview
 
-ReckonUp is an Electron-based desktop application built using Nextron, integrating MongoDB as the database backend. The app provides an intuitive GUI for managing invoices and payment Histories.
+ReckonUp is an Electron-based desktop application built using Nextron, integrating Sqllite as the database backend. The app provides an intuitive GUI for managing invoices and payment histories.
 
 ## Features
 
 - Export all invoices to Excel
 - Auto-update functionality using `electron-updater`
-- Integration with postgresql for invoice-related event handling
+- Integration with sqllite for invoice-related event handling
 
 ## Installation
 
 ### Prerequisites
 
 - Node.js (Latest LTS recommended)
-- MongoDB (Running Locally)
-
-### Setting up MongoDB Locally
-
-1. Download and install MongoDB from [MongoDB Official Website](https://www.mongodb.com/try/download/community).
-2. Setup mongodb
 
 ### Steps to Run ReckonUp
 
@@ -29,10 +23,12 @@ ReckonUp is an Electron-based desktop application built using Nextron, integrati
    git clone https://github.com/NIREX-mig/reckonUp_nextron.git
    cd reckonUp_nextron
    ```
+
 2. Install dependencies:
    ```sh
    yarn & npm install
    ```
+
 3. Start the development server:
    ```sh
    yarn dev & npm run dev
@@ -56,7 +52,6 @@ To package the application for production:
 
 - [Electron](https://www.electronjs.org/)
 - [Nextron](https://github.com/saltyshiomix/nextron)
-- [MongoDB](https://www.mongodb.com/)
 - [electron-updater](https://www.npmjs.com/package/electron-updater)
 
 ## Contributing

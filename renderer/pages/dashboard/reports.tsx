@@ -1,16 +1,17 @@
-import React, { ReactElement, useState, useMemo, useEffect } from 'react';
-import { NextPageWithLayout } from '../_app';
-import RootLayout from '../../components/rootLayout';
-import Head from 'next/head';
-import Header from '../../components/ui/Header';
-import InvoiceSatatusChart from '../../components/reports/InvoiceSatatusChart';
-import TotalRevenueChart from '../../components/reports/TotalRevenueChart';
-import { FaFileInvoiceDollar, FaRegCreditCard } from 'react-icons/fa';
-import { MdPaid } from 'react-icons/md';
-import { IoMdWarning } from 'react-icons/io';
-import Select from 'react-select';
-import TotalPaymentsInMonth from '../../components/reports/TotalPaymentsInMonth';
-import { APiRes } from '../../types';
+import React, { ReactElement, useState, useMemo, useEffect } from "react";
+import { NextPageWithLayout } from "../_app";
+import RootLayout from "../../components/rootLayout";
+import Head from "next/head";
+import Header from "../../components/ui/Header";
+import InvoiceSatatusChart from "../../components/reports/InvoiceSatatusChart";
+import TotalRevenueChart from "../../components/reports/TotalRevenueChart";
+import { FaFileInvoiceDollar, FaRegCreditCard } from "react-icons/fa";
+import { MdPaid } from "react-icons/md";
+import { IoMdWarning } from "react-icons/io";
+import Select from "react-select";
+import TotalPaymentsInMonth from "../../components/reports/TotalPaymentsInMonth";
+import { APiRes } from "../../types";
+import ProgressLevel from "../../components/reports/ProgressLevel";
 
 const reports: NextPageWithLayout = () => {
   const currentYear = new Date().getFullYear();
@@ -24,15 +25,13 @@ const reports: NextPageWithLayout = () => {
     totalDueInvoice: 0,
   });
 
-  const [weeksData, setWeeksData] = useState({
-    paymentCount: [],
-    invoiceCount: [],
-  });
   const [yearsData, setYearsData] = useState({
     paymentCount: [],
     invoiceCount: [],
   });
   const [paymentsInYear, setPaymentsInYear] = useState([]);
+
+  const [growth, setGrowth] = useState(undefined);
 
   const yearOptions = useMemo(() => {
     return Array.from({ length: currentYear - startYear + 1 }, (_, index) => {
@@ -42,27 +41,25 @@ const reports: NextPageWithLayout = () => {
   }, [currentYear]);
 
   // Default to current year if none selected
-  const selected = yearOptions.find((option) => option.value === (year || currentYear));
+  const selected = yearOptions.find(
+    (option) => option.value === (year || currentYear)
+  );
 
-  const TotalRenenueInWeak = () => {
-    window.ipc.send('getWeeklyRevenueChart', year);
+  const growthInYear = () => {
+    window.ipc.send("getYearlyGrowthPercentage", {year});
 
-    window.ipc.on('getWeeklyRevenueChart', async (res: APiRes) => {
+    window.ipc.on("getYearlyGrowthPercentage", async (res: APiRes) => {
       if (res.success) {
         const { data } = res;
-
-        for (const elm of data) {
-          weeksData.paymentCount.push(elm.paymentCount);
-          weeksData.invoiceCount.push(elm.invoiceCount);
-        }
+        setGrowth(data)
       }
     });
   };
 
   const TotalRenenueInYear = () => {
-    window.ipc.send('getYearlyRevenueChart', { year });
+    window.ipc.send("getYearlyRevenueChart", { year });
 
-    window.ipc.on('getYearlyRevenueChart', async (res: APiRes) => {
+    window.ipc.on("getYearlyRevenueChart", async (res: APiRes) => {
       if (res.success) {
         const newPaymentCount: number[] = [];
         const newInvoiceCount: number[] = [];
@@ -84,9 +81,9 @@ const reports: NextPageWithLayout = () => {
   };
 
   const TotalStats = () => {
-    window.ipc.send('getReportStats', year);
+    window.ipc.send("getReportStats", year);
 
-    window.ipc.on('getReportStats', async (res: APiRes) => {
+    window.ipc.on("getReportStats", async (res: APiRes) => {
       if (res.success) {
         setReportStats({
           totalDueInvoice: res.data.totalDueInvoices,
@@ -99,7 +96,7 @@ const reports: NextPageWithLayout = () => {
   };
 
   useEffect(() => {
-    // TotalRenenueInWeak();
+    growthInYear();
     TotalRenenueInYear();
     TotalStats();
   }, [year]);
@@ -130,7 +127,9 @@ const reports: NextPageWithLayout = () => {
               <div className="grid grid-cols-2 gap-x-5 gap-y-3 mt-5">
                 <div className="h-[180px] bg-primary-200 p-5 border border-primary-300 rounded-lg">
                   <div className="flex justify-between">
-                    <h3 className="text-[24px] font-semibold text-primary-800">Total Invoices</h3>
+                    <h3 className="text-[24px] font-semibold text-primary-800">
+                      Total Invoices
+                    </h3>
                     <FaFileInvoiceDollar
                       size={45}
                       className="p-3 bg-primary-800 text-white rounded-xl"
@@ -143,7 +142,9 @@ const reports: NextPageWithLayout = () => {
                 </div>
                 <div className="h-[180px] bg-primary-200 p-5 border border-primary-300 rounded-lg">
                   <div className="flex justify-between">
-                    <h3 className="text-[24px] font-semibold text-primary-800">Total Payments</h3>
+                    <h3 className="text-[24px] font-semibold text-primary-800">
+                      Total Payments
+                    </h3>
                     <FaRegCreditCard
                       size={45}
                       className="p-3 bg-primary-800 text-white rounded-xl"
@@ -159,7 +160,10 @@ const reports: NextPageWithLayout = () => {
                     <h3 className="text-[24px] font-semibold text-primary-800">
                       Total Paid Invoice
                     </h3>
-                    <MdPaid size={45} className="p-3 bg-primary-800 text-white rounded-xl" />
+                    <MdPaid
+                      size={45}
+                      className="p-3 bg-primary-800 text-white rounded-xl"
+                    />
                   </div>
 
                   <h2 className="text-[40px] font-semibold mt-3 text-primary-900">
@@ -171,7 +175,10 @@ const reports: NextPageWithLayout = () => {
                     <h3 className="text-[24px] font-semibold text-primary-800">
                       Total Due Invoice
                     </h3>
-                    <IoMdWarning size={45} className="p-3 bg-primary-800 text-white rounded-xl" />
+                    <IoMdWarning
+                      size={45}
+                      className="p-3 bg-primary-800 text-white rounded-xl"
+                    />
                   </div>
 
                   <h2 className="text-[40px] font-semibold mt-3 text-primary-900">
@@ -189,10 +196,7 @@ const reports: NextPageWithLayout = () => {
                 paymentCount={yearsData.paymentCount}
                 invoiceCount={yearsData.invoiceCount}
               />
-              <TotalRevenueChart
-                paymentCount={weeksData.paymentCount}
-                invoiceCount={weeksData.invoiceCount}
-              />
+              <ProgressLevel percentage={growth} />
             </div>
           </div>
         </div>

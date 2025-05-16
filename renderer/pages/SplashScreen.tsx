@@ -32,7 +32,7 @@ export default function SplashScreen() {
           style={{ width: `${progress}%` }}
         ></div>
       </div>
-      <p className=" absolute bottom-4 right-7 text-sm text-white">V1.03</p>
+      <p className=" absolute bottom-48 left-[66px] text-2xl text-white font-mono">V2.0.0</p>
     </div>
   );
 }

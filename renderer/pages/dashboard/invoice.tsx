@@ -621,7 +621,7 @@ const InvoicePage: NextPageWithLayout = () => {
             <button
               type="button"
               onClick={handleClearInvoice}
-              className="text-white bg-red-600 hover:bg-red-700 focus:ring-2 focus:outline-none focus:ring-purple-600 font-medium rounded-lg w-full sm:w-auto px-6 py-2.5 text-center flex gap-3 mb-2 active:scale-95 transition-all duration-300"
+              className="text-white bg-red-600 hover:bg-red-700 focus:ring-2 focus:outline-none focus:ring-purple-600 font-medium rounded-md w-full sm:w-auto px-6 py-2.5 text-center flex gap-3 mb-2 active:scale-95 transition-all duration-300"
             >
               Clear invoice
             </button>

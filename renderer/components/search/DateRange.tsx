@@ -80,7 +80,7 @@ const DateRange = ({ currentPage, setCurrentPage, setTotalPages, setFilteredData
             setDate({ start: '', end: '' });
             clear();
           }}
-          className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm sm:w-auto px-5 py-1 text-center active:scale-95 transition-all duration-300"
+          className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-md text-sm sm:w-auto px-5 py-1 text-center active:scale-95 transition-all duration-300"
         >
           Clear
         </button>

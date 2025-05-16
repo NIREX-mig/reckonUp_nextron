@@ -1,34 +1,53 @@
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LuLayoutDashboard } from 'react-icons/lu';
-import { FiFileText, FiLogOut, FiSettings } from 'react-icons/fi';
-import { ImStatsBars } from 'react-icons/im';
-import { MdOutlinePostAdd, MdPayment } from 'react-icons/md';
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LuLayoutDashboard } from "react-icons/lu";
+import { FiFileText, FiLogOut, FiSettings } from "react-icons/fi";
+import { ImStatsBars } from "react-icons/im";
+import { MdOutlinePostAdd, MdPayment } from "react-icons/md";
+import { useRouter } from "next/router";
+import { APiRes } from "../types";
 
 const SideBar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  // Define the menu items with their respective paths and icons
 
   const menuItems = [
-    { name: 'Dashboard', path: '/dashboard/', icon: LuLayoutDashboard },
+    { name: "Dashboard", path: "/dashboard/", icon: LuLayoutDashboard },
     {
-      name: 'New Invoice',
-      path: '/dashboard/invoice/',
+      name: "New Invoice",
+      path: "/dashboard/invoice/",
       icon: MdOutlinePostAdd,
     },
-    { name: 'View Invoices', path: '/dashboard/search/', icon: FiFileText },
-    { name: 'Due Payments', path: '/dashboard/duehistory/', icon: MdPayment },
-    { name: 'Reports', path: '/dashboard/reports/', icon: ImStatsBars },
-    { name: 'Settings', path: '/dashboard/settings/', icon: FiSettings },
+    { name: "View Invoices", path: "/dashboard/search/", icon: FiFileText },
+    { name: "Due Payments", path: "/dashboard/duehistory/", icon: MdPayment },
+    { name: "Reports", path: "/dashboard/reports/", icon: ImStatsBars },
+    { name: "Settings", path: "/dashboard/settings/", icon: FiSettings },
   ];
 
-  const handleLogOut = () => {};
+  const handleLogOut = () => {
+    // Perform logout logic here
+    window.ipc.send("logout", {});
+    window.ipc.on("logout", (res: APiRes) => {
+      // Handle successful logout
+      if (res.success) {
+        window.localStorage.removeItem("logedinUser");
+        router.push("/home");
+      }
+    });
+  };
 
   return (
     <section className="flex">
       <aside className="w-44 h-screen bg-primary-950">
         <div className={`flex items-center  border-b border-primary-800 p-2`}>
-          <img src="/app_logo.png" alt="logo" className="w-[40px]" draggable="false" />
+          <img
+            src="/app_logo.png"
+            alt="logo"
+            className="w-[40px]"
+            draggable="false"
+          />
           <p className="font-bold text-2xl">
             <span className="text-primary-400">Reckon</span>
             <span className="text-primary-200">Up</span>
@@ -52,12 +71,16 @@ const SideBar = () => {
                 <menu.icon
                   size={26}
                   className={`rounded-lg p-1 group-hover:text-primary-900  ${
-                    pathname === menu.path ? 'text-primary-900' : 'text-primary-200'
+                    pathname === menu.path
+                      ? "text-primary-900"
+                      : "text-primary-200"
                   }`}
                 />
                 <span
                   className={`ml-1 font-medium group-hover:text-primary-900 ${
-                    pathname === menu.path ? 'text-primary-950' : 'text-primary-200'
+                    pathname === menu.path
+                      ? "text-primary-950"
+                      : "text-primary-200"
                   }`}
                 >
                   {menu.name}

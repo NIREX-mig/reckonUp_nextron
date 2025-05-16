@@ -1,17 +1,25 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-import { app } from 'electron';
-import fs from 'node:fs';
+import Database from "better-sqlite3";
+import path from "path";
+import { app } from "electron";
+import fs from "node:fs";
 
-const dbDir = path.join(app.getPath('userData'), 'DB');
+const isProd = process.env.NODE_ENV === "production";
+
+let dbDir: string | undefined;
+
+if (isProd) {
+  dbDir = path.join(`app.getPath('userData')`, "DB");
+} else {
+  dbDir = path.join(`${app.getPath("userData")} (development)`, "DB");
+}
 
 // Ensure DB directory exists
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-const configDBPath = path.join(dbDir, 'config.sqlite');
-const dataDBPath = path.join(dbDir, 'database.sqlite');
+const configDBPath = path.join(dbDir, "config.sqlite");
+const dataDBPath = path.join(dbDir, "database.sqlite");
 
 let configDB: Database.Database | undefined;
 let dataDB: Database.Database | undefined;
@@ -99,12 +107,12 @@ try {
     );
   `);
 
-  console.log('SQLite databases initialized successfully.');
+  console.log("SQLite databases initialized successfully.");
 } catch (error) {
-  console.error('Failed to initialize database:', error);
+  console.error("Failed to initialize database:", error);
   configDB = undefined;
   dataDB = undefined;
-  throw new Error('Failed to initialize SQLite databases.');
+  throw new Error("Failed to initialize SQLite databases.");
 }
 
 export { configDB, dataDB };
