@@ -1,4 +1,4 @@
-# ReckonUp
+# 🧾 ReckonUp  - Invoice Management System
 
 ## Overview
 
@@ -50,9 +50,16 @@ To package the application for production:
 
 ## Technologies Used
 
-- [Electron](https://www.electronjs.org/)
-- [Nextron](https://github.com/saltyshiomix/nextron)
-- [electron-updater](https://www.npmjs.com/package/electron-updater)
+- **[Electron](https://www.electronjs.org/)**
+- **[Nextron](https://github.com/saltyshiomix/nextron)**
+- **[electron-updater](https://www.npmjs.com/package/electron-updater)**
+- **React** (for frontend)
+- **Node.js**
+- **SQLite** (with plans for PostgreSQL support)
+- **Tailwind CSS** (UI styling)
+- **Chart.js / Recharts** (for analytics dashboard)
+
+
 
 ## Contributing
 
