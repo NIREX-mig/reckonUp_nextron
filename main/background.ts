@@ -20,8 +20,6 @@ import {
   format,
   startOfYear,
   endOfYear,
-  isAfter,
-  addDays,
   startOfMonth,
   setMonth,
   setYear,
@@ -46,7 +44,20 @@ async function checkUserIsExistOrNot() {
       const insertStmt = configDB.prepare(
         "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
       );
-      insertStmt.run("app-admin", "akay93796@gmail.com", newpassword);
+      insertStmt.run("app-admin", "", newpassword);
+    }
+
+    const settingStmt = configDB.prepare(`SELECT * FROM settingAuth`);
+    const setting: any = settingStmt.get();
+
+    if (!setting) {
+      const settingSalt = await bcrypt.genSalt(10);
+      const newSettingPasswordHash = await bcrypt.hash("12345", settingSalt);
+
+      const insertSettingAuthStmt = configDB.prepare(`
+        INSERT INTO settingAuth (id, password) VALUES (?, ?);
+      `);
+      insertSettingAuthStmt.run(1, newSettingPasswordHash);
     }
   } catch (error) {
     console.error("Error checking user existence:", error);
@@ -230,7 +241,7 @@ ipcMain.on("forgotpasswordemail", async (event, args) => {
     const otp = genrateOtp(6);
 
     // Send forgot password email
-    await sendForgotPasswordEmail(user.email, user.username, otp);
+    await sendForgotPasswordEmail(otp);
 
     // Create OTP hash
     const salt = await bcrypt.genSalt(10);
@@ -256,7 +267,7 @@ ipcMain.on("forgotpasswordemail", async (event, args) => {
     // Create response and emit event
     const response = new EventResponse(
       true,
-      "Otp Sent To Your Email.",
+      "Opt Send To Devloper Email.",
       tempToken
     );
     event.reply("forgotpasswordemail", response);
@@ -349,6 +360,60 @@ ipcMain.on("logout", async (event) => {
     }
   } catch (err) {
     event.reply("logout", err);
+  }
+});
+
+// Change profile (app User) password Event
+ipcMain.on("change-password", async (event, args) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = await args;
+    // get user from database
+    const stmt = configDB.prepare(`
+      SELECT * FROM users WHERE username = ?
+    `);
+
+    const user: any = stmt.get("add-admin");
+
+    if (!user) {
+      throw new EventResponse(false, "Invalid Current Password.", {});
+    }
+
+    // check Current password is Valid or not
+    const currentPasswordIsValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+
+    if (!currentPasswordIsValid) {
+      throw new EventResponse(false, "Invalid Credential!", {});
+    }
+
+    // create new password hash
+    const salt = await bcrypt.genSalt(10);
+    const newPasswordHash = await bcrypt.hash(confirmPassword, salt);
+
+    // update new password
+    const resetStmt = configDB.prepare(`
+      UPDATE users SET password = ? WHERE username = ?
+    `);
+    resetStmt.run(newPasswordHash, "app-admin");
+
+    const response = new EventResponse(
+      true,
+      "Successfully Password Changed.",
+      {}
+    );
+    event.reply("change-password", response);
+  } catch (err) {
+    event.reply("change-password", err);
+  }
+});
+
+// Update Profile data (email) Event
+ipcMain.on("update-profile", async (event, args) => {
+  try {
+  } catch (err) {
+    event.reply("update-profile", err);
   }
 });
 
@@ -1736,6 +1801,188 @@ ipcMain.on("feedback", async (event, args) => {
     event.reply("feedback", response);
   } catch (err) {
     event.reply("feedback", err);
+  }
+});
+
+// -------------------------------------
+//     Setting Authentication Events
+// ------------------------------------
+
+// Upadate setting password Event
+ipcMain.on("update-setting-password", async (event, args) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = await args;
+
+    // get setting Auth from db
+    const stmt = configDB.prepare(`
+      SELECT * FROM settingauth WHERE id = ?
+    `);
+    const settingAuth: any = stmt.get(1);
+
+    if (!settingAuth) {
+      throw new EventResponse(false, "Something Went Wrong!", {});
+    }
+
+    // Check current password is valid or not
+    const settingAuthPasswordIsValid = await bcrypt.compare(
+      currentPassword,
+      settingAuth.password
+    );
+
+    if (!settingAuthPasswordIsValid) {
+      throw new EventResponse(false, "Invalid Current Password.", {});
+    }
+
+    // create new password hash
+    const salt = await bcrypt.genSalt(10);
+    const newPasswordHash = await bcrypt.hash(confirmPassword, salt);
+
+    // update new password
+    const resetStmt = configDB.prepare(`
+      UPDATE settingauth SET password = ? WHERE id = ? 
+    `);
+    resetStmt.run(newPasswordHash, 1);
+
+    const response = new EventResponse(
+      true,
+      "Successfully Password Changed.",
+      {}
+    );
+    event.reply("update-setting-password", response);
+  } catch (err) {
+    event.reply("update-setting-password", err);
+  }
+});
+
+// Login in setting Event
+ipcMain.on("login-setting", async (event, args) => {
+  try {
+    const { settingPassword } = await args;
+
+    // get setting Auth form db
+    const stmt = configDB.prepare(`
+      SELECT * FROM settingauth WHERE id = ?
+    `);
+    const settingAuth: any = stmt.get(1);
+
+    if (!settingAuth) {
+      throw new EventResponse(false, "Something Went Wrong!", {});
+    }
+
+    // Check current password is valid or not
+    const settingAuthPasswordIsValid = await bcrypt.compare(
+      settingPassword,
+      settingAuth.password
+    );
+
+    if (!settingAuthPasswordIsValid) {
+      throw new EventResponse(false, "Invalid Password.", {});
+    }
+
+    const response = new EventResponse(true, "Successfully Authenticated.", {});
+
+    event.reply("login-setting", response);
+  } catch (err) {
+    event.reply("login-setting", err);
+  }
+});
+
+// Send Otp on user Email
+ipcMain.on("setting-forgot-email", async (event) => {
+  try {
+    const otp = genrateOtp(6);
+
+    // send Email
+    await sendForgotPasswordEmail(otp);
+
+    // Create OTP hash
+    const salt = await bcrypt.genSalt(10);
+    const otphash = await bcrypt.hash(otp.toString(), salt);
+
+    // Update OTP hash in database
+    const updateStmt = configDB.prepare(
+      "UPDATE settingauth SET forgotOtpHash = ? WHERE id = ?"
+    );
+    updateStmt.run(otphash, 1);
+
+    const response = new EventResponse(true, "Opt Send To Devloper Email.", {});
+
+    event.reply("setting-forgot-email", response);
+  } catch (err) {
+    event.reply("setting-forgot-email", err);
+  }
+});
+
+// Validate otp of forget Setting login password Event
+ipcMain.on("validate-setting-otp", async (event, args) => {
+  try {
+    const { otp } = await args;
+    // get setting auth from db
+    const stmt = configDB.prepare(`SELECT * FROM settinauth WHERE id = ?`);
+    const settingAuth: any = stmt.get(1);
+
+    if (!settingAuth) {
+      throw new EventResponse(false, "Something Went Wrong!", {});
+    }
+
+    // check otp is correct or not
+    const otpIsValid = await bcrypt.compare(otp, settingAuth.forgotOtpHash);
+
+    if (!otpIsValid) {
+      throw new EventResponse(false, "Incorrect OTP.", {});
+    }
+
+    // update otp hash or otpvalidation
+    const resetStmt = configDB.prepare(`
+      UPDATE settingauth SET otpValidation = ? WHERE id = ?
+    `);
+    resetStmt.run("success", 1);
+
+    const response = new EventResponse(true, "OPT validate SuccessFully.", {});
+    event.reply("validate-setting-otp", response);
+  } catch (err) {
+    event.reply("validate-setting-otp", err);
+  }
+});
+
+// Update new password of Forget setting login password Event
+ipcMain.on("forgot-setting-password", async (event, args) => {
+  try {
+    const { newPassword } = await args;
+
+    // get setting auth from db
+    const stmt = configDB.prepare(`SELECT * FROM settinauth WHERE id = ?`);
+    const settingAuth: any = stmt.get(1);
+
+    if (!settingAuth) {
+      throw new EventResponse(false, "Something Went Wrong!", {});
+    }
+
+    // create new password hash
+    const salt = await bcrypt.genSalt(10);
+    const newPasswordHash = await bcrypt.hash(newPassword, salt);
+
+    // update password
+    const resetStmt = configDB.prepare(`
+      UPDATE settingauth SET password = ? WHERE id = ?
+    `);
+    resetStmt.run(newPasswordHash, 1);
+
+    // clear otp or validation
+    const clearStmt = configDB.prepare(`
+      UPDATE settingauth SET forgotOtpHash = NULL, otpValidation = NULL WHERE id = ?
+    `);
+    clearStmt.run(1);
+
+    const response = new EventResponse(
+      true,
+      "Forgot Password Successfully.",
+      {}
+    );
+
+    event.reply("forgot-setting-password", response);
+  } catch (err) {
+    event.reply("forgot-setting-password", err);
   }
 });
 

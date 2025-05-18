@@ -37,14 +37,14 @@ const ProgressLevel = ({ percentage }) => {
       className="h-[350px] w-[300px]  border border-primary-300 rounded-lg p-5
       bg-primary-200 mt-3"
     >
-      <h3 className="font-bold text-xl text-primary-950">
+      <h3 className="font-bold text-xl text-primary-900">
         Yearly Progress Level
       </h3>
       <p className="text-primary-900 font-semibold">
         Growth According To Previous Year
       </p>
 
-      <span className="text-[60px] font-semibold text-primary-950">
+      <span className="text-[60px] font-semibold text-primary-900">
         {clamp > 0 ? "" : clamp < 0 ? "-" : ""}
         {Math.abs(clamp)}%
       </span>

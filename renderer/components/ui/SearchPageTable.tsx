@@ -61,8 +61,8 @@ const SearchPageTable = ({
               <th className="px-3 py-[2px] text-sm font-normal text-left">
                 Dues
               </th>
-              <th className="px-3 py-[2px] text-sm font-normal text-left">
-                Details
+              <th className="px-3 py-[2px] text-sm font-normal text-center">
+                Action
               </th>
             </tr>
           </thead>

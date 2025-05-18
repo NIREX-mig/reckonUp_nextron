@@ -56,6 +56,17 @@ try {
     );
   `);
 
+  // setting auth Table (configDB)
+  configDB.exec(`
+    CREATE TABLE IF NOT EXISTS settingauth (
+      id INTEGER,
+      password TEXT NOT NULL,
+      forgotOtpHash TEXT,
+      otpValidation TEXT,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
   // Invoices Table (dataDB)
   dataDB.exec(`
     CREATE TABLE IF NOT EXISTS invoices (
