@@ -346,7 +346,7 @@ ipcMain.on("forgotpassword", async (event, args) => {
 // logout Event
 ipcMain.on("logout", async (event) => {
   try {
-    const choice = dialog.showMessageBoxSync(null, {
+    const choice = dialog.showMessageBoxSync(mainWindow, {
       type: "question",
       buttons: ["Cancel", "Yes"],
       defaultId: 0,
@@ -1652,120 +1652,156 @@ ipcMain.on("get-logo", async (event) => {
 // Exprt to excel Event
 ipcMain.on("export2excel", async (event, args) => {
   try {
-    const { date } = args;
+    const { date, ...selectedFields } = args;
 
     const adjustedStartDate = new Date(date.start);
     adjustedStartDate.setDate(adjustedStartDate.getDate() - 1);
-
     const adjustedEndDate = new Date(date.end);
     adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
 
-    // Fetch invoice and product data
-    const invoices: any = dataDB
-      .prepare(
-        `
-      SELECT
-        i.invoiceNo,
-        i.name,
-        i.phone,
-        i.address,
-        i.exchangeCategory,
-        i.exchangeWeight,
-        i.exchangePercentage,
-        i.exchangeAmount,
-        i.gstPercentage,
-        i.discount,
-        i.totalAmount,
-        p.id AS productId,
-        p.name AS productName,
-        p.category AS productCategory,
-        p.weight AS productWeight,
-        p.quantity AS productQuantity,
-        p.rate AS productRate,
-        p.amount AS productAmount,
-        p.makingCost AS productMakingCost
+    const selectedKeys = Object.keys(selectedFields).filter(
+      (key) => selectedFields[key]
+    );
+    if (!selectedKeys.length) {
+      return event.reply(
+        "export2excel",
+        new EventResponse(false, "No fields selected for export", {})
+      );
+    }
+
+    const includesTotalPaid = selectedKeys.includes("TotalPaid");
+
+    const fieldMap: Record<string, string> = {
+      invoiceNo: "i.invoiceNo",
+      name: "i.name",
+      phone: "i.phone",
+      address: "i.address",
+      ExchangeCategory: "i.exchangeCategory",
+      ExchangeWeight: "i.exchangeWeight",
+      ExchangePercentage: "i.exchangePercentage",
+      ExchangeAmount: "i.exchangeAmount",
+      ProName: "p.name AS productName",
+      ProWeight: "p.weight AS productWeight",
+      ProCategory: "p.category AS productCategory",
+      ProQuantity: "p.quantity AS productQuantity",
+      ProAmount: "p.amount AS productAmount",
+      ProRate: "p.rate AS productRate",
+      ProMaking: "p.makingCost AS productMakingCost",
+      gstPercentage: "i.gstPercentage",
+      gstAmount: "i.gstAmount",
+      discount: "i.discount",
+      grossAmount: "i.grossAmount",
+      totalAmount: "i.totalAmount",
+      dueAmount: "i.dueAmount",
+      paymentStatus: "i.paymentStatus",
+      createdAt: "i.createdAt",
+      TotalPaid: includesTotalPaid
+        ? "IFNULL((SELECT SUM(paidAmount) FROM payments pm WHERE pm.invoiceId = i.invoiceNo), 0) AS totalPaid"
+        : "i.totalPaid",
+    };
+
+    const keyMapToResultAlias = (key: string) => {
+      if (fieldMap[key].includes(" AS ")) {
+        return fieldMap[key].split(" AS ")[1].trim();
+      }
+      return fieldMap[key].split(".")[1];
+    };
+
+    const selectedSqlFields = selectedKeys.map((key) => fieldMap[key]);
+
+    const sql = `
+      SELECT ${selectedSqlFields.join(", ")}
       FROM invoices i
       LEFT JOIN products p ON i.invoiceNo = p.invoiceId
       WHERE i.createdAt BETWEEN ? AND ?
-    `
-      )
-      .all(adjustedStartDate.toISOString(), adjustedEndDate.toISOString());
+      ORDER BY i.invoiceNo, p.name
+    `;
 
-    if (!invoices.length) {
+    const rows: any[] = dataDB
+      .prepare(sql)
+      .all(adjustedStartDate.toISOString(), adjustedEndDate.toISOString());
+    if (!rows.length) {
       return event.reply(
         "export2excel",
         new EventResponse(false, "No invoices found", {})
       );
     }
 
-    const headerData = [
-      [
-        "InvoiceNO",
-        "Name",
-        "PhoneNo",
-        "Address",
-        "ExchangeCategory",
-        "ExchangeWeight",
-        "ExchangePercentage",
-        "ExchangeAmount",
-        "ProName",
-        "ProCategory",
-        "ProRate",
-        "ProWeight",
-        "ProQuantity",
-        "ProMaking",
-        "ProAmount",
-        "GST(%)",
-        "Discount",
-        "Total",
-      ],
-    ];
+    // Group by invoiceNo
+    const grouped = new Map<string, any[]>();
+    for (const row of rows) {
+      const invoiceNo = row.invoiceNo;
+      if (!grouped.has(invoiceNo)) {
+        grouped.set(invoiceNo, []);
+      }
+      grouped.get(invoiceNo)!.push(row);
+    }
 
-    const merges = [];
+    const headerLabels: Record<string, string> = {
+      invoiceNo: "Invoice No",
+      name: "Name",
+      phone: "Phone No",
+      address: "Address",
+      ExchangeCategory: "Exchange Category",
+      ExchangeWeight: "Exchange Weight",
+      ExchangePercentage: "Exchange %",
+      ExchangeAmount: "Exchange Amount",
+      ProName: "Product Name",
+      ProWeight: "Product Weight",
+      ProCategory: "Product Category",
+      ProQuantity: "Product Quantity",
+      ProAmount: "Product Amount",
+      ProRate: "Product Rate",
+      ProMaking: "Product Making",
+      gstPercentage: "GST(%)",
+      gstAmount: "GST Amount",
+      discount: "Discount",
+      grossAmount: "Gross Amount",
+      totalAmount: "Total Amount",
+      dueAmount: "Due Amount",
+      paymentStatus: "Payment Status",
+      createdAt: "Created At",
+      TotalPaid: "Total Paid",
+    };
+
+    const headerRow = selectedKeys.map((key) => headerLabels[key]);
+    const dataRows: any[][] = [];
+    const merges: any[] = [];
     let rowIndex = 1;
 
-    invoices.forEach((invoice) => {
+    for (const [invoiceNo, products] of grouped.entries()) {
       const startRow = rowIndex;
 
-      headerData.push([
-        invoice.invoiceNo,
-        invoice.name,
-        invoice.phone,
-        invoice.address,
-        invoice.exchangeCategory,
-        invoice.exchangeWeight,
-        invoice.exchangePercentage,
-        invoice.exchangeAmount,
-        invoice.productName,
-        invoice.productCategory,
-        invoice.productRate?.toString(),
-        invoice.productWeight?.toString(),
-        invoice.productQuantity?.toString(),
-        invoice.productMakingCost?.toString(),
-        invoice.productAmount?.toString(),
-        invoice.gstPercentage?.toString(),
-        invoice.discount?.toString(),
-        invoice.totalAmount?.toString(),
-      ]);
-      rowIndex++;
+      products.forEach((product) => {
+        const row: any[] = [];
+        selectedKeys.forEach((key) => {
+          const alias = keyMapToResultAlias(key);
+          row.push(product[alias]?.toString() ?? "");
+        });
+        dataRows.push(row);
+        rowIndex++;
+      });
 
-      // Merge repeated invoice columns
-      for (const col of [0, 1, 2, 3, 4, 5, 6, 7, 15, 16, 17]) {
+      const invoiceMergeCols = selectedKeys
+        .map((key, idx) => (fieldMap[key].startsWith("p.") ? -1 : idx))
+        .filter((idx) => idx >= 0);
+
+      for (const col of invoiceMergeCols) {
         merges.push({
           s: { r: startRow, c: col },
           e: { r: rowIndex - 1, c: col },
         });
       }
-    });
+    }
 
-    const ws = XLSX.utils.aoa_to_sheet(headerData);
+    const wsData = [headerRow, ...dataRows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws["!cols"] = headerRow.map(() => ({ wch: 20 }));
     ws["!merges"] = merges;
-    ws["!cols"] = Array(18).fill({ wch: 20 });
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Invoices");
 
-    // Show save dialog
     const { filePath, canceled } = await dialog.showSaveDialog({
       title: "Save Exported Excel",
       defaultPath: path.join(app.getPath("documents"), `exported_data.xlsx`),
@@ -1777,14 +1813,15 @@ ipcMain.on("export2excel", async (event, args) => {
         "export2excel",
         new EventResponse(false, "Export cancelled", {})
       );
+    } else {
+      XLSX.writeFile(wb, filePath);
+      return event.reply(
+        "export2excel",
+        new EventResponse(true, "Successfully exported Excel file!", {})
+      );
     }
-
-    XLSX.writeFile(wb, filePath);
-    event.reply(
-      "export2excel",
-      new EventResponse(true, "Successfully exported Excel file!", {})
-    );
   } catch (err) {
+    console.error("Export error:", err);
     event.reply(
       "export2excel",
       new EventResponse(false, "Export failed", { error: err.message })

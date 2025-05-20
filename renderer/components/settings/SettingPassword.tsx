@@ -56,7 +56,7 @@ const SettingPassword = () => {
 
   return (
     <div>
-      <h3 className="text-xl font-semibold mb-6">Update your admin password</h3>
+      <h3 className="text-xl font-semibold mb-6">Update your setting password</h3>
       <div className="w-[450px] flex flex-col gap-y-2">
         <Input
           type="password"

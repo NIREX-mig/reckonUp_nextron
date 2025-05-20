@@ -632,7 +632,7 @@ const InvoicePage: NextPageWithLayout = () => {
             <div className="flex gap-2 items-center h-5 mb-2">
               <input
                 type="checkbox"
-                className="w-4 h-4 border border-primary-900 rounded bg-primary-100 focus:outline-purple-600 accent-primary-900"
+                className="w-4 h-4 border border-primary-900 rounded bg-primary-100 focus:outline-primary-600 accent-primary-900"
                 onChange={() => {
                   setcheckedbox(!checkedbox);
                   setGST(0);

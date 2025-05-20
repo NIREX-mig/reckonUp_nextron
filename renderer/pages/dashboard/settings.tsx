@@ -249,11 +249,11 @@ const SettingPage: NextPageWithLayout = () => {
       <Head>
         <title>ReckonUp - Devloped by NIreX</title>
       </Head>
-      <div className="p-1 bg-primary-50 h-[calc(100%-16px)] overflow-auto rounded-xl m-2">
+      <div className="p-1 bg-primary-50 h-[calc(100%-16px)] rounded-xl m-2">
         <Header title="Settings" extraStyle="mb-3" />
         <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        <div className="bg-primary-50 border-primary-500 border text-primary-900 rounded-lg p-6 h-[calc(100%-135px)]">
+        <div className="bg-primary-50 border-primary-500 border text-primary-900 rounded-lg p-6 h-[calc(100%-135px)] overflow-auto">
           {activeTab === "general" && <ShopDetails />}
           {activeTab === "export" && <ExportToExel />}
           {activeTab === "profile" && <Profile />}
