@@ -113,14 +113,15 @@ const ExportToExel = () => {
       discount: invoiceDetailsCheck.discount,
       grossAmount: invoiceDetailsCheck.grossAmount,
       totalAmount: invoiceDetailsCheck.totalAmount,
+      TotalPaid: paymentDetailsCheck.TotalPaid,
       dueAmount: invoiceDetailsCheck.dueAmount,
       paymentStatus: invoiceDetailsCheck.paymentStatus,
       createdAt: invoiceDetailsCheck.createdAt,
-      TotalPaid: paymentDetailsCheck.TotalPaid,
     };
 
     setLoading(true);
     if (date.start === "" && date.end === "") {
+      setLoading(false);
       toast.error("Date not selected!");
       return;
     }
@@ -130,13 +131,17 @@ const ExportToExel = () => {
       if (!res.success) {
         setLoading(false);
         setDate({
-          start: undefined,
-          end: undefined,
+          start: "",
+          end: "",
         });
         toast.error(res.message);
         return;
       }
       setLoading(false);
+      setDate({
+        start: "",
+        end: "",
+      });
       toast.success("Saved Successfully.");
     });
   };

@@ -14,7 +14,8 @@ const SettingPassword = () => {
   const [isSubmiting, setIsSubmiting] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     if (
       passwords.confirmPassword.length === 0 ||
       passwords.newPassword.length === 0 ||
@@ -56,68 +57,71 @@ const SettingPassword = () => {
 
   return (
     <div>
-      <h3 className="text-xl font-semibold mb-6">Update your setting password</h3>
-      <div className="w-[450px] flex flex-col gap-y-2">
-        <Input
-          type="password"
-          title="Current Password"
-          value={passwords.currentPassword}
-          handleChangeText={(e) => {
-            setPasswords((prev) => ({
-              ...prev,
-              currentPassword: e.target.value,
-            }));
-          }}
-          lableStyle="sm:text-[18px]"
-          otherStyle="w-[270px]"
-          placeholder="current password"
-        />
+      <h3 className="text-xl font-semibold mb-6">
+        Change your setting password
+      </h3>
+      <form onSubmit={handleSubmit}>
+        <div className="w-[450px] flex flex-col gap-y-2">
+          <Input
+            type="password"
+            title="Current Password"
+            value={passwords.currentPassword}
+            handleChangeText={(e) => {
+              setPasswords((prev) => ({
+                ...prev,
+                currentPassword: e.target.value,
+              }));
+            }}
+            lableStyle="sm:text-[18px]"
+            otherStyle="w-[270px]"
+            placeholder="current password"
+          />
 
-        <Input
-          type="password"
-          title="New Password"
-          value={passwords.newPassword}
-          handleChangeText={(e) => {
-            setPasswords((prev) => ({
-              ...prev,
-              newPassword: e.target.value,
-            }));
-          }}
-          lableStyle="sm:text-[18px]"
-          otherStyle="w-[270px]"
-          placeholder="new password"
-        />
+          <Input
+            type="password"
+            title="New Password"
+            value={passwords.newPassword}
+            handleChangeText={(e) => {
+              setPasswords((prev) => ({
+                ...prev,
+                newPassword: e.target.value,
+              }));
+            }}
+            lableStyle="sm:text-[18px]"
+            otherStyle="w-[270px]"
+            placeholder="new password"
+          />
 
-        <Input
-          type="password"
-          title="Confirm Password"
-          value={passwords.confirmPassword}
-          handleChangeText={(e) => {
-            setPasswords((prev) => ({
-              ...prev,
-              confirmPassword: e.target.value,
-            }));
-          }}
-          lableStyle="sm:text-[18px]"
-          otherStyle="w-[270px]"
-          placeholder="confirm password"
-        />
-        {error && (
-          <p className="text-red-600 font-semibold text-end">
-            confirm and new password does not match.
-          </p>
-        )}
+          <Input
+            type="password"
+            title="Confirm Password"
+            value={passwords.confirmPassword}
+            handleChangeText={(e) => {
+              setPasswords((prev) => ({
+                ...prev,
+                confirmPassword: e.target.value,
+              }));
+            }}
+            lableStyle="sm:text-[18px]"
+            otherStyle="w-[270px]"
+            placeholder="confirm password"
+          />
+          {error && (
+            <p className="text-red-600 font-semibold text-end">
+              confirm and new password does not match.
+            </p>
+          )}
 
-        <Button
-          buttonType="button"
-          title={isSubmiting ? "Updating ...." : "Update Password"}
-          disabled={isSubmiting}
-          handleClick={handleSubmit}
-          extraClass="py-1.5"
-          loading={isSubmiting}
-          icon={<AiOutlineLoading size={20} />}
-        />
-      </div>
+          <Button
+            buttonType="submit"
+            title={isSubmiting ? "Updating ...." : "Update Password"}
+            disabled={isSubmiting}
+            extraClass="py-1.5"
+            loading={isSubmiting}
+            icon={<AiOutlineLoading size={20} />}
+          />
+        </div>
+      </form>
     </div>
   );
 };

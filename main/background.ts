@@ -1692,12 +1692,12 @@ ipcMain.on("export2excel", async (event, args) => {
       discount: "i.discount",
       grossAmount: "i.grossAmount",
       totalAmount: "i.totalAmount",
-      dueAmount: "i.dueAmount",
-      paymentStatus: "i.paymentStatus",
-      createdAt: "i.createdAt",
       TotalPaid: includesTotalPaid
         ? "IFNULL((SELECT SUM(paidAmount) FROM payments pm WHERE pm.invoiceId = i.invoiceNo), 0) AS totalPaid"
         : "i.totalPaid",
+      dueAmount: "i.dueAmount",
+      paymentStatus: "i.paymentStatus",
+      createdAt: "i.createdAt",
     };
 
     const keyMapToResultAlias = (key: string) => {
@@ -1758,10 +1758,10 @@ ipcMain.on("export2excel", async (event, args) => {
       discount: "Discount",
       grossAmount: "Gross Amount",
       totalAmount: "Total Amount",
+      TotalPaid: "Total Paid",
       dueAmount: "Due Amount",
       paymentStatus: "Payment Status",
       createdAt: "Created At",
-      TotalPaid: "Total Paid",
     };
 
     const headerRow = selectedKeys.map((key) => headerLabels[key]);

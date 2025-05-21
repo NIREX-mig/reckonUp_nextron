@@ -36,7 +36,8 @@ const SettingPage: NextPageWithLayout = () => {
   });
   const [passwordSubmit, setPasswordSubmit] = useState(false);
 
-  const handlePasswordSubmit = () => {
+  const handlePasswordSubmit = (e) => {
+    e.preventDefault();
     setIsAuthenticating(true);
 
     window.ipc.send("login-setting", { settingPassword });
@@ -121,35 +122,35 @@ const SettingPage: NextPageWithLayout = () => {
                 Please enter your setting password to access settings
               </p>
             </div>
+            <form onSubmit={handlePasswordSubmit}>
+              <div className="mt-5 flex flex-col">
+                <Input
+                  type="password"
+                  title="Password"
+                  lableStyle="text-primary-900 sm:text-lg"
+                  otherStyle="w-[300px] mx-auto"
+                  handleChangeText={(e) => setSettingPassword(e.target.value)}
+                  value={settingPassword}
+                  placeholder="Enter your setting password"
+                />
 
-            <div className="mt-5 flex flex-col">
-              <Input
-                type="password"
-                title="Password"
-                lableStyle="text-primary-900 sm:text-lg"
-                otherStyle="w-[300px] mx-auto"
-                handleChangeText={(e) => setSettingPassword(e.target.value)}
-                value={settingPassword}
-                placeholder="Enter your setting password"
-              />
+                <p
+                  onClick={handleClickForgotPassword}
+                  className=" font-semibold hover:underline inline-block focus:outline-primary-900 text-end mr-6 mt-2"
+                >
+                  Forger Password
+                </p>
 
-              <p
-                onClick={handleClickForgotPassword}
-                className=" font-semibold hover:underline inline-block focus:outline-primary-900 text-end mr-6 mt-2"
-              >
-                Forger Password
-              </p>
-
-              <Button
-                title={isAuthenticating ? "Submiting..." : "Submit"}
-                buttonType="button"
-                disabled={isAuthenticating}
-                handleClick={handlePasswordSubmit}
-                extraClass="mt-2 sm:w-[400px]"
-                loading={isAuthenticating}
-                icon={<AiOutlineLoading size={20} />}
-              />
-            </div>
+                <Button
+                  title={isAuthenticating ? "Submiting..." : "Submit"}
+                  buttonType="submit"
+                  disabled={isAuthenticating}
+                  extraClass="mt-2 sm:w-[400px]"
+                  loading={isAuthenticating}
+                  icon={<AiOutlineLoading size={20} />}
+                />
+              </div>
+            </form>
           </div>
         )}
         {otpContainer && (
@@ -162,7 +163,6 @@ const SettingPage: NextPageWithLayout = () => {
                 Validate Otp And Change Password.
               </p>
             </div>
-
             <div className="mt-5 flex flex-col">
               <Input
                 type="text"
