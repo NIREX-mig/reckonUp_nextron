@@ -1,29 +1,51 @@
-import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import moment from "moment";
+import React, { useEffect, useState } from "react";
+import useModal from "../../hooks/useModal";
 
-const DashboardPageTable = ({ data, handleTableRowClick, handlePaymentClick }) => {
+const DashboardPageTable = ({
+  data,
+  handleTableRowClick,
+  handlePaymentClick,
+}) => {
   const [selectedRow, setSelectedRow] = useState(0);
+  const { modal } = useModal();
 
   useEffect(() => {
-    
     const handleKeyDown = (event) => {
-      if (event.key === 'ArrowDown') {
+      // ✅ Block all keyboard actions if a modal is open
+      if (modal?.isOpen) return;
+
+      // ✅ Prevent key actions when no invoice is present
+      if (!data || data.length === 0) return;
+
+      if (event.key === "ArrowDown") {
         setSelectedRow((prev) => Math.min(prev + 1, data.length - 1));
-      } else if (event.key === 'ArrowUp') {
+      } else if (event.key === "ArrowUp") {
         setSelectedRow((prev) => Math.max(prev - 1, 0));
-      } else if (event.key === 'Enter') {
-        handleTableRowClick(data[selectedRow]);
-      } else if (event.ctrlKey && event.key === 'p') {
-        handlePaymentClick(data[selectedRow]);
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        if (data[selectedRow]) {
+          handleTableRowClick(data[selectedRow]);
+        }
+      } else if (event.ctrlKey && event.key === "p") {
+        event.preventDefault(); // prevent browser print dialog
+        if (data[selectedRow]) {
+          handlePaymentClick(data[selectedRow]);
+        }
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-
-  }, [selectedRow, data, handleTableRowClick, handlePaymentClick]);
+  }, [
+    selectedRow,
+    data,
+    handleTableRowClick,
+    handlePaymentClick,
+    modal?.isOpen,
+  ]);
 
   return (
     <section className="">
@@ -93,7 +115,7 @@ const DashboardPageTable = ({ data, handleTableRowClick, handlePaymentClick }) =
                 <tr
                   key={index}
                   className={`cursor-pointer hover:bg-primary-200 ${
-                    selectedRow === index ? 'bg-primary-300' : ''
+                    selectedRow === index ? "bg-primary-300" : ""
                   }`}
                 >
                   <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
@@ -109,13 +131,16 @@ const DashboardPageTable = ({ data, handleTableRowClick, handlePaymentClick }) =
                     {invoice.phone}
                   </td>
                   <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
-                    {moment(invoice.createdAt).format('MMM DD, YYYY')}
+                    {moment(invoice.createdAt).format("MMM DD, YYYY")}
                   </td>
                   <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
                     {`₹ ${invoice.totalAmount}`}
                   </td>
                   <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
-                    {invoice?.payments.reduce((sum, history) => sum + history.paidAmount, 0)}
+                    {invoice?.payments.reduce(
+                      (sum, history) => sum + history.paidAmount,
+                      0
+                    )}
                   </td>
                   <td className="px-2 py-[2px] text-sm font-medium whitespace-nowrap">
                     {invoice?.dueAmount}

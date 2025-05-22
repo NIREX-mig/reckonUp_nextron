@@ -1,6 +1,7 @@
 import moment from "moment";
 import React, { useState, useEffect } from "react";
 import Pagination from "./Pagination";
+import useModal from "../../hooks/useModal";
 
 const SearchPageTable = ({
   data,
@@ -11,17 +12,30 @@ const SearchPageTable = ({
   handlePaymentClick,
 }) => {
   const [selectedRow, setSelectedRow] = useState(0);
+  const { modal } = useModal();
 
   useEffect(() => {
     const handleKeyDown = (event) => {
+      // ✅ Block all keyboard actions if a modal is open
+      if (modal?.isOpen) return;
+
+      // ✅ Prevent key actions when no invoice is present
+      if (!data || data.length === 0) return;
+
       if (event.key === "ArrowDown") {
         setSelectedRow((prev) => Math.min(prev + 1, data.length - 1));
       } else if (event.key === "ArrowUp") {
         setSelectedRow((prev) => Math.max(prev - 1, 0));
       } else if (event.key === "Enter") {
-        handleTableRowClick(data[selectedRow]);
+        event.preventDefault();
+        if (data[selectedRow]) {
+          handleTableRowClick(data[selectedRow]);
+        }
       } else if (event.ctrlKey && event.key === "p") {
-        handlePaymentClick(data[selectedRow]);
+        event.preventDefault(); // prevent browser print dialog
+        if (data[selectedRow]) {
+          handlePaymentClick(data[selectedRow]);
+        }
       }
     };
 
@@ -29,7 +43,13 @@ const SearchPageTable = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedRow, data, handleTableRowClick, handlePaymentClick]);
+  }, [
+    selectedRow,
+    data,
+    handleTableRowClick,
+    handlePaymentClick,
+    modal?.isOpen,
+  ]);
 
   return (
     <section className="px-2">

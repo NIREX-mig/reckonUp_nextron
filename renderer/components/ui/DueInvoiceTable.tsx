@@ -1,5 +1,4 @@
 import React from 'react';
-import { FcMoneyTransfer } from 'react-icons/fc';
 
 const DueInvoiceTable = ({ invoiceData, handlePaymentClick }) => {
   return (

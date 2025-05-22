@@ -7,6 +7,7 @@ import Button from "./Button";
 import toast from "react-hot-toast";
 import { APiRes } from "../../types";
 import { ModalType } from "../../hooks/useModal";
+import Input from "./Input";
 
 interface ModalProps {
   type: ModalType | null;
@@ -19,6 +20,8 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose, modalData }) => {
   const [invoiceData, setInvoiceData] = useState(undefined);
   const [pay, setPay] = useState(0);
   const router = useRouter();
+  const [paymentDateCheck, setPaymentDateCheck] = useState(false);
+  const [paymentDate, setPaymentDate] = useState("");
 
   const handlGenrateInvoice = () => {
     router.push("/dashboard/viewInvoice/");
@@ -31,12 +34,18 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose, modalData }) => {
 
     const payment = {
       paidAmount: pay,
-      createdAt: new Date()?.toISOString(),
+      createdAt:
+        paymentDate.length === 0
+          ? new Date()?.toISOString()
+          : new Date(paymentDate).toISOString(),
     };
 
-    const index = modalData?.findIndex(
-      (inv) => inv?.invoiceNo === invoiceData?.invoiceNo
-    );
+    let index;
+    if (pay != 0) {
+      index = modalData?.findIndex(
+        (inv) => inv?.invoiceNo === invoiceData?.invoiceNo
+      );
+    }
 
     if (index !== -1) {
       modalData[index] = {
@@ -47,19 +56,21 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose, modalData }) => {
     }
 
     modalData[index]?.payments?.push(payment);
-    console.log(modalData)
   };
 
-  const handlePayAmount = (invoiceData) => {
+  const handlePayAmount = () => {
     addPaymentAndUpdateInvoice(modalData, pay);
+
     window.ipc.send("payment", {
       invoiceNo: invoiceData?.invoiceNo,
+      paymentDate,
       paidAmount: pay,
     });
 
     window.ipc.on("payment", (res: APiRes) => {
       if (!res.success) {
         setPay(0);
+        setPaymentDate("");
         toast.error(res.message);
         return;
       }
@@ -76,15 +87,18 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose, modalData }) => {
       setInvoiceData(ObjInvoice);
     };
     setinvoice();
-  }, [type,modalData]);
+  }, [type, modalData]);
 
   useEffect(() => {
     const handleCloseModalByKey = (event) => {
       if (event.ctrlKey && event.key === "x") {
         onClose();
-      } else if (event.ctrlKey && event.key === "g") {
+      } else if (event.key === "Enter") {
+        event.preventDefault();
         if (type === "Invoice-Details") {
           handlGenrateInvoice();
+        } else if (type === "Payment") {
+          handlePayAmount(invoiceData);
         }
       }
     };
@@ -94,6 +108,12 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose, modalData }) => {
       window.removeEventListener("keydown", handleCloseModalByKey);
     };
   }, [type]);
+
+  useEffect(() => {
+    if (!paymentDateCheck) {
+      setPaymentDate("");
+    }
+  }, [paymentDateCheck]);
 
   if (!isOpen) return null;
   return (
@@ -448,7 +468,41 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose, modalData }) => {
                     <span>Due: </span>
                     <span>{`₹${invoiceData?.dueAmount}`}</span>
                   </div>
-
+                  <div>
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="checkbox"
+                        checked={paymentDateCheck}
+                        onChange={() => setPaymentDateCheck(!paymentDateCheck)}
+                        className="accent-primary-700"
+                      />
+                      <label
+                        htmlFor="customer"
+                        className="text-sm font-semibold"
+                      >
+                        Select Payment Date (If Required)
+                      </label>
+                    </div>
+                    <div className="ml-5">
+                      <div className=" flex gap-2 items-center mb-2">
+                        <label
+                          htmlFor="date"
+                          className={`${!paymentDateCheck && "text-gray-300"}`}
+                        >
+                          Date :
+                        </label>
+                        <Input
+                          type="date"
+                          value={paymentDate}
+                          handleChangeText={(e) =>
+                            setPaymentDate(e.target.value)
+                          }
+                          otherStyle="disabled:text-gray-300 disabled:border-gray-300"
+                          disabled={!paymentDateCheck}
+                        />
+                      </div>
+                    </div>
+                  </div>
                   <div className="flex gap-2 items-center">
                     <label htmlFor="pay" className="font-bold text-primary-900">
                       Amount:{" "}
@@ -460,14 +514,14 @@ const Modal: React.FC<ModalProps> = ({ type, isOpen, onClose, modalData }) => {
                       autoFocus={true}
                       onChange={(e) => setPay(e.target.valueAsNumber)}
                       onFocus={(e) => e.target.select()}
-                      className={`bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-purple-800 inline-block py-1.5 px-2`}
+                      className={`bg-primary-100 border border-primary-800 text-primary-900 text-sm font-semibold rounded-md focus:outline-primary-900 inline-block py-1.5 px-2`}
                     />
                   </div>
                   <Button
                     buttonType="button"
                     title="Pay or Add"
+                    handleClick={handlePayAmount}
                     extraClass="sm:w-auto mt-3"
-                    handleClick={() => handlePayAmount(invoiceData)}
                   />
                 </div>
                 <div>

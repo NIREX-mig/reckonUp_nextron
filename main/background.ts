@@ -1167,10 +1167,14 @@ ipcMain.on("tracks", async (event) => {
 
     // Calculate total outstanding amount
     const outstandingAmountStmt = dataDB.prepare(`
-      SELECT SUM(i.totalAmount - COALESCE(p.paidAmount, 0)) AS outstandingAmount 
+      SELECT SUM(i.totalAmount - COALESCE(p.totalPaid, 0)) AS outstandingAmount
       FROM invoices i
-      LEFT JOIN payments p ON i.invoiceNo = p.invoiceId
-      WHERE (i.totalAmount - COALESCE(p.paidAmount, 0)) > 0
+      LEFT JOIN (
+        SELECT invoiceId, SUM(paidAmount) AS totalPaid
+        FROM payments
+        GROUP BY invoiceId
+      ) p ON i.invoiceNo = p.invoiceId
+      WHERE (i.totalAmount - COALESCE(p.totalPaid, 0)) > 0;
     `);
     const outstandingAmountResult: any = outstandingAmountStmt.get();
 
@@ -1178,7 +1182,9 @@ ipcMain.on("tracks", async (event) => {
     const tracksData = [
       {
         title: "Outstanding",
-        value: `₹ ${outstandingAmountResult.outstandingAmount || 0} `,
+        value: `₹ ${
+          Math.round(outstandingAmountResult.outstandingAmount) || 0
+        } `,
         icon: "FaDollarSign",
       },
       {
@@ -2028,7 +2034,7 @@ ipcMain.on("forgot-setting-password", async (event, args) => {
 //---------------------------------
 ipcMain.on("payment", async (event, args) => {
   try {
-    const { paidAmount, invoiceNo } = await args;
+    const { paidAmount, invoiceNo, paymentDate } = await args;
 
     // Validate input
     if (!invoiceNo || !paidAmount || paidAmount <= 0) {
@@ -2049,7 +2055,7 @@ ipcMain.on("payment", async (event, args) => {
       .get(invoiceNo);
 
     if (!invoice) {
-      throw new EventResponse(false, "Invoice not found", {});
+      throw new EventResponse(false, "Payments Details Not found!", {});
     }
 
     const dueAmount: number = invoice.dueAmount;
@@ -2066,16 +2072,18 @@ ipcMain.on("payment", async (event, args) => {
     const newDueAmount: number = dueAmount - paidAmount;
     const newPaymentStatus: string =
       newDueAmount === 0 ? "Full Paid" : "Due Amount";
+    const newPaymentDate =
+      paymentDate.length === 0
+        ? new Date().toISOString()
+        : new Date(paymentDate).toISOString();
 
     // Insert the payment record into the payments table
-    const now = new Date().toISOString();
-
     const stmt = dataDB.prepare(`
       INSERT INTO payments (invoiceId, paidAmount, createdAt)
       VALUES (?, ?, ?)
     `);
 
-    stmt.run(invoiceNo, paidAmount, now);
+    stmt.run(invoiceNo, paidAmount, newPaymentDate);
 
     // Update Due Amount record and paymentStatus record in invoice table
     const updateStmt = dataDB.prepare(`
